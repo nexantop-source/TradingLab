@@ -20,7 +20,7 @@ export default async function AdminAIPage() {
 
   const month = new Date().toISOString().slice(0, 7);
 
-  const [byKind, byEngine, topUsers, flagged, cost, totalCalls, ratings] = await Promise.all([
+  const [byKind, byEngine, topUsers, flagged, cost, totalCalls, ratings, degraded] = await Promise.all([
     db.aIAnalysis.groupBy({ by: ['kind'], _count: { _all: true }, _sum: { costUsd: true } }),
     db.aIAnalysis.groupBy({ by: ['engine'], _count: { _all: true } }),
     db.aIUsage.findMany({
@@ -38,7 +38,29 @@ export default async function AdminAIPage() {
     monthlyCostUsd(true),
     db.aIAnalysis.count(),
     db.aIAnalysis.groupBy({ by: ['helpful'], _count: { _all: true } }),
+    // Análisis servidos por el motor local: interesa saber por qué.
+    db.aIAnalysis.findMany({
+      where: { engine: 'deterministic-v1' },
+      orderBy: { createdAt: 'desc' },
+      take: 20,
+      select: { createdAt: true, kind: true, guardrailReport: true },
+    }),
   ]);
+
+  // Se agrupan por motivo para no repetir veinte veces la misma línea.
+  const degradationReasons = new Map<string, { count: number; last: Date }>();
+  for (const d of degraded) {
+    const reason =
+      fromJson<{ degradedReason?: string | null }>(d.guardrailReport, {}).degradedReason ??
+      'Sin credencial de proveedor configurada';
+    const current = degradationReasons.get(reason);
+    if (current) {
+      current.count++;
+      if (d.createdAt > current.last) current.last = d.createdAt;
+    } else {
+      degradationReasons.set(reason, { count: 1, last: d.createdAt });
+    }
+  }
 
   const cap = monthlyCap();
   const helpfulYes = ratings.find((r) => r.helpful === true)?._count._all ?? 0;
@@ -128,6 +150,36 @@ export default async function AdminAIPage() {
           ))}
         </ul>
       </Card>
+
+      {degradationReasons.size > 0 && (
+        <Card className="border-[color-mix(in_srgb,var(--color-gold)_24%,transparent)] bg-[var(--color-gold-soft)] p-5">
+          <h2 className="text-[14px] font-semibold text-[var(--color-gold)]">
+            Por qué se está usando el motor determinístico
+          </h2>
+          <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--color-muted)]">
+            El servicio no se interrumpe cuando el proveedor falla, pero conviene saber la causa: no es lo mismo
+            un pico de tráfico que una credencial caducada o una cuenta sin saldo.
+          </p>
+          <ul className="mt-3 space-y-2">
+            {Array.from(degradationReasons.entries())
+              .sort((a, b) => b[1].count - a[1].count)
+              .map(([reason, info]) => (
+                <li
+                  key={reason}
+                  className="rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface)] p-3"
+                >
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <span className="num text-[11px] text-[var(--color-subtle)]">
+                      {formatDateTime(info.last, auth.user.timezone)}
+                    </span>
+                    <Badge tone="gold">{info.count} vez(ces)</Badge>
+                  </div>
+                  <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--color-muted)]">{reason}</p>
+                </li>
+              ))}
+          </ul>
+        </Card>
+      )}
 
       <Card>
         <div className="border-b border-[var(--color-border)] px-5 py-3.5">

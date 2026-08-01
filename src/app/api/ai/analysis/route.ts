@@ -185,7 +185,10 @@ export async function POST(req: NextRequest) {
         latencyMs = result.latencyMs;
       } catch (error) {
         if (error instanceof AIUnavailableError) {
-          degradedReason = `Proveedor no disponible (${error.reason})`;
+          // Se guarda el mensaje del proveedor, no solo la categoría: sin él,
+          // diagnosticar por qué degradó obliga a reproducir la llamada a mano.
+          degradedReason = `${error.reason}: ${error.message}`;
+          console.error('[ai] Se ha degradado al motor determinístico —', degradedReason);
         } else {
           throw error;
         }

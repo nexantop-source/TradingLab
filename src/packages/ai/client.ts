@@ -27,11 +27,54 @@ export interface AICallResult {
   latencyMs: number;
 }
 
+export type AIFailureReason =
+  | 'NO_KEY'
+  | 'QUOTA'
+  | 'AUTH'
+  | 'UPSTREAM'
+  | 'INVALID_OUTPUT'
+  | 'TIMEOUT'
+  | 'MODERATED';
+
 export class AIUnavailableError extends Error {
-  constructor(message: string, readonly reason: 'NO_KEY' | 'UPSTREAM' | 'INVALID_OUTPUT' | 'TIMEOUT' | 'MODERATED') {
+  constructor(message: string, readonly reason: AIFailureReason) {
     super(message);
     this.name = 'AIUnavailableError';
   }
+}
+
+/**
+ * Traduce un error del proveedor a un motivo accionable.
+ *
+ * Importa distinguirlos: un límite de frecuencia se resuelve reintentando,
+ * mientras que un saldo agotado o una credencial inválida no. Reintentar esos
+ * solo añade 45 segundos de espera antes de la misma respuesta, y deja el
+ * diagnóstico enterrado bajo un «UPSTREAM» genérico.
+ */
+function classifyUpstream(status: number, body: string): { reason: AIFailureReason; retry: boolean; message: string } {
+  let code = '';
+  let detail = body.slice(0, 300);
+  try {
+    const parsed = JSON.parse(body) as { error?: { code?: string; type?: string; message?: string } };
+    code = parsed.error?.code ?? parsed.error?.type ?? '';
+    if (parsed.error?.message) detail = parsed.error.message;
+  } catch {
+    /* respuesta no JSON: se conserva el texto recortado */
+  }
+
+  if (status === 401 || status === 403) {
+    return { reason: 'AUTH', retry: false, message: `Credencial rechazada por el proveedor (${status}): ${detail}` };
+  }
+  if (code === 'insufficient_quota' || code === 'credit_balance_exhausted' || code === 'billing_hard_limit_reached') {
+    return { reason: 'QUOTA', retry: false, message: `Sin saldo en la cuenta del proveedor: ${detail}` };
+  }
+  if (status === 429) {
+    return { reason: 'UPSTREAM', retry: true, message: `Límite de frecuencia del proveedor (429): ${detail}` };
+  }
+  if (status >= 500) {
+    return { reason: 'UPSTREAM', retry: true, message: `El proveedor devolvió ${status}: ${detail}` };
+  }
+  return { reason: 'UPSTREAM', retry: false, message: `Error del proveedor (${status}): ${detail}` };
 }
 
 /** Precios por millón de tokens. Se usan para estimar coste por usuario y plan. */
@@ -134,12 +177,13 @@ export async function callEducationalModel(params: AICallParams): Promise<AICall
       });
 
       if (!res.ok) {
-        const detail = await res.text();
-        if (res.status === 429 || res.status >= 500) {
-          lastError = new AIUnavailableError(`Proveedor de IA no disponible (${res.status}).`, 'UPSTREAM');
+        const { reason, retry, message } = classifyUpstream(res.status, await res.text());
+        const failure = new AIUnavailableError(message, reason);
+        if (retry && attempt === 0) {
+          lastError = failure;
           continue;
         }
-        throw new AIUnavailableError(`Error del proveedor de IA (${res.status}): ${detail.slice(0, 300)}`, 'UPSTREAM');
+        throw failure;
       }
 
       const json = (await res.json()) as {
