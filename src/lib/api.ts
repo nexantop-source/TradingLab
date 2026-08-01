@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
-import { ForbiddenError, UnauthorizedError } from './auth';
+import { ConfigurationError, ForbiddenError, UnauthorizedError } from './auth';
 import { RateLimitError } from './rate-limit';
 import { SimulationError } from '@tl/simulation-engine';
 import { LedgerError } from '@tl/simulation-engine';
@@ -37,6 +37,12 @@ export function handleError(error: unknown): NextResponse {
       422,
       error.issues.map((i) => ({ path: i.path.join('.'), message: i.message })),
     );
+  }
+  if (error instanceof ConfigurationError) {
+    // Se registra como error del servidor porque requiere intervención de quien
+    // administra el despliegue, no del usuario.
+    console.error('[config]', error.message);
+    return fail('SERVICE_NOT_CONFIGURED', error.message, 503);
   }
   if (error instanceof UnauthorizedError) return fail('UNAUTHORIZED', error.message, 401);
   if (error instanceof ForbiddenError) return fail('FORBIDDEN', error.message, 403);

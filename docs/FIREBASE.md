@@ -45,32 +45,32 @@ Con Neon o Supabase, usa la cadena de conexión **con pooling** (la que incluye 
 
 ## Estado actual
 
-Ya hecho:
+El backend ya existe:
 
-- Proyecto de Firebase creado: **`tradinglab-app`**
-  ([consola](https://console.firebase.google.com/project/tradinglab-app/overview)).
-- `.firebaserc` apunta a ese proyecto, así que la CLI ya sabe con cuál trabajar.
-- `apphosting.yaml` con la configuración de ejecución, variables y referencias a secretos.
-- `prisma/schema.prisma` con el objetivo binario que necesita Cloud Run.
-- Build verificado con el proveedor `postgresql`, tal como se ejecutará en Firebase.
-- Repositorio en GitHub: `nexantop-source/TradingLab`.
+| | |
+|---|---|
+| Proyecto | `nexant-87204` |
+| Backend | `tradinglab` |
+| Región | `us-east4` |
+| Runtime | `nodejs24` |
+| Repositorio | `nexantop-source/TradingLab`, rama `main` |
+| URL | https://tradinglab--nexant-87204.us-east4.hosted.app |
 
-Pendiente, y requiere tu intervención porque implica facturación y una autorización en el navegador:
+También se creó el proyecto `tradinglab-app`, que quedó sin usar porque no tiene el plan Blaze
+activado. Puedes borrarlo desde la consola si no lo vas a necesitar.
 
-1. Activar el plan Blaze.
-2. Crear la base de datos PostgreSQL.
-3. Crear los dos secretos.
-4. Crear el backend y autorizar el acceso a GitHub.
+**Falta un único paso para que el despliegue funcione: crear los dos secretos** en el proyecto
+`nexant-87204`. Sin ellos, el paso `preparer` de Cloud Build aborta con el estado 100. Ver más
+abajo.
 
 ---
 
 ## Paso a paso
 
-### 1. Activar el plan Blaze
+### 1. Plan Blaze
 
-App Hosting usa Cloud Run y Cloud Build, que no están en el plan gratuito.
-
-https://console.firebase.google.com/project/tradinglab-app/usage/details
+Ya está activo en `nexant-87204`. Si trabajas en otro proyecto, actívalo antes: App Hosting usa
+Cloud Run y Cloud Build, que no están en el plan gratuito.
 
 Con tráfico bajo y `minInstances: 0` el coste real tiende a cero, pero hace falta un método de pago
 asociado. Conviene además fijar un presupuesto con alerta en Google Cloud Billing.
@@ -99,12 +99,16 @@ npm run db:seed          # opcional: catálogo + cuentas de demostración
 Nunca van en `apphosting.yaml` ni en el repositorio.
 
 ```bash
-firebase apphosting:secrets:set DATABASE_URL --project tradinglab-app
+firebase apphosting:secrets:set DATABASE_URL --project nexant-87204
 # pega la cadena de conexión de PostgreSQL
 
-firebase apphosting:secrets:set AUTH_SECRET --project tradinglab-app
+firebase apphosting:secrets:set AUTH_SECRET --project nexant-87204
 # pega un valor generado con:
 node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
+
+# Sin este paso, el backend no puede leerlos aunque existan:
+firebase apphosting:secrets:grantaccess DATABASE_URL,AUTH_SECRET \
+  --backend tradinglab --project nexant-87204
 ```
 
 > `AUTH_SECRET` firma las sesiones. Si cambia entre despliegues, todas las sesiones activas se
@@ -121,8 +125,11 @@ Y descomenta el bloque correspondiente al final de `apphosting.yaml`.
 
 ### 4. Crear el backend y conectar GitHub
 
+Este paso **ya está hecho** para `nexant-87204`. Se documenta para poder recrearlo o levantar un
+entorno de staging:
+
 ```bash
-firebase apphosting:backends:create --project tradinglab-app --backend tradinglab --primary-region us-central1 --root-dir "/"
+firebase apphosting:backends:create --project nexant-87204 --backend tradinglab --primary-region us-east4 --root-dir "/"
 ```
 
 Ejecútalo de forma interactiva: la conexión con GitHub abre una autorización en el navegador que no
@@ -212,6 +219,33 @@ comprobar variables de entorno antes de desplegar.
 
 ## Problemas frecuentes
 
+**`build step 1 "…/preparer:…" failed: step exited with non-zero status: 100`.**
+Es el error más común y casi siempre significa lo mismo: **`apphosting.yaml` referencia un secreto
+que no existe** en el proyecto del backend, o al que la cuenta de servicio no tiene acceso.
+
+El paso `preparer` resuelve los secretos *antes* de compilar, así que falla antes de tocar el
+código. Comprueba cuáles existen:
+
+```bash
+firebase apphosting:secrets:describe DATABASE_URL --project <proyecto>
+firebase apphosting:secrets:describe AUTH_SECRET  --project <proyecto>
+```
+
+Si falta alguno, créalo y concede acceso:
+
+```bash
+firebase apphosting:secrets:set DATABASE_URL --project <proyecto>
+firebase apphosting:secrets:set AUTH_SECRET  --project <proyecto>
+firebase apphosting:secrets:grantaccess DATABASE_URL,AUTH_SECRET --backend <backend> --project <proyecto>
+```
+
+Cuidado con un detalle fácil de pasar por alto: los secretos son **por proyecto**. Si creaste el
+backend en un proyecto distinto de aquel donde creaste los secretos, no se ven entre sí.
+
+Ninguno de los dos se necesita en `BUILD`. Está verificado que `prisma generate` y `next build`
+completan sin ellos, así que en este repositorio ambos están declarados solo como `RUNTIME`: cuanto
+menos tenga que resolver el `preparer`, menos motivos hay para que falle la compilación.
+
 **`Query engine binary not found` al arrancar.**
 Falta el motor de Prisma para el contenedor. Ya está resuelto en el repositorio: el generador de
 `prisma/schema.prisma` declara `binaryTargets = ["native", "debian-openssl-3.0.x"]`. Si lo tocas, no
@@ -227,6 +261,12 @@ Falta pooling. Usa la cadena de conexión con `-pooler` o añade `?pgbouncer=tru
 **La sesión no persiste.**
 `AUTH_SECRET` debe existir y ser estable. Si cambia entre despliegues, todas las sesiones se
 invalidan. Compruébalo con `firebase apphosting:secrets:describe AUTH_SECRET`.
+
+**El sitio carga pero no se puede iniciar sesión, y los registros repiten «modo público».**
+Falta `AUTH_SECRET`. La aplicación está diseñada para no caerse por ello: sin secreto, `getAuth()`
+trata a todo el mundo como anónimo en lugar de propagar la excepción, de modo que la landing, los
+precios y el centro legal siguen en pie. Falla de forma cerrada —nadie obtiene sesión— y el intento
+de inicio de sesión devuelve un 503 con un mensaje explícito en lugar de un 500 opaco.
 
 **El esquema sigue en SQLite.**
 `DATABASE_PROVIDER` debe valer `postgresql` con disponibilidad `BUILD`. El script

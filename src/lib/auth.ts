@@ -21,14 +21,42 @@ import type { PlanId, Role, SessionUser, ExperienceLevel, Locale } from '@tl/typ
 const COOKIE_NAME = 'tl_session';
 const SESSION_DAYS = 30;
 
+const SECRET_ERROR =
+  'AUTH_SECRET no está configurado o es demasiado corto. Debe tener al menos 32 caracteres. Ver .env.example y docs/FIREBASE.md.';
+
+/** `true` si hay un secreto de sesión utilizable. */
+export function authSecretConfigured(): boolean {
+  const s = process.env.AUTH_SECRET;
+  return Boolean(s && s.length >= 32);
+}
+
+/**
+ * Secreto de firma de sesiones. Lanza si falta: crear o validar una sesión sin
+ * él sería inseguro, así que se falla de forma ruidosa.
+ */
 function secret(): Uint8Array {
   const s = process.env.AUTH_SECRET;
-  if (!s || s.length < 32) {
-    throw new Error(
-      'AUTH_SECRET no está configurado o es demasiado corto. Debe tener al menos 32 caracteres. Ver .env.example.',
-    );
-  }
+  if (!s || s.length < 32) throw new Error(SECRET_ERROR);
   return new TextEncoder().encode(s);
+}
+
+/**
+ * Aviso único al arrancar sin secreto configurado.
+ *
+ * Sin él, `getAuth` trata a todo el mundo como anónimo en lugar de propagar la
+ * excepción. Eso mantiene en pie las páginas públicas de un despliegue recién
+ * creado —landing, precios, centro legal— en lugar de devolver un 500 opaco,
+ * y falla de forma cerrada: nadie obtiene sesión, así que no se concede ningún
+ * acceso indebido. Iniciar sesión sí devuelve un error explícito.
+ */
+let warnedAboutSecret = false;
+
+function warnMissingSecret(): void {
+  if (warnedAboutSecret) return;
+  warnedAboutSecret = true;
+  console.error(
+    `[auth] ${SECRET_ERROR} Mientras tanto la aplicación funciona en modo público: ninguna sesión será válida.`,
+  );
 }
 
 export function hashToken(token: string): string {
@@ -54,6 +82,12 @@ export async function createSession(
   userId: string,
   meta: { userAgent?: string | null; ip?: string | null },
 ): Promise<string> {
+  if (!authSecretConfigured()) {
+    throw new ConfigurationError(
+      'El servidor no tiene configurado el secreto de sesión, así que no es posible iniciar sesión. Si administras esta instalación, define AUTH_SECRET.',
+    );
+  }
+
   const raw = randomBytes(32).toString('base64url');
   const expiresAt = new Date(Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000);
 
@@ -133,6 +167,14 @@ export interface AuthContext {
  * Es la única puerta de entrada: ninguna ruta debe leer la cookie por su cuenta.
  */
 export async function getAuth(): Promise<AuthContext | null> {
+  // Sin secreto no puede existir ninguna sesión firmada válida, así que se
+  // trata al visitante como anónimo en lugar de romper la página. Ver
+  // `warnMissingSecret` para el razonamiento completo.
+  if (!authSecretConfigured()) {
+    warnMissingSecret();
+    return null;
+  }
+
   const store = await cookies();
   const value = store.get(COOKIE_NAME)?.value;
   if (!value) return null;
@@ -180,6 +222,21 @@ export async function requireAuth(): Promise<AuthContext> {
   const auth = await getAuth();
   if (!auth) throw new UnauthorizedError();
   return auth;
+}
+
+/**
+ * Falta una variable de entorno imprescindible.
+ *
+ * Es distinto de un error interno: no hay ningún fallo en el código, sino en el
+ * despliegue. Se devuelve 503 y un mensaje que dice qué configurar, en lugar de
+ * un 500 opaco que obliga a bucear en los registros.
+ */
+export class ConfigurationError extends Error {
+  readonly status = 503;
+  constructor(message: string) {
+    super(message);
+    this.name = 'ConfigurationError';
+  }
 }
 
 export class UnauthorizedError extends Error {

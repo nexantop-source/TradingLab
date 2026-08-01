@@ -23,19 +23,18 @@ runConfig:
 
 env:
   # ── Configuración pública ──────────────────────────────────────────────────
-  - variable: NODE_ENV
-    value: production
-    availability:
-      - BUILD
-      - RUNTIME
+  # NODE_ENV no se declara aquí a propósito: App Hosting ya lo fija a
+  # "production" durante la compilación y la ejecución. Declararlo otra vez solo
+  # añade una variable que puede entrar en conflicto, sin ganar nada.
 
   # PostgreSQL: el sistema de archivos de Cloud Run es efímero y no se comparte
   # entre instancias, así que SQLite no es una opción en producción.
+  # Solo se necesita en BUILD, que es cuando `scripts/set-db-provider.mjs`
+  # reescribe el proveedor del esquema de Prisma.
   - variable: DATABASE_PROVIDER
     value: postgresql
     availability:
       - BUILD
-      - RUNTIME
 
   - variable: NEXT_PUBLIC_APP_NAME
     value: TradingLab
@@ -43,11 +42,10 @@ env:
       - BUILD
       - RUNTIME
 
-  # App Hosting asigna la URL definitiva al crear el backend, con la forma
-  # https://tradinglab--<hash>.us-central1.hosted.app. Sustituye este valor por
-  # esa URL —o por tu dominio propio— y vuelve a desplegar.
+  # URL pública del backend. Sustitúyela por tu dominio propio cuando lo
+  # conectes: se usa en los metadatos de Open Graph y en los enlaces absolutos.
   - variable: NEXT_PUBLIC_APP_URL
-    value: https://tradinglab-app.web.app
+    value: https://tradinglab--nexant-87204.us-east4.hosted.app
     availability:
       - BUILD
       - RUNTIME
@@ -101,17 +99,26 @@ env:
       - RUNTIME
 
   # ── Secretos ───────────────────────────────────────────────────────────────
-  # Créalos antes del primer despliegue:
   #
-  #   firebase apphosting:secrets:set DATABASE_URL
-  #   firebase apphosting:secrets:set AUTH_SECRET
+  # IMPORTANTE: estos secretos deben EXISTIR antes de desplegar. El paso
+  # `preparer` de Cloud Build los resuelve antes de compilar, y si alguno falta
+  # aborta con «step exited with non-zero status: 100».
   #
-  # DATABASE_URL se necesita también en BUILD porque `prisma generate` lee el
-  # esquema durante la compilación.
+  # Créalos y concede acceso al backend con:
+  #
+  #   firebase apphosting:secrets:set DATABASE_URL --project <proyecto>
+  #   firebase apphosting:secrets:set AUTH_SECRET  --project <proyecto>
+  #   firebase apphosting:secrets:grantaccess DATABASE_URL,AUTH_SECRET \
+  #     --backend <backend> --project <proyecto>
+  #
+  # Ninguno se necesita en BUILD: está comprobado que `prisma generate` y
+  # `next build` completan sin ellos, porque el esquema no requiere conexión y
+  # ninguna página se prerenderiza contra la base de datos. Mantenerlos fuera
+  # de BUILD reduce a la mitad los motivos por los que puede fallar la
+  # compilación.
   - variable: DATABASE_URL
     secret: DATABASE_URL
     availability:
-      - BUILD
       - RUNTIME
 
   - variable: AUTH_SECRET
