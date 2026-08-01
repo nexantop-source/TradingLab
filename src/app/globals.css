@@ -1,0 +1,392 @@
+@import 'tailwindcss';
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TradingLab · Tokens del sistema de diseño
+
+   Tres modos: oscuro (principal), claro (profesional) y alto contraste.
+   Los componentes nunca usan colores literales: siempre estas variables.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@theme {
+  /* ── Tipografía ─────────────────────────────────────────────────────────── */
+  --font-sans: var(--font-instrument-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-instrument-serif), ui-serif, Georgia, serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, 'SF Mono', monospace;
+
+  /* ── Paleta base ────────────────────────────────────────────────────────── */
+  --color-bg: #070a12;
+  --color-surface: #0d1320;
+  --color-elevated: #131b2b;
+  --color-overlay: #18223480;
+
+  --color-border: #ffffff14;
+  --color-border-strong: #ffffff1f;
+
+  --color-text: #f8fafc;
+  --color-muted: #98a4b7;
+  --color-subtle: #64748b;
+
+  --color-blue: #5b8cff;
+  --color-blue-soft: #5b8cff1f;
+  --color-violet: #8b5cf6;
+  --color-violet-soft: #8b5cf61f;
+  --color-positive: #20d6a2;
+  --color-positive-soft: #20d6a21f;
+  --color-negative: #ff6178;
+  --color-negative-soft: #ff61781f;
+  --color-gold: #f3b95f;
+  --color-gold-soft: #f3b95f1f;
+
+  /* ── Radios y sombras ───────────────────────────────────────────────────── */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+
+  --shadow-soft: 0 1px 2px #00000040, 0 8px 24px -12px #00000073;
+  --shadow-lifted: 0 2px 4px #0000004d, 0 20px 48px -16px #00000080;
+  --shadow-glow-blue: 0 0 0 1px #5b8cff33, 0 12px 40px -12px #5b8cff4d;
+
+  /* ── Animación ──────────────────────────────────────────────────────────── */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* ── Tema claro ───────────────────────────────────────────────────────────── */
+:root[data-theme='light'] {
+  --color-bg: #f7f9fc;
+  --color-surface: #ffffff;
+  --color-elevated: #ffffff;
+  --color-overlay: #0f172a0d;
+
+  --color-border: #0f172a14;
+  --color-border-strong: #0f172a24;
+
+  --color-text: #0b1220;
+  --color-muted: #55647c;
+  --color-subtle: #7b8aa1;
+
+  --color-blue: #2f62e8;
+  --color-blue-soft: #2f62e814;
+  --color-violet: #7038d6;
+  --color-violet-soft: #7038d614;
+  --color-positive: #0f9f78;
+  --color-positive-soft: #0f9f7814;
+  --color-negative: #d92b48;
+  --color-negative-soft: #d92b4814;
+  --color-gold: #b47c19;
+  --color-gold-soft: #b47c1914;
+
+  --shadow-soft: 0 1px 2px #0f172a0f, 0 8px 24px -14px #0f172a29;
+  --shadow-lifted: 0 2px 4px #0f172a14, 0 20px 48px -18px #0f172a33;
+  --shadow-glow-blue: 0 0 0 1px #2f62e824, 0 12px 40px -16px #2f62e833;
+}
+
+/* ── Alto contraste ───────────────────────────────────────────────────────── */
+:root[data-theme='high-contrast'] {
+  --color-bg: #000000;
+  --color-surface: #000000;
+  --color-elevated: #0a0a0a;
+  --color-overlay: #ffffff1a;
+
+  --color-border: #ffffff80;
+  --color-border-strong: #ffffff;
+
+  --color-text: #ffffff;
+  --color-muted: #e2e8f0;
+  --color-subtle: #cbd5e1;
+
+  --color-blue: #8ab4ff;
+  --color-blue-soft: #8ab4ff33;
+  --color-violet: #c4a6ff;
+  --color-violet-soft: #c4a6ff33;
+  --color-positive: #4ff0c0;
+  --color-positive-soft: #4ff0c033;
+  --color-negative: #ff8fa0;
+  --color-negative-soft: #ff8fa033;
+  --color-gold: #ffd27f;
+  --color-gold-soft: #ffd27f33;
+
+  --shadow-soft: none;
+  --shadow-lifted: none;
+  --shadow-glow-blue: 0 0 0 2px #8ab4ff;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Base
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+* {
+  border-color: var(--color-border);
+}
+
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* Foco visible y consistente. Nunca se elimina el outline sin sustituto. */
+:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--color-blue);
+  color: #fff;
+}
+
+/* Scrollbar discreta y coherente con el tema. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-subtle);
+  background-clip: content-box;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Utilidades del sistema
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@utility surface {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+@utility surface-elevated {
+  background-color: var(--color-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+}
+
+@utility glass {
+  background-color: color-mix(in srgb, var(--color-surface) 72%, transparent);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid var(--color-border);
+}
+
+@utility num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+@utility editorial {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+}
+
+/* Degradado mesh muy controlado. Se usa solo en la landing y en cabeceras. */
+@utility mesh-aurora {
+  background-image:
+    radial-gradient(60rem 32rem at 12% -10%, color-mix(in srgb, var(--color-blue) 22%, transparent), transparent 60%),
+    radial-gradient(48rem 28rem at 88% 4%, color-mix(in srgb, var(--color-violet) 18%, transparent), transparent 62%),
+    radial-gradient(40rem 24rem at 50% 110%, color-mix(in srgb, var(--color-positive) 10%, transparent), transparent 65%);
+}
+
+@utility text-gradient {
+  background-image: linear-gradient(
+    100deg,
+    var(--color-text) 0%,
+    var(--color-text) 40%,
+    var(--color-blue) 70%,
+    var(--color-violet) 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* Rejilla sutil de fondo, evocando una hoja de datos. */
+@utility grid-lines {
+  background-image:
+    linear-gradient(to right, var(--color-border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-border) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Animaciones
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes tl-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes tl-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes tl-pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.85);
+  }
+}
+
+@keyframes tl-shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes tl-sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+.animate-fade-up {
+  animation: tl-fade-up 0.5s var(--ease-out-soft) both;
+}
+.animate-fade-in {
+  animation: tl-fade-in 0.4s var(--ease-out-soft) both;
+}
+.animate-pulse-dot {
+  animation: tl-pulse-dot 2s var(--ease-in-out-soft) infinite;
+}
+.animate-sheet-up {
+  animation: tl-sheet-up 0.28s var(--ease-out-soft);
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-elevated) 25%,
+    color-mix(in srgb, var(--color-elevated) 60%, var(--color-border-strong)) 50%,
+    var(--color-elevated) 75%
+  );
+  background-size: 200% 100%;
+  animation: tl-shimmer 1.6s linear infinite;
+}
+
+/* Preferencia de movimiento reducido, del sistema o del perfil del usuario. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+:root[data-reduce-motion='true'] *,
+:root[data-reduce-motion='true'] *::before,
+:root[data-reduce-motion='true'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Accesibilidad
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Enlace de salto al contenido, visible solo al recibir foco. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  z-index: 999;
+  padding: 0.75rem 1.25rem;
+  background: var(--color-elevated);
+  color: var(--color-text);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+}
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+}
+
+/* Área táctil mínima en móvil (44 px, recomendación WCAG 2.5.5). */
+@media (pointer: coarse) {
+  button,
+  a[role='button'],
+  [role='tab'],
+  input[type='checkbox'],
+  input[type='radio'] {
+    min-height: 44px;
+  }
+}
+
+/* Impresión: certificados y resúmenes legibles en papel. */
+@media print {
+  body {
+    background: #fff;
+    color: #000;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

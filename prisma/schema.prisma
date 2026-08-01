@@ -1,0 +1,956 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// TradingLab · Modelo de datos
+//
+// Proveedor: SQLite en desarrollo (cero infraestructura). Para producción,
+// cambia `provider` a "postgresql" y ajusta DATABASE_URL. El esquema es
+// deliberadamente portable:
+//   · Los campos enumerados se modelan como String, y los valores válidos
+//     viven en `src/packages/types` (una sola fuente de verdad, tipada).
+//   · Los campos JSON se guardan como String y se serializan con los ayudantes
+//     de `src/lib/json.ts`.
+// Ver docs/DEPLOYMENT.md para la migración a PostgreSQL.
+// ─────────────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+  // `native` cubre el desarrollo local (Windows, macOS, Linux).
+  // `debian-openssl-3.0.x` es el motor que necesita el contenedor de Cloud Run
+  // sobre el que corre Firebase App Hosting. Sin él, Prisma falla en tiempo de
+  // ejecución con "Query engine binary not found".
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+// El proveedor lo fija `scripts/set-db-provider.mjs` a partir de la variable
+// DATABASE_PROVIDER (sqlite por defecto, postgresql en Firebase). Se reescribe
+// esta línea en lugar de mantener dos esquemas, para que haya una sola fuente
+// de verdad. Ver docs/FIREBASE.md.
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ── Identidad ───────────────────────────────────────────────────────────────
+
+model User {
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  emailVerifiedAt    DateTime?
+  passwordHash       String
+  name               String
+  role               String    @default("STUDENT")
+  status             String    @default("ACTIVE") // ACTIVE | SUSPENDED | DELETED
+  locale             String    @default("es")
+  timezone           String    @default("UTC")
+  countryCode        String?
+  /// Fecha de nacimiento declarada. Solo se guarda el año y mes de referencia
+  /// para verificar mayoría de edad; ver docs/SECURITY.md.
+  birthYear          Int?
+  mfaEnabled         Boolean   @default(false)
+  mfaSecret          String?
+  onboardingCompleted Boolean  @default(false)
+  /// Marca temporal del último acceso. Alimenta métricas de retención.
+  lastSeenAt         DateTime?
+  /// Racha de días consecutivos con actividad educativa.
+  streakDays         Int       @default(0)
+  streakUpdatedAt    DateTime?
+  xp                 Int       @default(0)
+  level              Int       @default(1)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  deletedAt          DateTime?
+
+  profile        Profile?
+  sessions       Session[]
+  subscription   Subscription?
+  payments       Payment[]
+  demoAccounts   DemoAccount[]
+  simulations    Simulation[]
+  journalEntries JournalEntry[]
+  watchlists     WatchlistItem[]
+  alerts         Alert[]
+  progress       UserProgress[]
+  quizAttempts   QuizAttempt[]
+  certificates   Certificate[]
+  aiAnalyses     AIAnalysis[]
+  aiUsage        AIUsage[]
+  consents       Consent[]
+  notifications  Notification[]
+  tickets        SupportTicket[]
+  auditLogs      AuditLog[]      @relation("AuditActor")
+  badges         UserBadge[]
+  challenges     ChallengeEntry[]
+  portfolios     Portfolio[]
+  adImpressions  AdImpression[]
+  adClicks       AdClick[]
+  strategies     Strategy[]
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Profile {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  experienceLevel    String   @default("PRINCIPIANTE")
+  /// JSON: string[] con las clases de activo de interés.
+  marketInterests    String   @default("[]")
+  educationalGoal    String?
+  /// Horas semanales que declara poder dedicar.
+  weeklyAvailability Int      @default(2)
+  /// Puntuación de la evaluación inicial, 0-100.
+  riskKnowledgeScore Int      @default(0)
+  theme              String   @default("dark")
+  reduceMotion       Boolean  @default(false)
+  highContrast       Boolean  @default(false)
+  emailOptIn         Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Hash del token de sesión. El token en claro solo existe en la cookie.
+  tokenHash    String   @unique
+  userAgent    String?
+  ipHash       String?
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+// ── Suscripciones ───────────────────────────────────────────────────────────
+
+model Plan {
+  id               String   @id
+  name             String
+  priceMonthlyCents Int
+  priceYearlyCents  Int
+  active           Boolean  @default(true)
+  /// JSON con la matriz de derechos. Espejo de packages/types/plans.ts.
+  entitlements     String   @default("{}")
+  updatedAt        DateTime @updatedAt
+
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id                 String    @id @default(cuid())
+  userId             String    @unique
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId             String
+  plan               Plan      @relation(fields: [planId], references: [id])
+  status             String    @default("ACTIVE") // ACTIVE | TRIALING | PAST_DUE | CANCELED | EXPIRED
+  interval           String    @default("MONTHLY") // MONTHLY | YEARLY
+  currentPeriodStart DateTime  @default(now())
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean   @default(false)
+  canceledAt         DateTime?
+  trialEndsAt        DateTime?
+  couponCode         String?
+  /// Identificador en la pasarela de pagos.
+  externalId         String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([status])
+}
+
+model Payment {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amountCents    Int
+  currency       String   @default("USD")
+  status         String   @default("PENDING") // PENDING | SUCCEEDED | FAILED | REFUNDED
+  description    String
+  /// Clave de idempotencia del webhook. Impide procesar dos veces el mismo evento.
+  idempotencyKey String   @unique
+  externalId     String?
+  invoiceUrl     String?
+  processedAt    DateTime?
+  createdAt      DateTime @default(now())
+
+  @@index([userId])
+  @@index([status])
+}
+
+model WebhookEvent {
+  id          String   @id @default(cuid())
+  provider    String
+  externalId  String
+  type        String
+  payload     String
+  processedAt DateTime?
+  error       String?
+  createdAt   DateTime @default(now())
+
+  @@unique([provider, externalId])
+}
+
+model Coupon {
+  id               String    @id @default(cuid())
+  code             String    @unique
+  description      String
+  percentOff       Int?
+  amountOffCents   Int?
+  appliesToPlanId  String?
+  maxRedemptions   Int?
+  timesRedeemed    Int       @default(0)
+  expiresAt        DateTime?
+  active           Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+}
+
+// ── Cuenta DEMO y libro mayor ───────────────────────────────────────────────
+
+model DemoAccount {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label          String   @default("Cuenta DEMO principal")
+  /// Saldo virtual en centavos. Es un valor derivado: siempre debe coincidir
+  /// con la suma de los asientos del libro mayor. `verifyLedger` lo comprueba.
+  balanceCents   Int      @default(1000000)
+  currency       String   @default("VUSD")
+  resetsThisMonth Int     @default(0)
+  lastResetAt    DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  ledger      DemoBalanceLedger[]
+  simulations Simulation[]
+  portfolios  Portfolio[]
+
+  @@index([userId])
+}
+
+model DemoBalanceLedger {
+  id                String      @id @default(cuid())
+  demoAccountId     String
+  demoAccount       DemoAccount @relation(fields: [demoAccountId], references: [id], onDelete: Cascade)
+  amountCents       Int
+  balanceAfterCents Int
+  reason            String
+  reference         String?
+  memo              String?
+  createdAt         DateTime    @default(now())
+
+  @@index([demoAccountId, createdAt])
+}
+
+// ── Instrumentos y mercado ──────────────────────────────────────────────────
+
+model Asset {
+  symbol          String @id
+  name            String
+  assetClass      String
+  quoteCurrency   String
+  precision       Int
+  tickSize        Float
+  spreadBps       Float
+  educationalRisk Int
+  description     String
+  minPlan         String @default("FREE")
+  sessionLabel    String
+  active          Boolean @default(true)
+
+  watchlistItems WatchlistItem[]
+  alerts         Alert[]
+}
+
+model DataProviderRecord {
+  id               String   @id
+  label            String
+  synthetic        Boolean  @default(false)
+  active           Boolean  @default(false)
+  declaredDelaySec Int      @default(0)
+  attributionText  String?
+  attributionUrl   String?
+  lastHealthCheck  DateTime?
+  lastLatencyMs    Int?
+  lastStatus       String?
+  errorsToday      Int      @default(0)
+  requestsToday    Int      @default(0)
+  estimatedCostUsd Float    @default(0)
+  updatedAt        DateTime @updatedAt
+}
+
+model WatchlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  symbol    String
+  asset     Asset    @relation(fields: [symbol], references: [symbol])
+  position  Int      @default(0)
+  favorite  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, symbol])
+  @@index([userId])
+}
+
+// ── Simulación ──────────────────────────────────────────────────────────────
+
+model Simulation {
+  id                   String      @id @default(cuid())
+  userId               String
+  user                 User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  demoAccountId        String
+  demoAccount          DemoAccount @relation(fields: [demoAccountId], references: [id], onDelete: Cascade)
+  portfolioId          String?
+  portfolio            Portfolio?  @relation(fields: [portfolioId], references: [id])
+
+  mode                 String
+  symbol               String
+  assetClass           String
+  direction            String?
+  status               String      @default("OPEN")
+  outcome              String      @default("PENDING")
+  orderType            String      @default("MARKET")
+
+  stakeCents           Int
+  leverage             Int         @default(1)
+  quantity             Float
+  entryPrice           Float
+  exitPrice            Float?
+  limitPrice           Float?
+  stopLoss             Float?
+  takeProfit           Float?
+  trailingStopDistance Float?
+  feeCents             Int         @default(0)
+  pnlCents             Int?
+
+  openedAt             DateTime    @default(now())
+  expiresAt            DateTime?
+  closedAt             DateTime?
+  closeReason          String?
+
+  rationale            String
+  confidence           String      @default("MEDIUM")
+  perceivedRisk        Int         @default(3)
+  strategyTag          String?
+
+  // ── Auditoría ─────────────────────────────────────────────────────────────
+  engineVersion        String
+  /// Identificador del proveedor de datos usado en la apertura.
+  priceSourceProvider  String
+  /// Marca temporal del precio de apertura según el proveedor.
+  priceSourceTimestamp DateTime
+  entryLatencyMs       Int         @default(0)
+  exitSourceProvider   String?
+  exitSourceTimestamp  DateTime?
+  exitLatencyMs        Int?
+  userTimezone         String      @default("UTC")
+  /// JSON con `SimulationContextSnapshot`: indicadores visibles, sus valores,
+  /// procedencia del dato y últimas velas. Congelado en la apertura.
+  contextSnapshot      String
+  /// JSON con la traza de cálculo devuelta por el motor al cerrar.
+  settlementAudit      String?
+
+  journalEntry JournalEntry?
+  aiAnalyses   AIAnalysis[]
+
+  @@index([userId, openedAt])
+  @@index([status])
+  @@index([symbol])
+}
+
+model Portfolio {
+  id            String      @id @default(cuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  demoAccountId String
+  demoAccount   DemoAccount @relation(fields: [demoAccountId], references: [id], onDelete: Cascade)
+  name          String
+  /// Símbolo de referencia para comparar rendimiento.
+  benchmark     String      @default("SPX500")
+  createdAt     DateTime    @default(now())
+
+  simulations Simulation[]
+  holdings    PortfolioHolding[]
+
+  @@index([userId])
+}
+
+model PortfolioHolding {
+  id            String    @id @default(cuid())
+  portfolioId   String
+  portfolio     Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  symbol        String
+  quantity      Float
+  avgPrice      Float
+  investedCents Int
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([portfolioId, symbol])
+}
+
+model Alert {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  symbol       String
+  asset        Asset     @relation(fields: [symbol], references: [symbol])
+  kind         String    @default("PRICE") // PRICE | INDICATOR | EVENT
+  condition    String    // ABOVE | BELOW | CROSSES
+  threshold    Float
+  note         String?
+  active       Boolean   @default(true)
+  triggeredAt  DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([userId, active])
+}
+
+model Strategy {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String
+  /// JSON con las reglas declaradas por el estudiante.
+  rules       String   @default("[]")
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+}
+
+// ── Diario ──────────────────────────────────────────────────────────────────
+
+model JournalEntry {
+  id             String      @id @default(cuid())
+  userId         String
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  simulationId   String?     @unique
+  simulation     Simulation? @relation(fields: [simulationId], references: [id], onDelete: SetNull)
+  title          String
+  hypothesis     String
+  entryReason    String
+  emotionBefore  String
+  emotionAfter   String?
+  riskLevel      Int         @default(3)
+  /// JSON: string[] con los identificadores de indicadores usados.
+  indicatorsUsed String      @default("[]")
+  /// JSON con las velas visibles en el momento de la anotación, para
+  /// reconstruir el gráfico sin depender del proveedor.
+  chartSnapshot  String?
+  result         String?
+  mistake        String?
+  lesson         String?
+  /// JSON: string[] con etiquetas de estrategia.
+  tags           String      @default("[]")
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@index([userId, createdAt])
+}
+
+// ── Academia ────────────────────────────────────────────────────────────────
+
+model Track {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  summary     String
+  level       String   @default("BASICO")
+  topic       String
+  position    Int      @default(0)
+  minPlan     String   @default("FREE")
+  icon        String   @default("book")
+  published   Boolean  @default(true)
+  /// Patrocinio institucional, sin injerencia en el contenido.
+  sponsorId   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  courses Course[]
+}
+
+model Course {
+  id        String   @id @default(cuid())
+  trackId   String
+  track     Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  slug      String   @unique
+  title     String
+  summary   String
+  position  Int      @default(0)
+  minPlan   String   @default("FREE")
+  published Boolean  @default(true)
+
+  modules Module[]
+}
+
+model Module {
+  id       String @id @default(cuid())
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  slug     String @unique
+  title    String
+  position Int    @default(0)
+
+  lessons Lesson[]
+}
+
+model Lesson {
+  id                  String  @id @default(cuid())
+  moduleId            String
+  module              Module  @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  slug                String  @unique
+  title               String
+  summary             String
+  /// JSON con `LessonBlock[]`.
+  blocks              String
+  estimatedMinutes    Int     @default(8)
+  position            Int     @default(0)
+  minPlan             String  @default("FREE")
+  /// Exige completar una simulación antes de dar la lección por superada.
+  requiresSimulation  Boolean @default(false)
+  published           Boolean @default(true)
+  topic               String  @default("general")
+
+  quiz     Quiz?
+  progress UserProgress[]
+}
+
+model Quiz {
+  id           String @id @default(cuid())
+  lessonId     String @unique
+  lesson       Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  /// JSON con `QuizQuestion[]`.
+  questions    String
+  passingScore Int    @default(70)
+
+  attempts QuizAttempt[]
+}
+
+model QuizAttempt {
+  id        String   @id @default(cuid())
+  quizId    String
+  quiz      Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// JSON: number[] con el índice elegido en cada pregunta.
+  answers   String
+  score     Int
+  passed    Boolean
+  createdAt DateTime @default(now())
+
+  @@index([userId, quizId])
+}
+
+model UserProgress {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessonId    String
+  lesson      Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  status      String    @default("IN_PROGRESS") // IN_PROGRESS | COMPLETED
+  completedAt DateTime?
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([userId, lessonId])
+  @@index([userId])
+}
+
+model Certificate {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trackSlug      String
+  trackTitle     String
+  /// Código público de verificación. No contiene datos personales.
+  verificationCode String @unique
+  verified       Boolean  @default(false)
+  issuedAt       DateTime @default(now())
+
+  @@index([userId])
+}
+
+model GlossaryTerm {
+  id         String @id @default(cuid())
+  slug       String @unique
+  term       String
+  definition String
+  category   String @default("general")
+  related    String @default("[]")
+}
+
+// ── Gamificación ────────────────────────────────────────────────────────────
+
+model Badge {
+  id          String @id @default(cuid())
+  slug        String @unique
+  name        String
+  description String
+  /// Criterio evaluado por el motor de gamificación.
+  criterion   String
+  icon        String @default("award")
+  /// Categoría: DISCIPLINA | APRENDIZAJE | CONSISTENCIA | ANALISIS
+  category    String @default("DISCIPLINA")
+
+  awards UserBadge[]
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badgeId   String
+  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  awardedAt DateTime @default(now())
+
+  @@unique([userId, badgeId])
+}
+
+model Challenge {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String
+  /// Métrica evaluada. Nunca es únicamente la ganancia virtual.
+  metric      String
+  target      Float
+  xpReward    Int      @default(50)
+  startsAt    DateTime
+  endsAt      DateTime
+  visibility  String   @default("PUBLIC") // PUBLIC | PRIVATE
+  minPlan     String   @default("FREE")
+  sponsorId   String?
+
+  entries ChallengeEntry[]
+}
+
+model ChallengeEntry {
+  id          String    @id @default(cuid())
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  progress    Float     @default(0)
+  completedAt DateTime?
+  joinedAt    DateTime  @default(now())
+
+  @@unique([challengeId, userId])
+}
+
+// ── Inteligencia artificial ─────────────────────────────────────────────────
+
+model AIAnalysis {
+  id              String      @id @default(cuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  simulationId    String?
+  simulation      Simulation? @relation(fields: [simulationId], references: [id], onDelete: SetNull)
+  kind            String
+  symbol          String?
+  timeframe       String?
+  /// JSON con `AIEducationalAnalysis` ya validado y con guardarraíles aplicados.
+  payload         String
+  /// Motor que lo generó: identificador del modelo, o `deterministic-v1`.
+  engine          String
+  promptVersionId String
+  /// JSON con el informe de guardarraíles.
+  guardrailReport String      @default("{}")
+  flagged         Boolean     @default(false)
+  inputTokens     Int         @default(0)
+  outputTokens    Int         @default(0)
+  costUsd         Float       @default(0)
+  latencyMs       Int         @default(0)
+  /// Valoración del estudiante: útil / no útil.
+  helpful         Boolean?
+  createdAt       DateTime    @default(now())
+
+  @@index([userId, createdAt])
+  @@index([kind])
+}
+
+model AIUsage {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Día en formato YYYY-MM-DD, en UTC.
+  day       String
+  /// Mes en formato YYYY-MM, en UTC.
+  month     String
+  calls     Int      @default(0)
+  costUsd   Float    @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, day])
+  @@index([month])
+}
+
+model PromptVersionRecord {
+  id        String   @id
+  notes     String
+  system    String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+// ── Contenido y noticias ────────────────────────────────────────────────────
+
+model NewsArticleRecord {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  kind            String   @default("EDUCATIONAL")
+  title           String
+  summary         String
+  body            String
+  source          String
+  sourceUrl       String?
+  tags            String   @default("[]")
+  relatedSymbols  String   @default("[]")
+  readingMinutes  Int      @default(3)
+  published       Boolean  @default(true)
+  publishedAt     DateTime @default(now())
+}
+
+model EconomicEventRecord {
+  id              String   @id
+  time            DateTime
+  country         String
+  countryCode     String
+  currency        String
+  title           String
+  impact          String
+  educationalNote String
+  relatedSymbols  String   @default("[]")
+
+  @@index([time])
+}
+
+// ── Publicidad ──────────────────────────────────────────────────────────────
+
+model Advertiser {
+  id             String   @id @default(cuid())
+  name           String
+  contactEmail   String
+  category       String   @default("OTHER")
+  /// APPROVED | PENDING | BLOCKED. Los financieros exigen revisión manual.
+  status         String   @default("PENDING")
+  complianceNote String?
+  createdAt      DateTime @default(now())
+
+  campaigns AdCampaign[]
+}
+
+model AdUnit {
+  id              String @id
+  label           String
+  format          String
+  reservedHeight  Int
+  surface         String
+  description     String
+  active          Boolean @default(true)
+
+  placements Placement[]
+}
+
+model Placement {
+  id        String @id @default(cuid())
+  adUnitId  String
+  adUnit    AdUnit @relation(fields: [adUnitId], references: [id], onDelete: Cascade)
+  page      String
+  active    Boolean @default(true)
+
+  creatives Creative[]
+}
+
+model AdCampaign {
+  id                  String     @id @default(cuid())
+  advertiserId        String
+  advertiser          Advertiser @relation(fields: [advertiserId], references: [id], onDelete: Cascade)
+  name                String
+  status              String     @default("DRAFT")
+  pricingModel        String     @default("CPM")
+  /// Precio unitario en centavos: CPM, CPC o importe fijo según el modelo.
+  unitPriceCents      Int        @default(0)
+  budgetCents         Int        @default(0)
+  spentCents          Int        @default(0)
+  startsAt            DateTime
+  endsAt              DateTime?
+  frequencyCapPerDay  Int        @default(3)
+  priority            Int        @default(1)
+  /// JSON con la segmentación permitida (país, idioma, dispositivo, tema...).
+  targeting           String     @default("{}")
+  packageCode         String?
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  creatives   Creative[]
+  impressions AdImpression[]
+  clicks      AdClick[]
+
+  @@index([status])
+}
+
+model Creative {
+  id             String     @id @default(cuid())
+  campaignId     String
+  campaign       AdCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  placementId    String
+  placement      Placement  @relation(fields: [placementId], references: [id], onDelete: Cascade)
+  headline       String
+  body           String
+  ctaLabel       String
+  destinationUrl String
+  imageUrl       String?
+  /// PENDING | APPROVED | REJECTED. Toda creatividad pasa revisión.
+  reviewStatus   String     @default("PENDING")
+  /// JSON con el informe de `reviewCreative`.
+  reviewReport   String     @default("{}")
+  reviewedBy     String?
+  reviewedAt     DateTime?
+  createdAt      DateTime   @default(now())
+
+  impressions AdImpression[]
+  clicks      AdClick[]
+}
+
+model AdImpression {
+  id         String     @id @default(cuid())
+  creativeId String
+  creative   Creative   @relation(fields: [creativeId], references: [id], onDelete: Cascade)
+  campaignId String
+  campaign   AdCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  userId     String?
+  user       User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  slotCode   String
+  page       String
+  countryCode String?
+  device     String     @default("desktop")
+  /// `true` cuando el anuncio estuvo visible al menos un segundo en pantalla.
+  viewable   Boolean    @default(false)
+  /// Día YYYY-MM-DD para el cálculo de frequency capping.
+  day        String
+  createdAt  DateTime   @default(now())
+
+  @@index([campaignId, day])
+  @@index([userId, day])
+}
+
+model AdClick {
+  id         String     @id @default(cuid())
+  creativeId String
+  creative   Creative   @relation(fields: [creativeId], references: [id], onDelete: Cascade)
+  campaignId String
+  campaign   AdCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  userId     String?
+  user       User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  slotCode   String
+  createdAt  DateTime   @default(now())
+
+  @@index([campaignId])
+}
+
+// ── Cumplimiento y soporte ──────────────────────────────────────────────────
+
+model LegalDocument {
+  id          String   @id @default(cuid())
+  slug        String
+  version     String
+  title       String
+  body        String
+  effectiveAt DateTime
+  createdAt   DateTime @default(now())
+
+  consents Consent[]
+
+  @@unique([slug, version])
+}
+
+model Consent {
+  id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documentId  String
+  document    LegalDocument @relation(fields: [documentId], references: [id])
+  /// TERMS | PRIVACY | RISK | MARKETING | COOKIES | AI
+  kind        String
+  granted     Boolean       @default(true)
+  ipHash      String?
+  userAgent   String?
+  createdAt   DateTime      @default(now())
+
+  @@index([userId, kind])
+}
+
+model RestrictedCountry {
+  code   String @id
+  name   String
+  reason String
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actor      User?    @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+  actorRole  String?
+  action     String
+  entity     String
+  entityId   String?
+  /// JSON con el estado anterior y posterior, sin datos sensibles.
+  diff       String   @default("{}")
+  ipHash     String?
+  createdAt  DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      String    @default("INFO")
+  title     String
+  body      String
+  href      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt])
+}
+
+model SupportTicket {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject    String
+  body       String
+  category   String   @default("GENERAL")
+  status     String   @default("OPEN")
+  priority   String   @default("NORMAL")
+  assignedTo String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([status])
+}
+
+model AnalyticsEvent {
+  id         String   @id @default(cuid())
+  userId     String?
+  anonymousId String?
+  name       String
+  /// JSON con las propiedades del evento. Sin datos personales.
+  properties String   @default("{}")
+  createdAt  DateTime @default(now())
+
+  @@index([name, createdAt])
+}
+
+model RateLimitCounter {
+  id        String   @id
+  count     Int      @default(0)
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}

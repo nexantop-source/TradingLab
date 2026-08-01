@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": false,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [{ "name": "next" }],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@tl/types": ["./src/packages/types/index.ts"],
+      "@tl/types/*": ["./src/packages/types/*"],
+      "@tl/market-data": ["./src/packages/market-data/index.ts"],
+      "@tl/market-data/*": ["./src/packages/market-data/*"],
+      "@tl/simulation-engine": ["./src/packages/simulation-engine/index.ts"],
+      "@tl/simulation-engine/*": ["./src/packages/simulation-engine/*"],
+      "@tl/ai": ["./src/packages/ai/index.ts"],
+      "@tl/ai/*": ["./src/packages/ai/*"],
+      "@tl/ads": ["./src/packages/ads/index.ts"],
+      "@tl/ads/*": ["./src/packages/ads/*"],
+      "@tl/analytics": ["./src/packages/analytics/index.ts"],
+      "@tl/ui": ["./src/packages/ui/index.ts"],
+      "@tl/ui/*": ["./src/packages/ui/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}

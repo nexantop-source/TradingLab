@@ -1,0 +1,55 @@
+import type { MarketDataProvider } from './provider';
+import { SyntheticMarketDataProvider } from './synthetic-provider';
+
+/**
+ * Registro de proveedores.
+ *
+ * Añadir un proveedor comercial consiste en:
+ *   1. Implementar `MarketDataProvider` en `src/packages/market-data/providers/<id>.ts`.
+ *   2. Registrarlo aquí con `registerProvider`.
+ *   3. Cambiar `MARKET_DATA_PROVIDER` en el entorno.
+ *
+ * Ninguna otra parte del código cambia: el resto de la aplicación solo conoce
+ * la interfaz. Ver `docs/MARKET_DATA.md`.
+ */
+const registry = new Map<string, MarketDataProvider>();
+
+export function registerProvider(provider: MarketDataProvider): void {
+  registry.set(provider.id, provider);
+}
+
+const synthetic = new SyntheticMarketDataProvider();
+registerProvider(synthetic);
+// Alias para poder seleccionarlo por nombre corto desde el entorno.
+registry.set('synthetic', synthetic);
+
+let activeId = process.env.MARKET_DATA_PROVIDER || 'synthetic';
+
+export function setActiveProvider(id: string): void {
+  if (!registry.has(id)) throw new Error(`Proveedor de datos no registrado: ${id}`);
+  activeId = id;
+}
+
+/**
+ * Proveedor activo. Si el configurado no está disponible (por ejemplo, falta
+ * la credencial), se degrada al motor determinístico y lo deja registrado,
+ * de modo que la interfaz siga mostrando la procedencia correcta.
+ */
+export function marketData(): MarketDataProvider {
+  const p = registry.get(activeId);
+  if (p) return p;
+  if (process.env.NODE_ENV !== 'test') {
+    console.warn(
+      `[market-data] Proveedor "${activeId}" no registrado. Se usa el motor determinístico local.`,
+    );
+  }
+  return synthetic;
+}
+
+export function listProviders(): MarketDataProvider[] {
+  return Array.from(new Set(registry.values()));
+}
+
+export function activeProviderId(): string {
+  return activeId;
+}

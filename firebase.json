@@ -1,0 +1,28 @@
+{
+  "$comment": "TradingLab. El despliegue real lo hace Firebase App Hosting mediante apphosting.yaml, que construye desde GitHub y ejecuta Next.js con renderizado en servidor. Este archivo declara el backend y deja configurado el emulador local.",
+  "apphosting": [
+    {
+      "backendId": "tradinglab",
+      "rootDir": "/",
+      "ignore": [
+        "node_modules",
+        ".git",
+        ".next",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "prisma/dev.db",
+        "prisma/dev.db-journal"
+      ]
+    }
+  ],
+  "emulators": {
+    "apphosting": {
+      "port": 5002,
+      "rootDirectory": "./"
+    },
+    "ui": {
+      "enabled": true
+    },
+    "singleProjectMode": true
+  }
+}

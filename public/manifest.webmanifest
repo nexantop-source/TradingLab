@@ -1,0 +1,33 @@
+{
+  "name": "TradingLab · Plataforma educativa de análisis y simulación de mercados",
+  "short_name": "TradingLab",
+  "description": "Aprende a analizar los mercados sin arriesgar tu dinero. Simulación con USD 10.000 virtuales, academia y análisis educativo con inteligencia artificial.",
+  "start_url": "/panel",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#070A12",
+  "theme_color": "#070A12",
+  "lang": "es",
+  "dir": "ltr",
+  "categories": ["education", "finance"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    { "name": "Terminal de simulación", "url": "/terminal" },
+    { "name": "Academia", "url": "/academia" },
+    { "name": "Diario", "url": "/diario" }
+  ]
+}

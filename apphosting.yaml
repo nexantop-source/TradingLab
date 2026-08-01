@@ -1,0 +1,128 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# TradingLab · Firebase App Hosting
+#
+# App Hosting construye la aplicación desde GitHub y la ejecuta sobre Cloud Run,
+# así que soporta el renderizado en servidor, las rutas de API y las sesiones
+# con cookie httpOnly que esta aplicación necesita.
+#
+# Firebase Hosting a secas NO sirve: solo entrega archivos estáticos, y aquí
+# prácticamente todo se renderiza en servidor.
+#
+# Los secretos NUNCA se escriben en este archivo. Se guardan en Secret Manager
+# con `firebase apphosting:secrets:set NOMBRE` y aquí solo se referencian.
+# Ver docs/FIREBASE.md.
+# ─────────────────────────────────────────────────────────────────────────────
+
+runConfig:
+  # Punto de partida conservador. Súbelo cuando tengas datos de uso real.
+  minInstances: 0
+  maxInstances: 10
+  concurrency: 80
+  cpu: 1
+  memoryMiB: 1024
+
+env:
+  # ── Configuración pública ──────────────────────────────────────────────────
+  - variable: NODE_ENV
+    value: production
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # PostgreSQL: el sistema de archivos de Cloud Run es efímero y no se comparte
+  # entre instancias, así que SQLite no es una opción en producción.
+  - variable: DATABASE_PROVIDER
+    value: postgresql
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_APP_NAME
+    value: TradingLab
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # Sustituye por tu dominio real cuando lo tengas conectado.
+  - variable: NEXT_PUBLIC_APP_URL
+    value: https://tradinglab.web.app
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # ── Datos de mercado ───────────────────────────────────────────────────────
+  # `synthetic` usa el motor educativo determinístico incluido en el
+  # repositorio: la aplicación funciona sin contratar ningún proveedor, y la
+  # interfaz indica en todo momento que la serie no proviene de un mercado real.
+  - variable: MARKET_DATA_PROVIDER
+    value: synthetic
+    availability:
+      - RUNTIME
+
+  - variable: MARKET_DATA_DELAY_SECONDS
+    value: "0"
+    availability:
+      - RUNTIME
+
+  # ── Inteligencia artificial ────────────────────────────────────────────────
+  - variable: OPENAI_MODEL
+    value: gpt-4.1-mini
+    availability:
+      - RUNTIME
+
+  # Tope de gasto mensual. Al alcanzarlo, los análisis pasan al motor
+  # determinístico local en lugar de fallar, indicándolo al usuario.
+  - variable: AI_MONTHLY_COST_CAP_USD
+    value: "50"
+    availability:
+      - RUNTIME
+
+  # ── Facturación y publicidad ───────────────────────────────────────────────
+  - variable: BILLING_PROVIDER
+    value: mock
+    availability:
+      - RUNTIME
+
+  - variable: ADS_PROVIDER
+    value: internal
+    availability:
+      - RUNTIME
+
+  - variable: EMAIL_PROVIDER
+    value: console
+    availability:
+      - RUNTIME
+
+  - variable: LOG_LEVEL
+    value: info
+    availability:
+      - RUNTIME
+
+  # ── Secretos ───────────────────────────────────────────────────────────────
+  # Créalos antes del primer despliegue:
+  #
+  #   firebase apphosting:secrets:set DATABASE_URL
+  #   firebase apphosting:secrets:set AUTH_SECRET
+  #
+  # DATABASE_URL se necesita también en BUILD porque `prisma generate` lee el
+  # esquema durante la compilación.
+  - variable: DATABASE_URL
+    secret: DATABASE_URL
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: AUTH_SECRET
+    secret: AUTH_SECRET
+    availability:
+      - RUNTIME
+
+  # Opcional. Sin esta clave, el entrenador educativo responde con el motor
+  # determinístico local, que cumple exactamente las mismas reglas de conducta.
+  # Descomenta después de ejecutar:
+  #   firebase apphosting:secrets:set OPENAI_API_KEY
+  #
+  # - variable: OPENAI_API_KEY
+  #   secret: OPENAI_API_KEY
+  #   availability:
+  #     - RUNTIME
