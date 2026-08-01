@@ -119,36 +119,20 @@ env:
     availability:
       - RUNTIME
 
-  # ── DATABASE_URL: desactivada temporalmente ────────────────────────────────
-  #
-  # Está comentada porque el secreto todavía no existe, y declarar un secreto
-  # inexistente hace fallar la compilación entera en el paso `preparer`.
-  #
-  # Sin base de datos, todo el sitio público funciona —landing, precios,
-  # mercados, glosario, centro legal, estado— y solo fallan las acciones que
-  # consultan datos: registro, inicio de sesión y el producto. Esas devuelven
-  # un 503 explicativo, no un 500.
-  #
-  # PARA ACTIVARLA, en cuanto tengas una PostgreSQL (Neon, Supabase o Cloud
-  # SQL, siempre con la cadena que incluye pooling):
-  #
-  #   1. firebase apphosting:secrets:set DATABASE_URL --project nexant-87204
-  #   2. Descomenta las cuatro líneas de abajo.
-  #   3. Crea las tablas apuntando a esa base:
-  #        DATABASE_PROVIDER=postgresql DATABASE_URL="postgresql://…" npm run db:push
-  #   4. git commit && git push
-  #
-  # - variable: DATABASE_URL
-  #   secret: DATABASE_URL
-  #   availability:
-  #     - RUNTIME
+  # Apunta a la instancia de Cloud SQL `tradinglab-db` (PostgreSQL 16,
+  # us-east4), en el mismo proyecto de Firebase. Se aprovisiona y se rota con
+  # `scripts/provision-cloudsql.mjs`, y las migraciones se aplican con
+  # `scripts/db-remote.mjs`, que lee la cadena desde Secret Manager en lugar de
+  # exigir que ande suelta por un `.env`.
+  - variable: DATABASE_URL
+    secret: DATABASE_URL
+    availability:
+      - RUNTIME
 
-  # Opcional. Sin esta clave, el entrenador educativo responde con el motor
-  # determinístico local, que cumple exactamente las mismas reglas de conducta.
-  # Descomenta después de ejecutar:
-  #   firebase apphosting:secrets:set OPENAI_API_KEY
-  #
-  # - variable: OPENAI_API_KEY
-  #   secret: OPENAI_API_KEY
-  #   availability:
-  #     - RUNTIME
+  # Activa el entrenador con modelo de lenguaje. Sin esta clave, los análisis
+  # los genera el motor determinístico local, que cumple exactamente las mismas
+  # reglas de conducta y usa las mismas lecturas de indicadores.
+  - variable: OPENAI_API_KEY
+    secret: OPENAI_API_KEY
+    availability:
+      - RUNTIME
