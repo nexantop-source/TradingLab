@@ -339,6 +339,30 @@ Y para auditar el lockfile entero de una vez:
 node -e "const l=require('./package-lock.json');for(const[k,p]of Object.entries(l.packages)){if(!p.resolved?.includes('registry.npmjs.org'))continue;const n=k.replace(/^node_modules\//,'').split('/node_modules/').pop();const s=n.includes('/')?n.split('/')[1]:n;if(!p.resolved.split('/').pop().startsWith(s+'-'))console.log('INCOHERENTE',n,p.resolved)}"
 ```
 
+**Tras iniciar sesión o crear una cuenta, la página solo recarga y no entra a ninguna parte.**
+Es un bucle de redirecciones entre `/panel`, `/onboarding` y `/entrar`, y casi siempre significa que
+Next.js ha prerenderizado alguna de esas rutas con el estado «sin sesión» y la está sirviendo desde
+caché a usuarios que sí la tienen.
+
+Se confirma en un segundo mirando las cabeceras:
+
+```bash
+curl -sI https://<tu-backend>.hosted.app/onboarding | grep -Ei "cache-control|x-nextjs-cache|age"
+```
+
+Si aparece `x-nextjs-cache: HIT` o un `s-maxage` largo en una ruta que depende de la sesión, ese es
+el problema. Lo correcto es `private, no-cache, no-store`.
+
+La causa de fondo suele ser sutil: **cualquier camino de código que decida sobre la sesión sin
+llegar a llamar a `cookies()`** deja a Next sin señal dinámica, y este la prerenderiza. Ocurrió aquí
+al añadir una salida temprana en `getAuth()` para tolerar la ausencia de `AUTH_SECRET`: como ese
+secreto no existe durante la compilación, la función devolvía `null` sin tocar la cookie.
+
+Por eso `getAuth()` lee la cookie siempre y lo primero, aunque ya sepa que va a devolver `null`, y
+los tres layouts declaran `force-dynamic`. Declararlo en el layout y no en cada página es
+deliberado: una página nueva que se olvide de hacerlo quedaría cacheada con el estado de otro
+usuario, y ese fallo es silencioso hasta que alguien ve datos que no son suyos.
+
 **El entrenador responde siempre con el motor determinístico.**
 Mira `/admin/ia`: hay una sección que agrupa por causa los análisis servidos en local. Los motivos
 habituales son cuenta del proveedor sin saldo (`QUOTA`), credencial rechazada (`AUTH`) o el
