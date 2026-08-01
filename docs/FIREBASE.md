@@ -43,17 +43,37 @@ Con Neon o Supabase, usa la cadena de conexión **con pooling** (la que incluye 
 
 ---
 
+## Estado actual
+
+Ya hecho:
+
+- Proyecto de Firebase creado: **`tradinglab-app`**
+  ([consola](https://console.firebase.google.com/project/tradinglab-app/overview)).
+- `.firebaserc` apunta a ese proyecto, así que la CLI ya sabe con cuál trabajar.
+- `apphosting.yaml` con la configuración de ejecución, variables y referencias a secretos.
+- `prisma/schema.prisma` con el objetivo binario que necesita Cloud Run.
+- Build verificado con el proveedor `postgresql`, tal como se ejecutará en Firebase.
+- Repositorio en GitHub: `nexantop-source/TradingLab`.
+
+Pendiente, y requiere tu intervención porque implica facturación y una autorización en el navegador:
+
+1. Activar el plan Blaze.
+2. Crear la base de datos PostgreSQL.
+3. Crear los dos secretos.
+4. Crear el backend y autorizar el acceso a GitHub.
+
+---
+
 ## Paso a paso
 
-### 1. Crear el proyecto de Firebase
+### 1. Activar el plan Blaze
 
-```bash
-firebase login
-firebase projects:create tradinglab      # o créalo desde console.firebase.google.com
-firebase use tradinglab
-```
+App Hosting usa Cloud Run y Cloud Build, que no están en el plan gratuito.
 
-Activa el plan Blaze en la consola: **Configuración del proyecto → Uso y facturación**.
+https://console.firebase.google.com/project/tradinglab-app/usage/details
+
+Con tráfico bajo y `minInstances: 0` el coste real tiende a cero, pero hace falta un método de pago
+asociado. Conviene además fijar un presupuesto con alerta en Google Cloud Billing.
 
 ### 2. Preparar la base de datos
 
@@ -79,13 +99,16 @@ npm run db:seed          # opcional: catálogo + cuentas de demostración
 Nunca van en `apphosting.yaml` ni en el repositorio.
 
 ```bash
-firebase apphosting:secrets:set DATABASE_URL
+firebase apphosting:secrets:set DATABASE_URL --project tradinglab-app
 # pega la cadena de conexión de PostgreSQL
 
-firebase apphosting:secrets:set AUTH_SECRET
+firebase apphosting:secrets:set AUTH_SECRET --project tradinglab-app
 # pega un valor generado con:
 node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
 ```
+
+> `AUTH_SECRET` firma las sesiones. Si cambia entre despliegues, todas las sesiones activas se
+> invalidan y los usuarios tienen que volver a entrar. Genéralo una vez y no lo toques.
 
 Opcional, para activar el modelo de lenguaje. Sin él, el entrenador responde con el motor
 determinístico local, que aplica exactamente las mismas reglas de conducta:
@@ -99,8 +122,11 @@ Y descomenta el bloque correspondiente al final de `apphosting.yaml`.
 ### 4. Crear el backend y conectar GitHub
 
 ```bash
-firebase apphosting:backends:create --project tradinglab --location us-central1
+firebase apphosting:backends:create --project tradinglab-app --backend tradinglab --primary-region us-central1 --root-dir "/"
 ```
+
+Ejecútalo de forma interactiva: la conexión con GitHub abre una autorización en el navegador que no
+puede automatizarse.
 
 El asistente pide:
 
@@ -123,9 +149,14 @@ Sigue el progreso en la consola de Firebase, sección **App Hosting**.
 
 ### 6. Comprobar
 
+La URL la muestra la consola al terminar el despliegue, con la forma:
+
 ```
-https://tradinglab--<id>.us-central1.hosted.app
+https://tradinglab--<hash>.us-central1.hosted.app
 ```
+
+Cópiala a `NEXT_PUBLIC_APP_URL` en `apphosting.yaml` y vuelve a desplegar, para que los metadatos de
+Open Graph y los enlaces absolutos apunten al sitio real.
 
 Lista de verificación tras el primer despliegue:
 

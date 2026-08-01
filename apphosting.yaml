@@ -43,9 +43,11 @@ env:
       - BUILD
       - RUNTIME
 
-  # Sustituye por tu dominio real cuando lo tengas conectado.
+  # App Hosting asigna la URL definitiva al crear el backend, con la forma
+  # https://tradinglab--<hash>.us-central1.hosted.app. Sustituye este valor por
+  # esa URL —o por tu dominio propio— y vuelve a desplegar.
   - variable: NEXT_PUBLIC_APP_URL
-    value: https://tradinglab.web.app
+    value: https://tradinglab-app.web.app
     availability:
       - BUILD
       - RUNTIME
