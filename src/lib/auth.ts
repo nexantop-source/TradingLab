@@ -167,6 +167,19 @@ export interface AuthContext {
  * Es la única puerta de entrada: ninguna ruta debe leer la cookie por su cuenta.
  */
 export async function getAuth(): Promise<AuthContext | null> {
+  // La cookie se lee SIEMPRE y lo primero, incluso en los casos en que ya se
+  // sabe que la respuesta será `null`.
+  //
+  // No es una formalidad: llamar a `cookies()` es lo que marca la ruta como
+  // dinámica en Next.js. Si se saliera antes —por ejemplo, al no haber
+  // AUTH_SECRET, que durante la compilación nunca está— Next no vería ninguna
+  // señal dinámica, prerenderizaría la página con el resultado "sin sesión" y
+  // serviría esa copia con `s-maxage` de un año a todo el mundo, incluidos los
+  // usuarios que sí han iniciado sesión. El síntoma es un bucle de
+  // redirecciones entre /panel, /onboarding y /entrar.
+  const store = await cookies();
+  const value = store.get(COOKIE_NAME)?.value;
+
   // Sin secreto no puede existir ninguna sesión firmada válida, así que se
   // trata al visitante como anónimo en lugar de romper la página. Ver
   // `warnMissingSecret` para el razonamiento completo.
@@ -175,8 +188,6 @@ export async function getAuth(): Promise<AuthContext | null> {
     return null;
   }
 
-  const store = await cookies();
-  const value = store.get(COOKIE_NAME)?.value;
   if (!value) return null;
 
   const parsed = await parseCookie(value);

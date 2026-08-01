@@ -4,9 +4,10 @@ import { notFound } from 'next/navigation';
 import { LEGAL_DOCS, getLegalDoc } from '@/content/legal';
 import { Badge, Card } from '@tl/ui';
 
-export function generateStaticParams() {
-  return LEGAL_DOCS.map((d) => ({ slug: d.slug }));
-}
+// Sin `generateStaticParams` a propósito: el layout de este grupo consulta la
+// sesión para decidir qué muestra la cabecera, así que la respuesta no puede
+// prerenderizarse. Declarar ambas cosas a la vez es contradictorio y deja al
+// siguiente lector adivinando cuál manda.
 
 export async function generateMetadata({
   params,

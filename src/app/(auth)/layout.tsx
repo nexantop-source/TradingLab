@@ -2,6 +2,12 @@ import Link from 'next/link';
 import { Logo } from '@/components/Logo';
 import { ServiceNature, SimulationPill } from '@tl/ui/compliance';
 
+/**
+ * Iniciar sesión y crear cuenta redirigen si ya hay sesión, así que su
+ * respuesta depende de la cookie y no admite caché compartida.
+ */
+export const dynamic = 'force-dynamic';
+
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative min-h-dvh">

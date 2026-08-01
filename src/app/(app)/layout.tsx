@@ -6,6 +6,14 @@ import { ThemeProvider } from '@tl/ui/ThemeProvider';
 import { AppShell } from '@/components/app/AppShell';
 import type { ThemeId } from '@tl/types';
 
+/**
+ * Todo lo que cuelga de este layout depende de la sesión, así que nada puede
+ * cachearse. Se declara aquí y no en cada página: una página nueva que se
+ * olvide de declararlo quedaría cacheada con el estado de otro usuario, y ese
+ * fallo es silencioso hasta que alguien ve datos que no son suyos.
+ */
+export const dynamic = 'force-dynamic';
+
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const auth = await getAuth();
   if (!auth) redirect('/entrar');
