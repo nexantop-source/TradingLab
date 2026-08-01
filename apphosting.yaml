@@ -113,18 +113,35 @@ env:
   #
   # Ninguno se necesita en BUILD: está comprobado que `prisma generate` y
   # `next build` completan sin ellos, porque el esquema no requiere conexión y
-  # ninguna página se prerenderiza contra la base de datos. Mantenerlos fuera
-  # de BUILD reduce a la mitad los motivos por los que puede fallar la
-  # compilación.
-  - variable: DATABASE_URL
-    secret: DATABASE_URL
-    availability:
-      - RUNTIME
-
+  # ninguna página se prerenderiza contra la base de datos.
   - variable: AUTH_SECRET
     secret: AUTH_SECRET
     availability:
       - RUNTIME
+
+  # ── DATABASE_URL: desactivada temporalmente ────────────────────────────────
+  #
+  # Está comentada porque el secreto todavía no existe, y declarar un secreto
+  # inexistente hace fallar la compilación entera en el paso `preparer`.
+  #
+  # Sin base de datos, todo el sitio público funciona —landing, precios,
+  # mercados, glosario, centro legal, estado— y solo fallan las acciones que
+  # consultan datos: registro, inicio de sesión y el producto. Esas devuelven
+  # un 503 explicativo, no un 500.
+  #
+  # PARA ACTIVARLA, en cuanto tengas una PostgreSQL (Neon, Supabase o Cloud
+  # SQL, siempre con la cadena que incluye pooling):
+  #
+  #   1. firebase apphosting:secrets:set DATABASE_URL --project nexant-87204
+  #   2. Descomenta las cuatro líneas de abajo.
+  #   3. Crea las tablas apuntando a esa base:
+  #        DATABASE_PROVIDER=postgresql DATABASE_URL="postgresql://…" npm run db:push
+  #   4. git commit && git push
+  #
+  # - variable: DATABASE_URL
+  #   secret: DATABASE_URL
+  #   availability:
+  #     - RUNTIME
 
   # Opcional. Sin esta clave, el entrenador educativo responde con el motor
   # determinístico local, que cumple exactamente las mismas reglas de conducta.

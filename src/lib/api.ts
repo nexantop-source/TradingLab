@@ -38,6 +38,17 @@ export function handleError(error: unknown): NextResponse {
       error.issues.map((i) => ({ path: i.path.join('.'), message: i.message })),
     );
   }
+  // Prisma no falla al construir el cliente sin DATABASE_URL: falla en la
+  // primera consulta. Se traduce a un 503 explicativo en lugar de un 500
+  // opaco, porque el problema está en el despliegue y no en la petición.
+  if (error instanceof Error && error.name === 'PrismaClientInitializationError') {
+    console.error('[db] No se ha podido conectar con la base de datos:', error.message);
+    return fail(
+      'DATABASE_NOT_CONFIGURED',
+      'El servicio no puede conectar con su base de datos, así que esta acción no está disponible. Si administras esta instalación, revisa DATABASE_URL.',
+      503,
+    );
+  }
   if (error instanceof ConfigurationError) {
     // Se registra como error del servidor porque requiere intervención de quien
     // administra el despliegue, no del usuario.
