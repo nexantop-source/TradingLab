@@ -45,23 +45,73 @@ Con Neon o Supabase, usa la cadena de conexión **con pooling** (la que incluye 
 
 ## Estado actual
 
-El backend ya existe:
+**Desplegado y funcionando.**
 
 | | |
 |---|---|
 | Proyecto | `nexant-87204` |
-| Backend | `tradinglab` |
-| Región | `us-east4` |
-| Runtime | `nodejs24` |
-| Repositorio | `nexantop-source/TradingLab`, rama `main` |
+| Backend | `tradinglab` · `us-east4` · `nodejs24` |
+| Repositorio | `nexantop-source/TradingLab`, rama `main`, despliegue automático |
 | URL | https://tradinglab--nexant-87204.us-east4.hosted.app |
+| Base de datos | Cloud SQL `tradinglab-db` · PostgreSQL 16 · `us-east4` · `db-f1-micro` |
+| Secretos | `DATABASE_URL`, `AUTH_SECRET`, `OPENAI_API_KEY` |
 
-También se creó el proyecto `tradinglab-app`, que quedó sin usar porque no tiene el plan Blaze
-activado. Puedes borrarlo desde la consola si no lo vas a necesitar.
+Todo vive en el mismo proyecto de Firebase. Cloud SQL es el motor relacional que usa Firebase para
+Data Connect, así que Prisma se conecta sin ningún cambio de código.
 
-**Falta un único paso para que el despliegue funcione: crear los dos secretos** en el proyecto
-`nexant-87204`. Sin ellos, el paso `preparer` de Cloud Build aborta con el estado 100. Ver más
-abajo.
+También se creó el proyecto `tradinglab-app`, que quedó sin usar porque no tiene Blaze. Puedes
+borrarlo desde la consola.
+
+### Por qué no Firestore
+
+Es la primera pregunta que surge y conviene dejarla escrita. Firestore es documental y Prisma no
+tiene conector para él, pero el problema de fondo es otro: el producto depende de garantías que
+Firestore no ofrece.
+
+- **Transacciones ACID entre tablas.** Cada simulación escribe tres asientos en el libro mayor que
+  deben cuadrar o no escribirse ninguno. Es la base de la auditoría del saldo virtual.
+- **Agregaciones `groupBy`.** Sostienen el panel administrativo entero: versiones del motor,
+  proveedores de precio, uso y coste de IA, métricas de campañas. Firestore no tiene `GROUP BY`;
+  habría que mantener contadores a mano o exportar a BigQuery.
+- **Relaciones y claves únicas compuestas** en los 47 modelos.
+
+Migrar habría supuesto reescribir la capa de datos, las 24 rutas de API y el panel, para acabar con
+menos garantías de las que hay ahora.
+
+### Nota de seguridad sobre Cloud SQL
+
+App Hosting no expone conexión por socket a Cloud SQL en su configuración, así que la instancia
+necesita **IP pública**. Se ha configurado con la postura más estricta que permite esa restricción:
+
+- `sslMode: ENCRYPTED_ONLY` — una conexión sin cifrar se rechaza **en el servidor**, no solo por
+  convención del cliente.
+- Contraseña de 32 bytes aleatorios, generada y enviada directamente a Secret Manager sin pasar por
+  disco ni por pantalla.
+- Copias de seguridad diarias activadas.
+
+Aun así, la base queda alcanzable desde internet y la protección descansa en la contraseña y en TLS.
+Es la concesión que impone hoy la plataforma. Cuando App Hosting soporte salida por VPC, conviene
+pasar a IP privada y retirar la red autorizada `0.0.0.0/0`.
+
+### Utilidades
+
+```bash
+node scripts/provision-cloudsql.mjs    # crea o reutiliza instancia, base y usuario
+node scripts/db-remote.mjs push        # crea o actualiza las tablas desplegadas
+node scripts/db-remote.mjs migrate     # aplica migraciones pendientes
+node scripts/db-remote.mjs seed        # carga el catálogo
+node scripts/db-remote.mjs studio      # inspector contra la base real
+```
+
+`db-remote.mjs` lee la cadena de conexión desde Secret Manager, en lugar del patrón habitual de
+pegar la contraseña en la terminal o dejarla en un `.env` que acaba versionado por descuido.
+
+Para rotar la contraseña:
+
+```bash
+PRINT_URL=1 node scripts/provision-cloudsql.mjs \
+  | firebase apphosting:secrets:set DATABASE_URL --project nexant-87204 --data-file -
+```
 
 ---
 
@@ -271,6 +321,29 @@ de inicio de sesión devuelve un 503 con un mensaje explícito en lugar de un 50
 **El esquema sigue en SQLite.**
 `DATABASE_PROVIDER` debe valer `postgresql` con disponibilidad `BUILD`. El script
 `scripts/set-db-provider.mjs` reescribe el esquema durante la compilación.
+
+**`npm error 404` sobre un paquete durante el paso `build` (estado 51).**
+El `package-lock.json` apunta a una URL que no existe. Suele ocurrir tras una búsqueda y reemplazo
+sobre todo el repositorio: basta con que la cadena buscada aparezca dentro del nombre de un paquete.
+
+Se detecta mal en local porque npm reutiliza su caché y no llega a pedir el tarball por red. Para
+reproducir lo que hace el contenedor, hay que forzar una caché vacía:
+
+```bash
+npm ci --cache "$(mktemp -d)"
+```
+
+Y para auditar el lockfile entero de una vez:
+
+```bash
+node -e "const l=require('./package-lock.json');for(const[k,p]of Object.entries(l.packages)){if(!p.resolved?.includes('registry.npmjs.org'))continue;const n=k.replace(/^node_modules\//,'').split('/node_modules/').pop();const s=n.includes('/')?n.split('/')[1]:n;if(!p.resolved.split('/').pop().startsWith(s+'-'))console.log('INCOHERENTE',n,p.resolved)}"
+```
+
+**El entrenador responde siempre con el motor determinístico.**
+Mira `/admin/ia`: hay una sección que agrupa por causa los análisis servidos en local. Los motivos
+habituales son cuenta del proveedor sin saldo (`QUOTA`), credencial rechazada (`AUTH`) o el
+proveedor caído (`UPSTREAM`). Los dos primeros no se reintentan, porque reintentarlos solo añade
+espera antes de la misma respuesta.
 
 ---
 
