@@ -102,9 +102,10 @@ export function CoachView({
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-5 px-4 py-6 sm:px-6">
+    <div className="app-content-page mx-auto max-w-4xl space-y-5 px-4 py-6 sm:px-6">
       <header>
-        <div className="flex items-center gap-2">
+        <p className="app-page-kicker">Preguntar</p>
+        <div className="mt-2 flex items-center gap-2">
           <Sparkles className="size-5 text-[var(--color-violet)]" aria-hidden="true" />
           <h1 className="text-2xl font-semibold tracking-[-0.02em]">Entrenador educativo</h1>
         </div>
@@ -123,7 +124,7 @@ export function CoachView({
       )}
 
       {/* Formulario */}
-      <Card className="p-5">
+      <Card className="app-coach-form p-5">
         <Segmented
           ariaLabel="Tipo de análisis"
           className="w-full"

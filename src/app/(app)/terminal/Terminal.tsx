@@ -204,9 +204,9 @@ export function Terminal(props: TerminalProps) {
   const marketClosed = props.marketStatus === 'CLOSED' || props.marketStatus === 'HOLIDAY';
 
   return (
-    <div className="flex h-[calc(100dvh-3.5rem)] flex-col lg:h-dvh">
+    <div className="app-terminal-shell flex h-[calc(100dvh-3.5rem)] flex-col lg:h-[calc(100dvh-5.5rem)]">
       {/* ── Barra superior ───────────────────────────────────────────────── */}
-      <header className="flex shrink-0 flex-wrap items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5">
+      <header className="app-terminal-header flex shrink-0 flex-wrap items-center gap-3 border-b border-[var(--color-border)] px-4 py-2.5">
         <div className="flex items-center gap-2">
           <span className="num text-sm font-semibold">{props.symbol.symbol}</span>
           <span className="hidden text-[11px] text-[var(--color-muted)] sm:inline">{props.symbol.name}</span>
@@ -237,7 +237,7 @@ export function Terminal(props: TerminalProps) {
 
       <div className="flex min-h-0 flex-1">
         {/* ── Columna izquierda ─────────────────────────────────────────── */}
-        <aside className="hidden w-56 shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-surface)] lg:flex">
+        <aside className="app-terminal-watchlist hidden w-56 shrink-0 flex-col border-r border-[var(--color-border)] lg:flex">
           <div className="border-b border-[var(--color-border)] p-2.5">
             <div className="relative">
               <Search
@@ -316,9 +316,9 @@ export function Terminal(props: TerminalProps) {
         </aside>
 
         {/* ── Área central ──────────────────────────────────────────────── */}
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="app-terminal-main flex min-w-0 flex-1 flex-col">
           {/* Controles del gráfico */}
-          <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-[var(--color-border)] px-3 py-2">
+          <div className="app-terminal-toolbar flex shrink-0 flex-wrap items-center gap-2 border-b border-[var(--color-border)] px-3 py-2">
             <Segmented
               ariaLabel="Temporalidad"
               size="sm"
@@ -380,7 +380,7 @@ export function Terminal(props: TerminalProps) {
           </div>
 
           {/* Gráfico */}
-          <div className="min-h-0 flex-1 overflow-hidden px-1 py-1">
+          <div className="app-terminal-chart min-h-0 flex-1 overflow-hidden px-1 py-1">
             <PriceChart
               candles={candles}
               symbol={props.symbol.symbol}
@@ -398,7 +398,7 @@ export function Terminal(props: TerminalProps) {
           </div>
 
           {/* Zona inferior */}
-          <div className="shrink-0 border-t border-[var(--color-border)] bg-[var(--color-surface)]">
+          <div className="app-terminal-bottom shrink-0 border-t border-[var(--color-border)]">
             <Tabs
               ariaLabel="Paneles de la terminal"
               active={bottomTab}
@@ -457,7 +457,7 @@ export function Terminal(props: TerminalProps) {
         </div>
 
         {/* ── Panel de simulación (escritorio) ─────────────────────────── */}
-        <aside className="hidden w-80 shrink-0 overflow-y-auto border-l border-[var(--color-border)] bg-[var(--color-surface)] xl:block">
+        <aside className="app-terminal-simulation hidden w-80 shrink-0 overflow-y-auto border-l border-[var(--color-border)] xl:block">
           <SimulationPanel
             symbol={props.symbol}
             quote={quote}
@@ -483,7 +483,7 @@ export function Terminal(props: TerminalProps) {
       <button
         type="button"
         onClick={() => setSheetOpen(true)}
-        className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-center gap-2 border-t border-[var(--color-border)] bg-[var(--color-blue)] py-3.5 text-[13px] font-semibold text-white xl:hidden"
+        className="app-terminal-mobile-action fixed inset-x-0 bottom-0 z-40 flex items-center justify-center gap-2 border-t border-[var(--color-border)] bg-[var(--color-blue)] py-3.5 text-[13px] font-semibold text-white xl:hidden"
         style={{ paddingBottom: 'calc(0.875rem + env(safe-area-inset-bottom))' }}
       >
         <ChevronUp className="size-4" aria-hidden="true" />

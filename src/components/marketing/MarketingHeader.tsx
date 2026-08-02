@@ -7,10 +7,10 @@ import { Logo } from '@/components/Logo';
 import { Button, cn } from '@tl/ui';
 
 const NAV = [
-  { href: '/#simulador', label: 'Simulador' },
+  { href: '/#como-funciona', label: 'El ciclo' },
+  { href: '/#entrenador-ia', label: 'Entrenador IA' },
   // La academia completa exige cuenta; la vista pública vive en /recursos.
   { href: '/recursos', label: 'Academia' },
-  { href: '/#como-funciona', label: 'Cómo funciona' },
   { href: '/mercados', label: 'Mercados' },
   { href: '/precios', label: 'Precios' },
 ];
@@ -41,7 +41,7 @@ export function MarketingHeader({ authenticated = false }: { authenticated?: boo
     <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-4 sm:pt-4">
       <div
         className={cn(
-          'mx-auto flex max-w-7xl items-center gap-4 rounded-full px-4 transition-all duration-300 ease-[var(--ease-out-soft)] sm:px-5',
+          'marketing-nav-shell mx-auto flex max-w-7xl items-center gap-4 rounded-full px-4 transition-all duration-300 ease-[var(--ease-out-soft)] sm:px-5',
           scrolled
             ? 'h-13 border border-[var(--color-border-strong)] bg-[color-mix(in_srgb,var(--color-surface)_86%,transparent)] shadow-[var(--shadow-soft)] backdrop-blur-xl'
             : 'h-15 border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_48%,transparent)] backdrop-blur-md',
@@ -76,7 +76,7 @@ export function MarketingHeader({ authenticated = false }: { authenticated?: boo
                 </Button>
               </Link>
               <Link href="/crear-cuenta">
-                <Button size="sm" className="rounded-full px-4">Comenzar gratis</Button>
+                <Button size="sm" className="rounded-full px-4">Crear DEMO</Button>
               </Link>
             </>
           )}

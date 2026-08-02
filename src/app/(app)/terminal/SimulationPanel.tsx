@@ -229,7 +229,7 @@ export function SimulationPanel({
   }
 
   return (
-    <div className="p-4">
+    <div className="app-simulation-panel p-4">
       {/* Modo */}
       <Segmented
         ariaLabel="Modo de simulación"

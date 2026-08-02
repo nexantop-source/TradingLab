@@ -83,9 +83,10 @@ export function JournalView({
   );
 
   return (
-    <div className="mx-auto max-w-4xl space-y-5 px-4 py-6 sm:px-6">
+    <div className="app-content-page mx-auto max-w-4xl space-y-5 px-4 py-6 sm:px-6">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
+          <p className="app-page-kicker">Reflexionar</p>
           <h1 className="text-2xl font-semibold tracking-[-0.02em]">Diario educativo</h1>
           <p className="mt-1.5 max-w-2xl text-[14px] leading-relaxed text-[var(--color-muted)]">
             El historial registra qué pasó. El diario registra por qué decidiste lo que decidiste, que es lo único

@@ -54,9 +54,14 @@ export function HeroTerminal({
         className="absolute -inset-x-6 -inset-y-8 -z-10 rounded-[var(--radius-xl)] bg-[radial-gradient(60%_60%_at_50%_0%,color-mix(in_srgb,var(--color-blue)_18%,transparent),transparent_70%)] blur-2xl"
       />
 
-      <div className="overflow-hidden rounded-[2rem] border border-[var(--color-border-strong)] bg-[color-mix(in_srgb,var(--color-surface)_88%,transparent)] shadow-[var(--shadow-lifted)] backdrop-blur-2xl">
+      <div className="marketing-product-window overflow-hidden rounded-[2.75rem] border border-[var(--color-border-strong)] bg-[color-mix(in_srgb,var(--color-surface)_88%,transparent)] shadow-[var(--shadow-lifted)] backdrop-blur-2xl">
         {/* Barra superior */}
         <div className="flex flex-wrap items-center gap-3 border-b border-[var(--color-border)] px-5 py-4">
+          <span className="marketing-window-controls" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
           <div className="flex items-center gap-2">
             <Badge tone="gold">CUENTA DEMO</Badge>
             <span className="num text-[13px] font-semibold">

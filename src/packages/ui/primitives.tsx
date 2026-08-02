@@ -84,7 +84,7 @@ export function Card({
   return (
     <div
       className={cn(
-        'rounded-[var(--radius-lg)] border border-[var(--color-border)]',
+        'rounded-[var(--radius-lg)] border border-[var(--color-border)] shadow-[var(--shadow-soft)]',
         elevated
           ? 'bg-[var(--color-elevated)] shadow-[var(--shadow-soft)]'
           : 'bg-[var(--color-surface)]',

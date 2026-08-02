@@ -70,7 +70,8 @@ export default async function StatsPage() {
 
   if (stats.totalSimulations === 0) {
     return (
-      <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
+      <div className="app-content-page mx-auto max-w-4xl px-4 py-6 sm:px-6">
+        <p className="app-page-kicker">Medir</p>
         <h1 className="text-2xl font-semibold tracking-[-0.02em]">Estadísticas</h1>
         <Card className="mt-6">
           <EmptyState
@@ -89,8 +90,9 @@ export default async function StatsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-5 px-4 py-6 sm:px-6">
+    <div className="app-content-page mx-auto max-w-5xl space-y-5 px-4 py-6 sm:px-6">
       <header>
+        <p className="app-page-kicker">Medir</p>
         <h1 className="text-2xl font-semibold tracking-[-0.02em]">Estadísticas</h1>
         <p className="mt-1.5 max-w-2xl text-[14px] leading-relaxed text-[var(--color-muted)]">
           El indicador principal es la disciplina, no el beneficio virtual. Un buen proceso con resultado negativo
@@ -99,7 +101,7 @@ export default async function StatsPage() {
       </header>
 
       {/* Disciplina */}
-      <Card className="p-5">
+      <Card className="app-discipline-card p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-[11px] uppercase tracking-wider text-[var(--color-subtle)]">

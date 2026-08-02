@@ -56,34 +56,39 @@ export default async function AcademyPage() {
   const totalLessons = enriched.reduce((a, t) => a + t.totalLessons, 0);
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6">
+    <div className="app-content-page mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6">
       <header>
-        <h1 className="text-2xl font-semibold tracking-[-0.02em]">Academia</h1>
-        <p className="mt-1.5 max-w-2xl text-[14px] leading-relaxed text-[var(--color-muted)]">
-          Cada lección combina explicación, ejemplo, pregunta, ejercicio y evaluación. No se avanza por ver
-          contenido: se avanza demostrando comprensión.
+        <p className="app-page-kicker">Aprender</p>
+        <h1 className="mt-2 text-3xl font-semibold tracking-[-0.045em] sm:text-4xl">Tu ruta de aprendizaje</h1>
+        <p className="mt-2 max-w-2xl text-[14px] leading-relaxed text-[var(--color-muted)]">
+          Cada lección combina explicación, ejemplo, pregunta, ejercicio y evaluación. No avanzas por consumir contenido: avanzas demostrando comprensión.
         </p>
       </header>
 
-      <Card className="p-5">
-        <div className="flex flex-wrap items-baseline justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <GraduationCap className="size-4 text-[var(--color-blue)]" aria-hidden="true" />
-            <p className="text-[13px] font-semibold">Tu progreso general</p>
+      <section className="app-academy-hero">
+        <div className="relative z-10 max-w-xl">
+          <div className="flex items-center gap-2 text-[var(--color-blue)]">
+            <GraduationCap className="size-4" aria-hidden="true" />
+            <p className="app-page-kicker text-[var(--color-blue)]">Progreso general</p>
           </div>
-          <p className="num text-[13px] text-[var(--color-muted)]">
-            {totalCompleted} de {totalLessons} lecciones
-          </p>
+          <p className="num mt-4 text-4xl font-semibold tracking-[-0.06em]">{totalCompleted}<span className="text-lg text-[var(--color-subtle)]"> / {totalLessons}</span></p>
+          <p className="mt-1 text-[12px] text-[var(--color-muted)]">lecciones completadas</p>
+          <Progress className="mt-5 max-w-md" value={totalCompleted} max={Math.max(totalLessons, 1)} label="Progreso general" />
         </div>
-        <Progress className="mt-3" value={totalCompleted} max={Math.max(totalLessons, 1)} label="Progreso general" />
-      </Card>
+        <div className="app-academy-orbit" aria-hidden="true">
+          <span className="app-academy-orbit-line app-academy-orbit-line-a" />
+          <span className="app-academy-orbit-line app-academy-orbit-line-b" />
+          <span className="app-academy-orbit-core"><GraduationCap className="size-5" /></span>
+          <span className="app-academy-orbit-label">Aprender · aplicar · revisar</span>
+        </div>
+      </section>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="app-course-grid grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {enriched.map((t) => (
           <Link
             key={t.id}
             href={`/academia/${t.slug}`}
-            className="group flex flex-col rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 transition-colors hover:border-[var(--color-blue)]"
+            className="app-course-card group flex flex-col rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 transition-colors hover:border-[var(--color-blue)]"
           >
             <div className="flex items-center justify-between gap-2">
               <Badge

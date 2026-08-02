@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import { MarketingHeader } from '@/components/marketing/MarketingHeader';
 import { MarketingFooter } from '@/components/marketing/MarketingFooter';
@@ -22,6 +21,7 @@ import { marketData, SYMBOLS, requireSymbol, snapshotIndicators } from '@tl/mark
 import { ASSET_CLASSES, type AssetClass } from '@tl/types';
 import { getAuth } from '@/lib/auth';
 import { TRACKS, trackStats } from '@/content/academy';
+import { Reveal } from '@/components/motion/Motion';
 
 // La landing se renderiza en cada petición: `getAuth()` lee la cookie de
 // sesión para decidir si la cabecera muestra «Iniciar sesión» o «Ir a mi
@@ -117,91 +117,97 @@ export default async function LandingPage() {
 
       <main id="contenido">
         {/* ── Hero ─────────────────────────────────────────────────────────── */}
-        <section id="simulador" className="relative overflow-hidden border-b border-[var(--color-border)]">
-          <div aria-hidden="true" className="mesh-aurora absolute inset-0 -z-20" />
+        <section id="simulador" className="marketing-hero relative overflow-hidden">
+          <div aria-hidden="true" className="marketing-hero-noise absolute inset-0 -z-20" />
           <div aria-hidden="true" className="grid-lines absolute inset-0 -z-10 opacity-40" />
 
-          <div className="mx-auto max-w-7xl px-5 pb-16 pt-32 sm:px-8 sm:pb-20 sm:pt-40">
-            <div className="mb-10 flex flex-wrap items-center gap-3 text-[11px] font-medium text-[var(--color-muted)]">
-              <SimulationPill />
-              <span className="hidden h-4 w-px bg-[var(--color-border-strong)] sm:block" aria-hidden="true" />
-              <span>Aprende · practica · mejora</span>
-              <span className="ml-auto hidden text-[var(--color-subtle)] sm:block">Sin tarjeta · sin depósitos · sin riesgo real</span>
-            </div>
-
-            <div className="grid items-center gap-16 lg:grid-cols-[minmax(0,0.86fr)_minmax(0,1.14fr)] lg:gap-20">
-              <div className="animate-fade-up">
-
-                <h1 className="max-w-2xl text-[3.2rem] font-semibold leading-[0.98] tracking-[-0.055em] sm:text-[4.65rem]">
-                  Aprende a analizar los mercados{' '}
-                  <span className="editorial italic text-[var(--color-blue)]">sin arriesgar tu dinero</span>
-                </h1>
-
-                <p className="mt-7 max-w-xl text-[16px] leading-[1.65] text-[var(--color-muted)] sm:text-[17px]">
-                  Practica con USD 10.000 virtuales, estudia Forex, criptomonedas, acciones y otros mercados, y
-                  mejora cada decisión con análisis educativo impulsado por inteligencia artificial.
-                </p>
-
-                <div className="mt-9 flex flex-wrap items-center gap-3">
-                  <Link href="/crear-cuenta">
-                    <Button size="lg" className="rounded-full px-6">
-                      Crear mi cuenta DEMO
-                      <ArrowRight className="size-4" aria-hidden="true" />
-                    </Button>
-                  </Link>
-                  <Link href="/recursos">
-                    <Button size="lg" variant="outline" className="rounded-full px-6">
-                      Explorar la academia
-                    </Button>
-                  </Link>
-                </div>
-
-                <dl className="mt-12 grid max-w-xl grid-cols-3 gap-5 border-t border-[var(--color-border)] pt-7 sm:gap-8">
-                  <HeroStat value="USD 10.000" label="Saldo virtual al registrarte" />
-                  <HeroStat value={`${SYMBOLS.length}`} label="Instrumentos para practicar" />
-                  <HeroStat value={`${TRACKS.length}`} label="Rutas educativas" />
-                </dl>
-
-                <p className="mt-6 max-w-md text-[11px] leading-relaxed text-[var(--color-subtle)]">
-                  TradingLab es una plataforma educativa de análisis y simulación. No es un broker regulado,
-                  no admite depósitos de capital de trading y no permite retirar el saldo virtual.
-                </p>
+          <div className="mx-auto max-w-7xl px-5 pb-20 pt-32 sm:px-8 sm:pb-28 sm:pt-40">
+            <Reveal>
+              <div className="marketing-hero-kicker mb-10">
+                <SimulationPill />
+                <span className="hidden h-4 w-px bg-[var(--color-border-strong)] sm:block" aria-hidden="true" />
+                <span>El laboratorio de criterio para mercados financieros</span>
+                <span className="ml-auto hidden text-[var(--color-subtle)] sm:block">Sin tarjeta · sin depósitos · sin riesgo real</span>
               </div>
+            </Reveal>
 
-              <div className="animate-fade-up [animation-delay:120ms]">
-                <div className="relative isolate">
-                  <Image
-                    src="/images/tradinglab-hero.webp"
-                    alt="Composición editorial con gráfico de mercado y capas de vidrio"
-                    fill
-                    priority
-                    sizes="(max-width: 1024px) 100vw, 58vw"
-                    className="pointer-events-none -inset-10 -z-10 h-[calc(100%+5rem)] w-[calc(100%+5rem)] object-cover object-right opacity-90 mix-blend-multiply"
-                  />
-                  <div className="pointer-events-none absolute -inset-8 -z-10 rounded-[3rem] bg-[radial-gradient(circle_at_80%_45%,#2459e82b,transparent_65%)] blur-2xl" />
-                  <HeroTerminal
-                  candles={series.candles}
-                  provenance={series.provenance}
-                  tickers={tickers}
-                  symbol={meta.symbol}
-                  assetName={meta.name}
-                  precision={meta.precision}
-                  timeframe="1h"
-                  aiPreview={aiPreview}
-                  />
-                  <div className="absolute -bottom-5 -right-4 hidden rounded-2xl border border-[var(--color-border-strong)] bg-[color-mix(in_srgb,var(--color-surface)_88%,transparent)] px-4 py-3 shadow-[var(--shadow-lifted)] backdrop-blur-xl sm:block">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--color-blue)]">Modo aprendizaje</p>
-                    <p className="mt-1 text-[12px] text-[var(--color-muted)]">Cada decisión deja una lección.</p>
+            <div className="marketing-hero-layout grid items-center gap-16 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:gap-20">
+              <Reveal className="relative z-10">
+                <div className="marketing-hero-copy">
+                  <p className="marketing-eyebrow">Tu espacio para aprender trading</p>
+                  <h1 className="marketing-hero-title mt-5">
+                    Aprende a decidir.{' '}
+                    <span className="text-[var(--color-blue)]">Antes de arriesgar.</span>
+                  </h1>
+
+                  <p className="mt-7 max-w-xl text-[16px] leading-[1.7] text-[var(--color-muted)] sm:text-[18px]">
+                    Una plataforma clara y moderna para estudiar mercados, practicar con capital virtual y convertir cada decisión en aprendizaje real.
+                  </p>
+
+                  <div className="mt-9 flex flex-wrap items-center gap-3">
+                    <Link href="/crear-cuenta">
+                      <Button size="lg" className="rounded-full px-7">
+                        Empezar con USD 10.000 virtuales
+                        <ArrowRight className="size-4" aria-hidden="true" />
+                      </Button>
+                    </Link>
+                    <Link href="/recursos">
+                      <Button size="lg" variant="outline" className="rounded-full px-6">Ver la academia</Button>
+                    </Link>
                   </div>
+
+                  <div className="marketing-hero-proof mt-10">
+                    <div>
+                      <span className="num block text-xl font-semibold tracking-[-0.04em]">USD 10.000</span>
+                      <span className="mt-1 block text-[11px] text-[var(--color-muted)]">Saldo DEMO inicial</span>
+                    </div>
+                    <div>
+                      <span className="num block text-xl font-semibold tracking-[-0.04em]">{SYMBOLS.length}</span>
+                      <span className="mt-1 block text-[11px] text-[var(--color-muted)]">Instrumentos para practicar</span>
+                    </div>
+                    <div>
+                      <span className="num block text-xl font-semibold tracking-[-0.04em]">{TRACKS.length}</span>
+                      <span className="mt-1 block text-[11px] text-[var(--color-muted)]">Rutas educativas</span>
+                    </div>
+                  </div>
+
+                  <p className="mt-6 max-w-md text-[11px] leading-relaxed text-[var(--color-subtle)]">
+                    TradingLab es una plataforma educativa de análisis y simulación. No es un broker regulado ni permite operar con dinero real.
+                  </p>
                 </div>
-              </div>
+              </Reveal>
+
+              <Reveal delay={0.14}>
+                  <div className="marketing-hero-product-shell relative isolate">
+                    <div className="pointer-events-none absolute -inset-8 -z-10 rounded-[3rem] bg-[radial-gradient(circle_at_80%_45%,#2459e82b,transparent_65%)] blur-2xl" />
+                    <HeroTerminal
+                      candles={series.candles}
+                      provenance={series.provenance}
+                      tickers={tickers}
+                      symbol={meta.symbol}
+                      assetName={meta.name}
+                      precision={meta.precision}
+                      timeframe="1h"
+                      aiPreview={aiPreview}
+                    />
+                    <div className="marketing-hero-floating-proof absolute -bottom-5 -right-4 hidden sm:block">
+                      <span className="marketing-live-dot" aria-hidden="true" />
+                      <div>
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--color-blue)]">Modo aprendizaje</p>
+                        <p className="mt-1 text-[12px] text-[var(--color-muted)]">Cada decisión deja una lección.</p>
+                      </div>
+                    </div>
+                  </div>
+              </Reveal>
             </div>
 
-            <div className="mt-16 grid gap-4 rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_72%,transparent)] p-4 shadow-[var(--shadow-soft)] backdrop-blur-xl sm:grid-cols-3 sm:p-5">
-              <HeroSignal label="Datos para entender" value="Cotizaciones + contexto" />
-              <HeroSignal label="Capital de práctica" value="USD 10.000 virtuales" />
-              <HeroSignal label="Resultado que importa" value="Tu disciplina" />
-            </div>
+            <Reveal delay={0.18}>
+              <div className="marketing-signal-rail mt-16">
+                <HeroSignal label="Datos para entender" value="Cotizaciones + contexto" />
+                <HeroSignal label="Capital de práctica" value="USD 10.000 virtuales" />
+                <HeroSignal label="Resultado que importa" value="Tu disciplina" />
+              </div>
+            </Reveal>
           </div>
         </section>
 

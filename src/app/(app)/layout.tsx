@@ -32,7 +32,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <ThemeProvider
-      initialTheme={(profile?.theme === 'dark' ? 'system' : profile?.theme ?? 'system') as ThemeId}
+      initialTheme={(profile?.theme ?? 'system') as ThemeId}
       initialReduceMotion={profile?.reduceMotion ?? false}
       persistToServer
     >
