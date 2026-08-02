@@ -35,7 +35,7 @@ export default async function ProfilePage() {
     <ProfileView
       user={auth.user}
       profile={{
-        theme: profile?.theme ?? 'dark',
+        theme: profile?.theme ?? 'system',
         reduceMotion: profile?.reduceMotion ?? false,
         highContrast: profile?.highContrast ?? false,
         emailOptIn: profile?.emailOptIn ?? false,

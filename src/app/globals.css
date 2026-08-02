@@ -113,6 +113,61 @@
   --shadow-glow-blue: 0 0 0 2px #8ab4ff;
 }
 
+/* La web pública tiene una identidad propia: clara, editorial y luminosa.
+   Se aplica en un wrapper para que la landing nunca herede el tema guardado
+   de una sesión anterior de la plataforma. */
+.marketing-page {
+  --color-bg: #fbfcfe;
+  --color-surface: #ffffff;
+  --color-elevated: #ffffff;
+  --color-overlay: #eef3fa;
+
+  --color-border: #10213d14;
+  --color-border-strong: #10213d26;
+
+  --color-text: #0b1830;
+  --color-muted: #53627a;
+  --color-subtle: #8190a7;
+
+  --color-blue: #2459e8;
+  --color-blue-soft: #2459e814;
+  --color-violet: #7650d8;
+  --color-violet-soft: #7650d814;
+  --color-positive: #0d9271;
+  --color-positive-soft: #0d927114;
+  --color-negative: #d23d5d;
+  --color-negative-soft: #d23d5d14;
+  --color-gold: #b67b20;
+  --color-gold-soft: #b67b2014;
+
+  --shadow-soft: 0 1px 2px #0b18300a, 0 14px 36px -18px #0b183033;
+  --shadow-lifted: 0 2px 5px #0b183014, 0 28px 72px -24px #0b183033;
+  --shadow-glow-blue: 0 0 0 1px #2459e824, 0 18px 48px -20px #2459e84d;
+
+  min-height: 100dvh;
+  overflow: hidden;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  color-scheme: light;
+}
+
+.marketing-page ::selection {
+  background: var(--color-blue);
+  color: #fff;
+}
+
+.marketing-page .editorial {
+  font-weight: 400;
+}
+
+.marketing-page .grid-lines {
+  opacity: 0.52;
+}
+
+.marketing-page .mesh-aurora {
+  opacity: 0.7;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    Base
    ═══════════════════════════════════════════════════════════════════════════ */

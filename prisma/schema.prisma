@@ -100,7 +100,7 @@ model Profile {
   weeklyAvailability Int      @default(2)
   /// Puntuación de la evaluación inicial, 0-100.
   riskKnowledgeScore Int      @default(0)
-  theme              String   @default("dark")
+  theme              String   @default("system")
   reduceMotion       Boolean  @default(false)
   highContrast       Boolean  @default(false)
   emailOptIn         Boolean  @default(false)

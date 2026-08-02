@@ -54,9 +54,9 @@ export function HeroTerminal({
         className="absolute -inset-x-6 -inset-y-8 -z-10 rounded-[var(--radius-xl)] bg-[radial-gradient(60%_60%_at_50%_0%,color-mix(in_srgb,var(--color-blue)_18%,transparent),transparent_70%)] blur-2xl"
       />
 
-      <div className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--color-border-strong)] bg-[var(--color-surface)] shadow-[var(--shadow-lifted)]">
+      <div className="overflow-hidden rounded-[2rem] border border-[var(--color-border-strong)] bg-[color-mix(in_srgb,var(--color-surface)_88%,transparent)] shadow-[var(--shadow-lifted)] backdrop-blur-2xl">
         {/* Barra superior */}
-        <div className="flex flex-wrap items-center gap-3 border-b border-[var(--color-border)] px-4 py-3">
+        <div className="flex flex-wrap items-center gap-3 border-b border-[var(--color-border)] px-5 py-4">
           <div className="flex items-center gap-2">
             <Badge tone="gold">CUENTA DEMO</Badge>
             <span className="num text-[13px] font-semibold">
@@ -68,7 +68,7 @@ export function HeroTerminal({
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-[180px_1fr]">
+        <div className="grid lg:grid-cols-[190px_1fr]">
           {/* Watchlist */}
           <div className="hidden border-r border-[var(--color-border)] lg:block">
             <p className="px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--color-subtle)]">
@@ -118,7 +118,7 @@ export function HeroTerminal({
               precision={precision}
               chartType="candles"
               indicators={['SMA20']}
-              height={280}
+              height={360}
               showVolume={false}
             />
           </div>

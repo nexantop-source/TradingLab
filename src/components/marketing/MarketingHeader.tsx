@@ -13,7 +13,6 @@ const NAV = [
   { href: '/#como-funciona', label: 'Cómo funciona' },
   { href: '/mercados', label: 'Mercados' },
   { href: '/precios', label: 'Precios' },
-  { href: '/recursos', label: 'Recursos' },
 ];
 
 /**
@@ -42,22 +41,22 @@ export function MarketingHeader({ authenticated = false }: { authenticated?: boo
     <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-4 sm:pt-4">
       <div
         className={cn(
-          'mx-auto flex max-w-6xl items-center gap-4 rounded-[var(--radius-lg)] px-4 transition-all duration-300 ease-[var(--ease-out-soft)]',
+          'mx-auto flex max-w-7xl items-center gap-4 rounded-full px-4 transition-all duration-300 ease-[var(--ease-out-soft)] sm:px-5',
           scrolled
-            ? 'h-13 border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_82%,transparent)] shadow-[var(--shadow-soft)] backdrop-blur-xl'
-            : 'h-15 border border-transparent bg-transparent',
+            ? 'h-13 border border-[var(--color-border-strong)] bg-[color-mix(in_srgb,var(--color-surface)_86%,transparent)] shadow-[var(--shadow-soft)] backdrop-blur-xl'
+            : 'h-15 border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_48%,transparent)] backdrop-blur-md',
         )}
       >
         <Link href="/" className="shrink-0" aria-label="TradingLab, ir al inicio">
           <Logo size="sm" />
         </Link>
 
-        <nav aria-label="Navegación principal" className="hidden flex-1 items-center gap-1 lg:flex">
+        <nav aria-label="Navegación principal" className="hidden flex-1 items-center gap-0.5 lg:flex">
           {NAV.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-[var(--radius-xs)] px-3 py-2 text-[13px] font-medium text-[var(--color-muted)] transition-colors hover:text-[var(--color-text)]"
+              className="rounded-full px-3 py-2 text-[12px] font-medium text-[var(--color-muted)] transition-colors hover:bg-[var(--color-overlay)] hover:text-[var(--color-text)]"
             >
               {item.label}
             </Link>
@@ -67,17 +66,17 @@ export function MarketingHeader({ authenticated = false }: { authenticated?: boo
         <div className="ml-auto flex items-center gap-2">
           {authenticated ? (
             <Link href="/panel">
-              <Button size="sm">Ir a mi panel</Button>
+              <Button size="sm" className="rounded-full px-4">Ir a mi panel</Button>
             </Link>
           ) : (
             <>
               <Link href="/entrar" className="hidden sm:block">
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" className="rounded-full">
                   Iniciar sesión
                 </Button>
               </Link>
               <Link href="/crear-cuenta">
-                <Button size="sm">Comenzar gratis</Button>
+                <Button size="sm" className="rounded-full px-4">Comenzar gratis</Button>
               </Link>
             </>
           )}

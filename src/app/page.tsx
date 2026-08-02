@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import { MarketingHeader } from '@/components/marketing/MarketingHeader';
 import { MarketingFooter } from '@/components/marketing/MarketingFooter';
@@ -111,45 +112,51 @@ export default async function LandingPage() {
   });
 
   return (
-    <>
+    <div className="marketing-page">
       <MarketingHeader authenticated={Boolean(auth)} />
 
       <main id="contenido">
         {/* ── Hero ─────────────────────────────────────────────────────────── */}
-        <section id="simulador" className="relative overflow-hidden">
+        <section id="simulador" className="relative overflow-hidden border-b border-[var(--color-border)]">
           <div aria-hidden="true" className="mesh-aurora absolute inset-0 -z-20" />
           <div aria-hidden="true" className="grid-lines absolute inset-0 -z-10 opacity-40" />
 
-          <div className="mx-auto max-w-6xl px-5 pb-20 pt-32 sm:pt-40">
-            <div className="grid items-center gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
-              <div className="animate-fade-up">
-                <SimulationPill />
+          <div className="mx-auto max-w-7xl px-5 pb-16 pt-32 sm:px-8 sm:pb-20 sm:pt-40">
+            <div className="mb-10 flex flex-wrap items-center gap-3 text-[11px] font-medium text-[var(--color-muted)]">
+              <SimulationPill />
+              <span className="hidden h-4 w-px bg-[var(--color-border-strong)] sm:block" aria-hidden="true" />
+              <span>Aprende · practica · mejora</span>
+              <span className="ml-auto hidden text-[var(--color-subtle)] sm:block">Sin tarjeta · sin depósitos · sin riesgo real</span>
+            </div>
 
-                <h1 className="mt-6 text-[2.6rem] font-semibold leading-[1.05] tracking-[-0.035em] sm:text-6xl">
+            <div className="grid items-center gap-16 lg:grid-cols-[minmax(0,0.86fr)_minmax(0,1.14fr)] lg:gap-20">
+              <div className="animate-fade-up">
+
+                <h1 className="max-w-2xl text-[3.2rem] font-semibold leading-[0.98] tracking-[-0.055em] sm:text-[4.65rem]">
                   Aprende a analizar los mercados{' '}
-                  <span className="editorial italic text-gradient">sin arriesgar tu dinero</span>
+                  <span className="editorial italic text-[var(--color-blue)]">sin arriesgar tu dinero</span>
                 </h1>
 
-                <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-[var(--color-muted)] sm:text-base">
+                <p className="mt-7 max-w-xl text-[16px] leading-[1.65] text-[var(--color-muted)] sm:text-[17px]">
                   Practica con USD 10.000 virtuales, estudia Forex, criptomonedas, acciones y otros mercados, y
                   mejora cada decisión con análisis educativo impulsado por inteligencia artificial.
                 </p>
 
-                <div className="mt-9 flex flex-wrap gap-3">
+                <div className="mt-9 flex flex-wrap items-center gap-3">
                   <Link href="/crear-cuenta">
-                    <Button size="lg">
+                    <Button size="lg" className="rounded-full px-6">
                       Crear mi cuenta DEMO
                       <ArrowRight className="size-4" aria-hidden="true" />
                     </Button>
                   </Link>
                   <Link href="/recursos">
-                    <Button size="lg" variant="outline">
+                    <Button size="lg" variant="outline" className="rounded-full px-6">
                       Explorar la academia
                     </Button>
                   </Link>
                 </div>
 
-                <dl className="mt-12 grid max-w-md grid-cols-3 gap-6 border-t border-[var(--color-border)] pt-7">
+                <dl className="mt-12 grid max-w-xl grid-cols-3 gap-5 border-t border-[var(--color-border)] pt-7 sm:gap-8">
                   <HeroStat value="USD 10.000" label="Saldo virtual al registrarte" />
                   <HeroStat value={`${SYMBOLS.length}`} label="Instrumentos para practicar" />
                   <HeroStat value={`${TRACKS.length}`} label="Rutas educativas" />
@@ -162,7 +169,17 @@ export default async function LandingPage() {
               </div>
 
               <div className="animate-fade-up [animation-delay:120ms]">
-                <HeroTerminal
+                <div className="relative isolate">
+                  <Image
+                    src="/images/tradinglab-hero.webp"
+                    alt="Composición editorial con gráfico de mercado y capas de vidrio"
+                    fill
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 58vw"
+                    className="pointer-events-none -inset-10 -z-10 h-[calc(100%+5rem)] w-[calc(100%+5rem)] object-cover object-right opacity-90 mix-blend-multiply"
+                  />
+                  <div className="pointer-events-none absolute -inset-8 -z-10 rounded-[3rem] bg-[radial-gradient(circle_at_80%_45%,#2459e82b,transparent_65%)] blur-2xl" />
+                  <HeroTerminal
                   candles={series.candles}
                   provenance={series.provenance}
                   tickers={tickers}
@@ -171,8 +188,19 @@ export default async function LandingPage() {
                   precision={meta.precision}
                   timeframe="1h"
                   aiPreview={aiPreview}
-                />
+                  />
+                  <div className="absolute -bottom-5 -right-4 hidden rounded-2xl border border-[var(--color-border-strong)] bg-[color-mix(in_srgb,var(--color-surface)_88%,transparent)] px-4 py-3 shadow-[var(--shadow-lifted)] backdrop-blur-xl sm:block">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--color-blue)]">Modo aprendizaje</p>
+                    <p className="mt-1 text-[12px] text-[var(--color-muted)]">Cada decisión deja una lección.</p>
+                  </div>
+                </div>
               </div>
+            </div>
+
+            <div className="mt-16 grid gap-4 rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_72%,transparent)] p-4 shadow-[var(--shadow-soft)] backdrop-blur-xl sm:grid-cols-3 sm:p-5">
+              <HeroSignal label="Datos para entender" value="Cotizaciones + contexto" />
+              <HeroSignal label="Capital de práctica" value="USD 10.000 virtuales" />
+              <HeroSignal label="Resultado que importa" value="Tu disciplina" />
             </div>
           </div>
         </section>
@@ -188,7 +216,7 @@ export default async function LandingPage() {
       </main>
 
       <MarketingFooter />
-    </>
+    </div>
   );
 }
 
@@ -200,6 +228,18 @@ function HeroStat({ value, label }: { value: string; label: string }) {
         <span className="num block text-lg font-semibold tracking-tight">{value}</span>
         <span className="mt-1 block text-[11px] leading-snug text-[var(--color-muted)]">{label}</span>
       </dd>
+    </div>
+  );
+}
+
+function HeroSignal({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center gap-3 rounded-2xl px-2 py-2 sm:px-3">
+      <span className="flex size-2 shrink-0 rounded-full bg-[var(--color-positive)] shadow-[0_0_0_5px_var(--color-positive-soft)]" aria-hidden="true" />
+      <span>
+        <span className="block text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-subtle)]">{label}</span>
+        <span className="mt-1 block text-[13px] font-medium text-[var(--color-text)]">{value}</span>
+      </span>
     </div>
   );
 }

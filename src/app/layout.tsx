@@ -66,7 +66,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" data-theme="dark" suppressHydrationWarning>
+    <html lang="es" data-theme="dark" data-theme-preference="system" suppressHydrationWarning>
       <head>
         {/* Aplica el tema antes del primer pintado para evitar el destello. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />

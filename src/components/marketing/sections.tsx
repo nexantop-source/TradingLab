@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   BookOpen,
   Brain,
@@ -34,12 +35,13 @@ export function SectionHeading({
 }) {
   return (
     <div className={cn('max-w-2xl', align === 'center' && 'mx-auto text-center')}>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-blue)]">
+      <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-blue)]">
+        <span className="size-1.5 rounded-full bg-[var(--color-blue)]" aria-hidden="true" />
         {eyebrow}
       </p>
-      <h2 className="mt-3 text-3xl font-semibold tracking-[-0.03em] sm:text-4xl">{title}</h2>
+      <h2 className="mt-4 text-[2.2rem] font-semibold leading-[1.02] tracking-[-0.05em] sm:text-5xl">{title}</h2>
       {description && (
-        <p className="mt-4 text-[15px] leading-relaxed text-[var(--color-muted)]">{description}</p>
+        <p className="mt-5 text-[15px] leading-[1.7] text-[var(--color-muted)]">{description}</p>
       )}
     </div>
   );
@@ -72,27 +74,27 @@ const STEPS = [
 
 export function HowItWorks() {
   return (
-    <section id="como-funciona" className="mx-auto max-w-6xl px-5 py-24">
+    <section id="como-funciona" className="mx-auto max-w-7xl px-5 py-28 sm:px-8">
       <SectionHeading
         eyebrow="Cómo funciona"
         title="Un ciclo de cuatro pasos que se repite"
         description="La plataforma está construida alrededor de un bucle de aprendizaje deliberado: estudias, aplicas, arriesgas capital virtual y revisas con evidencia."
       />
 
-      <ol className="mt-14 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <ol className="mt-16 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {STEPS.map((s, i) => (
           <li key={s.title}>
-            <Card className="h-full p-5 transition-colors hover:border-[var(--color-border-strong)]">
-              <div className="flex items-center gap-3">
-                <span className="flex size-9 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--color-blue-soft)] text-[var(--color-blue)]">
+            <Card className="group relative h-full overflow-hidden p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[var(--color-blue)] hover:shadow-[var(--shadow-soft)]">
+              <div className="flex items-center justify-between gap-3">
+                <span className="flex size-10 items-center justify-center rounded-2xl bg-[var(--color-blue-soft)] text-[var(--color-blue)] transition-transform duration-300 group-hover:scale-110">
                   <s.icon className="size-4.5" aria-hidden="true" />
                 </span>
                 <span className="num text-[11px] font-semibold text-[var(--color-subtle)]">
                   0{i + 1}
                 </span>
               </div>
-              <h3 className="mt-4 text-[15px] font-semibold tracking-tight">{s.title}</h3>
-              <p className="mt-2 text-[13px] leading-relaxed text-[var(--color-muted)]">{s.body}</p>
+              <h3 className="mt-6 text-[16px] font-semibold tracking-tight">{s.title}</h3>
+              <p className="mt-2.5 text-[13px] leading-[1.7] text-[var(--color-muted)]">{s.body}</p>
             </Card>
           </li>
         ))}
@@ -117,19 +119,19 @@ const RISK_LABEL = ['', 'Muy bajo', 'Bajo', 'Medio', 'Alto', 'Muy alto'];
 
 export function MarketsSection({ markets }: { markets: MarketSummary[] }) {
   return (
-    <section id="mercados" className="border-y border-[var(--color-border)] bg-[var(--color-surface)]">
-      <div className="mx-auto max-w-6xl px-5 py-24">
+    <section id="mercados" className="border-y border-[var(--color-border)] bg-[var(--color-overlay)]">
+      <div className="mx-auto max-w-7xl px-5 py-28 sm:px-8">
         <SectionHeading
           eyebrow="Mercados"
           title="Seis familias de activos, con su propio comportamiento"
           description="Cada mercado tiene un horario, un nivel de volatilidad y unos factores que lo mueven. Aprender las diferencias es parte del programa."
         />
 
-        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {markets.map((m) => (
-            <Card key={m.assetClass} className={cn('p-5', !m.available && 'opacity-60')}>
+              <Card key={m.assetClass} className={cn('group p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-soft)]', !m.available && 'opacity-60')}>
               <div className="flex items-start justify-between gap-3">
-                <h3 className="text-[15px] font-semibold tracking-tight">
+                <h3 className="text-[16px] font-semibold tracking-tight transition-colors group-hover:text-[var(--color-blue)]">
                   {ASSET_CLASS_LABEL[m.assetClass]}
                 </h3>
                 {m.available ? (
@@ -207,21 +209,21 @@ const AI_CAPABILITIES = [
 
 export function AICoachSection() {
   return (
-    <section id="entrenador-ia" className="mx-auto max-w-6xl px-5 py-24">
+    <section id="entrenador-ia" className="mx-auto max-w-7xl px-5 py-28 sm:px-8">
       <SectionHeading
         eyebrow="Entrenador con inteligencia artificial"
         title="Un tutor que discute contigo, no un oráculo"
         description="El entrenador recibe del servidor los precios y los indicadores ya calculados. No puede inventarlos, no puede modificar el resultado de tus simulaciones y no puede darte una orden de compra o venta."
       />
 
-      <div className="mt-14 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-16 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {AI_CAPABILITIES.map((c) => (
-          <Card key={c.title} className="p-5">
-            <span className="flex size-9 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--color-violet-soft)] text-[var(--color-violet)]">
+          <Card key={c.title} className="group p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-soft)]">
+            <span className="flex size-10 items-center justify-center rounded-2xl bg-[var(--color-violet-soft)] text-[var(--color-violet)] transition-transform duration-300 group-hover:scale-110">
               <c.icon className="size-4.5" aria-hidden="true" />
             </span>
-            <h3 className="mt-4 text-[14px] font-semibold tracking-tight">{c.title}</h3>
-            <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--color-muted)]">{c.body}</p>
+            <h3 className="mt-5 text-[15px] font-semibold tracking-tight">{c.title}</h3>
+            <p className="mt-2 text-[13px] leading-[1.7] text-[var(--color-muted)]">{c.body}</p>
           </Card>
         ))}
       </div>
@@ -265,21 +267,21 @@ export function AcademySection({ tracks }: { tracks: TrackSummary[] }) {
   return (
     <section
       id="academia"
-      className="border-y border-[var(--color-border)] bg-[var(--color-surface)]"
+      className="border-y border-[var(--color-border)] bg-[var(--color-overlay)]"
     >
-      <div className="mx-auto max-w-6xl px-5 py-24">
+      <div className="mx-auto max-w-7xl px-5 py-28 sm:px-8">
         <SectionHeading
           eyebrow="Academia"
           title="Rutas que van del primer concepto a tu propia estrategia"
           description="Cada lección combina explicación, ejemplo, pregunta, ejercicio, simulación y evaluación. La progresión exige demostrar comprensión."
         />
 
-        <div className="mt-14 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {tracks.map((t) => (
             <Link
               key={t.slug}
               href="/recursos"
-              className="group rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg)] p-5 transition-colors hover:border-[var(--color-blue)]"
+              className="group rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-soft)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--color-blue)]"
             >
               <div className="flex items-center justify-between gap-2">
                 <Badge tone={t.level === 'BASICO' ? 'positive' : t.level === 'INTERMEDIO' ? 'blue' : 'violet'}>
@@ -320,7 +322,7 @@ const RECOGNITIONS = [
 
 export function PhilosophySection() {
   return (
-    <section className="mx-auto max-w-6xl px-5 py-24">
+    <section className="mx-auto max-w-7xl px-5 py-28 sm:px-8">
       <div className="grid gap-12 lg:grid-cols-[1fr_1.1fr] lg:items-center">
         <div>
           <SectionHeading
@@ -341,19 +343,34 @@ export function PhilosophySection() {
           </p>
         </div>
 
-        <ul className="grid gap-2.5 sm:grid-cols-2">
-          {RECOGNITIONS.map((r) => (
-            <li
-              key={r.label}
-              className="flex items-center gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4"
-            >
-              <span className="flex size-8 shrink-0 items-center justify-center rounded-[var(--radius-xs)] bg-[var(--color-positive-soft)] text-[var(--color-positive)]">
-                <r.icon className="size-4" aria-hidden="true" />
-              </span>
-              <span className="text-[13px] leading-snug">{r.label}</span>
-            </li>
-          ))}
-        </ul>
+        <div className="space-y-5">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-[2rem] border border-[var(--color-border-strong)] bg-[var(--color-surface)] shadow-[var(--shadow-lifted)]">
+            <Image
+              src="/images/tradinglab-discipline.webp"
+              alt="Cuaderno abierto con un gráfico dibujado y elementos que representan disciplina"
+              fill
+              sizes="(max-width: 1024px) 100vw, 48vw"
+              className="object-cover"
+            />
+            <div className="absolute inset-x-4 bottom-4 rounded-2xl border border-white/50 bg-white/75 p-4 shadow-[var(--shadow-soft)] backdrop-blur-xl sm:inset-x-6 sm:bottom-6">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--color-blue)]">El objetivo</p>
+              <p className="mt-1 text-[15px] font-medium tracking-tight text-[var(--color-text)]">Construir criterio antes de buscar resultados.</p>
+            </div>
+          </div>
+          <ul className="grid gap-2.5 sm:grid-cols-2">
+            {RECOGNITIONS.map((r) => (
+              <li
+                key={r.label}
+                className="flex items-center gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-[var(--shadow-soft)]"
+              >
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-[var(--radius-xs)] bg-[var(--color-positive-soft)] text-[var(--color-positive)]">
+                  <r.icon className="size-4" aria-hidden="true" />
+                </span>
+                <span className="text-[13px] leading-snug">{r.label}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </section>
   );
@@ -363,15 +380,15 @@ export function PhilosophySection() {
 
 export function PricingSection({ compact = false }: { compact?: boolean }) {
   return (
-    <section id="precios" className="border-y border-[var(--color-border)] bg-[var(--color-surface)]">
-      <div className="mx-auto max-w-6xl px-5 py-24">
+    <section id="precios" className="border-y border-[var(--color-border)] bg-[var(--color-overlay)]">
+      <div className="mx-auto max-w-7xl px-5 py-28 sm:px-8">
         <SectionHeading
           eyebrow="Planes"
           title="Precios transparentes, sin cargos ocultos"
           description="Puedes cancelar cuando quieras desde tu perfil, en dos clics. Te avisamos antes de cada renovación. No usamos patrones oscuros."
         />
 
-        <div className="mt-14 grid gap-4 lg:grid-cols-3">
+        <div className="mt-16 grid gap-4 lg:grid-cols-3">
           {PLANS.map((id) => {
             const plan = PLAN_ENTITLEMENTS[id];
             const featured = id === 'STANDARD';

@@ -52,7 +52,7 @@ export function Logo({
       </svg>
       {withWordmark && (
         <span className={cn('font-semibold tracking-[-0.02em]', text)}>
-          Broker<span className="text-[var(--color-muted)]">Capital</span>
+          Trading<span className="text-[var(--color-muted)]">Lab</span>
         </span>
       )}
     </span>

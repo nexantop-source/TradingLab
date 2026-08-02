@@ -48,7 +48,7 @@ export const LOCALES = ['es', 'en', 'pt'] as const;
 export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = 'es';
 
-export const THEMES = ['dark', 'light', 'high-contrast'] as const;
+export const THEMES = ['system', 'dark', 'light', 'high-contrast'] as const;
 export type ThemeId = (typeof THEMES)[number];
 
 // ─────────────────────────────────────────────────────────────────────────────

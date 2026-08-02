@@ -16,12 +16,12 @@ export const dynamic = 'force-dynamic';
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
   const auth = await getAuth();
   return (
-    <>
+    <div className="marketing-page">
       <MarketingHeader authenticated={Boolean(auth)} />
       <main id="contenido" className="pt-24">
         {children}
       </main>
       <MarketingFooter />
-    </>
+    </div>
   );
 }

@@ -91,10 +91,10 @@ export function AppShell({
   }
 
   return (
-    <div className="min-h-dvh lg:flex">
+    <div className="min-h-dvh bg-[var(--color-bg)] lg:flex">
       {/* ── Barra lateral (escritorio) ──────────────────────────────────── */}
-      <aside className="hidden w-60 shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-surface)] lg:flex">
-        <div className="px-4 py-5">
+      <aside className="hidden w-64 shrink-0 flex-col border-r border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_86%,var(--color-bg))] lg:flex">
+        <div className="px-5 py-6">
           <Link href="/panel" aria-label="Ir al panel">
             <Logo size="sm" />
           </Link>
@@ -115,7 +115,7 @@ export function AppShell({
           )}
         </nav>
 
-        <div className="border-t border-[var(--color-border)] p-3">
+        <div className="border-t border-[var(--color-border)] p-4">
           <div className="flex items-center gap-2.5 px-2 py-2">
             <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--color-blue-soft)] text-[11px] font-semibold text-[var(--color-blue)]">
               {user.name.slice(0, 2).toUpperCase()}
@@ -139,7 +139,7 @@ export function AppShell({
       {/* ── Contenido ───────────────────────────────────────────────────── */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Cabecera móvil */}
-        <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-bg)_88%,transparent)] px-4 backdrop-blur-xl lg:hidden">
+        <header className="sticky top-0 z-40 flex h-16 items-center gap-3 border-b border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-bg)_86%,transparent)] px-4 backdrop-blur-xl lg:hidden">
           <button
             type="button"
             onClick={() => setMenuOpen((v) => !v)}
@@ -167,7 +167,7 @@ export function AppShell({
         </header>
 
         {/* Barra superior de escritorio */}
-        <header className="sticky top-0 z-30 hidden h-14 items-center gap-4 border-b border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-bg)_88%,transparent)] px-6 backdrop-blur-xl lg:flex">
+        <header className="sticky top-0 z-30 hidden h-16 items-center gap-4 border-b border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-bg)_86%,transparent)] px-8 backdrop-blur-xl lg:flex">
           <Breadcrumb pathname={pathname} />
           <div className="ml-auto flex items-center gap-3">
             {user.plan === 'FREE' && (
@@ -195,7 +195,7 @@ export function AppShell({
         {!immersive && (
           <nav
             aria-label="Navegación rápida"
-            className="fixed inset-x-0 bottom-0 z-40 flex border-t border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_94%,transparent)] pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden"
+            className="fixed inset-x-0 bottom-0 z-40 flex border-t border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_94%,transparent)] pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_30px_-20px_var(--color-text)] backdrop-blur-xl lg:hidden"
           >
             {NAV_PRIMARY.map((item) => {
               const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -222,8 +222,8 @@ export function AppShell({
       {menuOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMenuOpen(false)} />
-          <div className="animate-fade-up relative h-full w-72 overflow-y-auto border-r border-[var(--color-border)] bg-[var(--color-surface)]">
-            <div className="flex items-center justify-between px-4 py-4">
+          <div className="animate-fade-up relative h-full w-80 overflow-y-auto border-r border-[var(--color-border)] bg-[var(--color-surface)]">
+            <div className="flex items-center justify-between px-5 py-5">
               <Logo size="sm" />
               <button
                 type="button"
@@ -266,14 +266,14 @@ export function AppShell({
 
 function BalanceCard({ cents }: { cents: number }) {
   return (
-    <div className="mx-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
+    <div className="mx-4 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg)] p-4 shadow-[var(--shadow-soft)]">
       <div className="flex items-center justify-between gap-2">
         <span className="text-[10px] font-medium uppercase tracking-wider text-[var(--color-subtle)]">
           Saldo virtual
         </span>
         <DemoBadge />
       </div>
-      <p className="num mt-1.5 text-lg font-semibold tracking-tight">
+          <p className="num mt-2 text-xl font-semibold tracking-tight">
         <span className="text-[var(--color-muted)]">USD </span>
         {(cents / 100).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
       </p>
@@ -296,7 +296,7 @@ function NavGroup({
   return (
     <div>
       {title && (
-        <p className="px-2 pb-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--color-subtle)]">
+            <p className="px-2 pb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-subtle)]">
           {title}
         </p>
       )}
@@ -309,7 +309,7 @@ function NavGroup({
                 href={item.href}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'flex items-center gap-2.5 rounded-[var(--radius-sm)] px-2.5 py-2 text-[13px] font-medium transition-colors',
+                  'flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2.5 text-[13px] font-medium transition-colors',
                   active
                     ? 'bg-[var(--color-blue-soft)] text-[var(--color-blue)]'
                     : 'text-[var(--color-muted)] hover:bg-[var(--color-overlay)] hover:text-[var(--color-text)]',

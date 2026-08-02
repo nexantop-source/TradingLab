@@ -329,7 +329,7 @@ export function ProfileView({
         <div className="space-y-4">
           <Card className="p-5">
             <h2 className="text-[14px] font-semibold">Tema visual</h2>
-            <div className="mt-3 grid gap-2 sm:grid-cols-3">
+            <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
               {THEME_OPTIONS.map((t) => (
                 <button
                   key={t.id}
