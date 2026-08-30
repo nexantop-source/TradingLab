@@ -29,9 +29,6 @@ const COMPARISON: Array<{
       },
       { label: 'Hipótesis direccional', value: () => true },
       { label: 'Posiciones con stop loss y take profit', value: (p) => p.simulationModes.includes('POSITION') },
-      { label: 'Portafolios DEMO', value: (p) => String(p.portfolios) },
-      { label: 'Reinicios de saldo al mes', value: (p) => String(p.balanceResetsPerMonth) },
-      { label: 'Alertas activas', value: (p) => String(p.alerts) },
     ],
   },
   {
@@ -47,44 +44,27 @@ const COMPARISON: Array<{
         value: (p) =>
           p.aiAnalysesPerDay != null ? `${p.aiAnalysesPerDay} al día` : `${p.aiAnalysesPerMonth} al mes`,
       },
-      { label: 'Análisis multitemporal', value: (p) => p.features.multiTimeframeAI },
-      { label: 'Comparación de estrategias', value: (p) => p.features.strategyComparison },
-      {
-        label: 'Backtesting',
-        value: (p) =>
-          p.features.backtesting === 'none' ? false : p.features.backtesting === 'basic' ? 'Básico' : 'Avanzado',
-      },
     ],
   },
   {
     group: 'Aprendizaje',
     rows: [
       { label: 'Academia', value: (p) => (p.id === 'FREE' ? 'Básica' : p.id === 'STANDARD' ? 'Intermedia' : 'Completa') },
-      {
-        label: 'Certificados',
-        value: (p) =>
-          p.features.certificates === 'none' ? false : p.features.certificates === 'standard' ? 'Estándar' : 'Verificables',
-      },
-      { label: 'Diario completo', value: (p) => p.features.journalFull },
+      { label: 'Diario educativo', value: (p) => p.features.journalFull },
       { label: 'Estadísticas avanzadas', value: (p) => p.features.advancedStats },
       { label: 'Historial consultable', value: (p) => (p.historyDays >= 3650 ? 'Sin límite práctico' : `${p.historyDays} días`) },
-      { label: 'Informes semanales', value: (p) => p.features.weeklyReports },
-      { label: 'Torneos privados', value: (p) => p.features.privateTournaments },
     ],
   },
   {
-    group: 'Exportación y soporte',
+    group: 'Experiencia',
     rows: [
-      { label: 'Exportación a CSV', value: (p) => p.features.exportCsv },
-      { label: 'Exportación a PDF', value: (p) => p.features.exportPdf },
       {
         label: 'Publicidad',
         value: (p) =>
           p.adDensity === 'none' ? 'Sin publicidad' : p.adDensity === 'reduced' ? 'Reducida' : 'Programática y patrocinada',
       },
       { label: 'Interstitials', value: () => 'Nunca, en ningún plan' },
-      { label: 'Soporte prioritario', value: (p) => p.features.prioritySupport },
-      { label: 'Acceso anticipado', value: (p) => p.features.earlyAccess },
+      { label: 'Reinicios de saldo al mes', value: (p) => String(p.balanceResetsPerMonth) },
     ],
   },
 ];
@@ -92,24 +72,39 @@ const COMPARISON: Array<{
 export default function PricingPage() {
   return (
     <>
-      <section className="mx-auto max-w-3xl px-5 pb-4 pt-8 text-center">
-        <Badge tone="blue">Precios</Badge>
-        <h1 className="mt-4 text-4xl font-semibold tracking-[-0.035em]">
-          Elige cuánto quieres profundizar
-        </h1>
-        <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-[var(--color-muted)]">
-          Todos los planes incluyen los USD 10.000 virtuales y la academia. Lo que cambia es cuánto puedes
-          practicar, cuánta ayuda del entrenador recibes y qué herramientas de análisis tienes disponibles.
-        </p>
+      <section className="public-hero">
+        <div className="relative z-10 mx-auto grid max-w-7xl gap-10 px-5 pb-20 pt-12 sm:px-8 sm:pb-24 sm:pt-16 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
+          <div>
+            <Badge tone="blue">Planes claros · sin permanencia</Badge>
+            <h1 className="mt-5 max-w-3xl text-5xl font-semibold leading-[0.98] tracking-[-0.055em] sm:text-6xl">
+              Paga por profundidad, <span className="text-[var(--color-blue)]">no por promesas.</span>
+            </h1>
+            <p className="mt-6 max-w-2xl text-[16px] leading-relaxed text-[var(--color-muted)]">
+              Todos empiezan con USD 10.000 virtuales y una ruta educativa. Elige más práctica, más contexto y menos publicidad cuando tu proceso lo necesite.
+            </p>
+          </div>
+          <dl className="grid gap-px overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-border)] sm:grid-cols-3 lg:grid-cols-1">
+            {[
+              ['DEMO', 'Nunca manejamos tu capital de inversión'],
+              ['COP', 'Wompi muestra el cobro final antes de pagar'],
+              ['2 clics', 'Cancelación desde tu perfil'],
+            ].map(([term, description]) => (
+              <div key={term} className="bg-[var(--color-surface)] p-4">
+                <dt className="num text-[11px] font-semibold text-[var(--color-blue)]">{term}</dt>
+                <dd className="mt-1 text-[12px] leading-snug text-[var(--color-muted)]">{description}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
       </section>
 
-      <PricingSection />
+      <PricingSection showHeading={false} />
 
       {/* ── Tabla comparativa ────────────────────────────────────────────── */}
       <section className="mx-auto max-w-5xl px-5 py-20">
         <h2 className="text-center text-2xl font-semibold tracking-[-0.03em]">Comparación completa</h2>
 
-        <div className="mt-10 overflow-x-auto">
+        <div className="pricing-comparison mt-10 overflow-x-auto">
           <table className="w-full min-w-[42rem] text-[13px]">
             <caption className="sr-only">Comparación de funciones entre los planes Free, Standard y Premium</caption>
             <thead>
@@ -186,8 +181,8 @@ export default function PricingPage() {
                 d: 'Desde tu perfil, sin encuestas obligatorias, sin ofertas que bloqueen el flujo y sin necesidad de escribir a soporte.',
               },
               {
-                t: 'Aviso antes de renovar',
-                d: 'Te escribimos antes de cada renovación, indicando el importe y la fecha exacta del cargo.',
+                t: 'Sin cobro automático',
+                d: 'Cada pago cubre un periodo. Antes de que venza te mostramos la fecha y tú decides si compras el siguiente.',
               },
               {
                 t: 'Sin cargos ocultos',
@@ -198,8 +193,8 @@ export default function PricingPage() {
                 d: 'No usamos cuentas atrás falsas, escasez inventada ni casillas premarcadas para contratar servicios adicionales.',
               },
               {
-                t: 'Prueba de Premium de 7 días',
-                d: 'Disponible una sola vez por cuenta y sin promesas de resultados. Puedes cancelarla antes de que termine sin coste.',
+                t: 'Free sigue disponible',
+                d: 'No necesitas pagar para conservar tu cuenta DEMO, el diario o el acceso educativo básico.',
               },
               {
                 t: 'Descuento anual visible',
@@ -210,8 +205,8 @@ export default function PricingPage() {
                 d: 'Disponemos de un programa de acceso gratuito al plan Standard para estudiantes y entidades educativas. Escríbenos desde el centro de ayuda.',
               },
               {
-                t: 'Precios regionales',
-                d: 'Estamos preparando precios ajustados por país. Se aplicarán automáticamente según tu país de residencia declarado.',
+                t: 'Importe final visible',
+                d: 'El servidor firma el precio en COP y lo muestra antes de enviarte a Wompi; el navegador no puede modificarlo.',
               },
             ].map((r) => (
               <Card key={r.t} className="p-5">

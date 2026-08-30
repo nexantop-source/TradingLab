@@ -4,22 +4,27 @@ import { PLAN_ENTITLEMENTS, PREMIUM_TRIAL_DAYS } from '@tl/types/plans';
 import type { PlanId } from '@tl/types';
 import { audit, track } from './analytics';
 import { ANALYTICS_EVENTS } from '@tl/analytics';
+import { WompiBillingProvider, WompiError } from './wompi';
 
 /**
  * Capa de facturación.
  *
- * Aísla la pasarela real detrás de una interfaz. En modo `mock` (por defecto)
- * la suscripción se activa de inmediato y se registra un pago simulado, lo que
- * permite recorrer todo el producto sin credenciales.
+ * Aísla la pasarela real detrás de una interfaz. En desarrollo puede usarse
+ * `mock` para recorrer el producto sin credenciales. Producción falla cerrada:
+ * el mock está prohibido y `disabled` nunca activa una membresía.
  *
- * Para conectar Stripe: implementa `StripeBillingProvider` cumpliendo esta
- * misma interfaz y cámbialo en `billingProvider()`. Ver docs/DEPLOYMENT.md.
+ * En producción puede seleccionarse Wompi. El navegador solo recibe una URL
+ * firmada de Checkout; la membresía se activa desde el webhook reconciliado.
+ * Ver docs/DEPLOYMENT.md.
  */
 
 export interface CheckoutResult {
   status: 'ACTIVE' | 'TRIALING' | 'REDIRECT';
   /** URL de la pasarela cuando el proveedor requiere redirección. */
   redirectUrl?: string;
+  /** Importe exacto calculado por servidor y firmado para la pasarela. */
+  amountInCents?: number;
+  currency?: 'COP' | 'USD';
   subscriptionId: string;
   currentPeriodEnd: string;
 }
@@ -170,6 +175,30 @@ class MockBillingProvider implements BillingProvider {
   }
 }
 
+class DisabledBillingProvider implements BillingProvider {
+  readonly id = 'disabled';
+
+  private unavailable(): never {
+    throw new WompiError(
+      'BILLING_NOT_CONFIGURED',
+      'Los pagos todavía no están habilitados. No se realizó ningún cargo ni se activó una membresía.',
+      503,
+    );
+  }
+
+  async createCheckout(): Promise<CheckoutResult> {
+    return this.unavailable();
+  }
+
+  async cancel(): Promise<{ canceledAt: string; accessUntil: string }> {
+    return this.unavailable();
+  }
+
+  async resume(): Promise<{ resumed: boolean }> {
+    return this.unavailable();
+  }
+}
+
 async function resolveCoupon(
   code: string | undefined,
   planId: PlanId,
@@ -196,11 +225,39 @@ async function resolveCoupon(
 
 let provider: BillingProvider | null = null;
 
+export function resolveBillingProviderId(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): 'wompi' | 'mock' | 'disabled' {
+  const providerId = (env.BILLING_PROVIDER ?? (env.NODE_ENV === 'production' ? 'disabled' : 'mock'))
+    .trim()
+    .toLowerCase();
+
+  if (providerId === 'mock' && env.NODE_ENV === 'production') {
+    throw new WompiError(
+      'BILLING_MOCK_FORBIDDEN',
+      'La facturación simulada está bloqueada en producción.',
+      503,
+    );
+  }
+  if (providerId === 'off') return 'disabled';
+  if (providerId === 'wompi' || providerId === 'mock' || providerId === 'disabled') return providerId;
+  throw new WompiError(
+    'BILLING_PROVIDER_UNSUPPORTED',
+    `El proveedor de pagos "${providerId}" no está implementado.`,
+    503,
+  );
+}
+
 export function billingProvider(): BillingProvider {
   if (!provider) {
-    // Aquí se registraría el proveedor real:
-    //   if (process.env.BILLING_PROVIDER === 'stripe') provider = new StripeBillingProvider();
-    provider = new MockBillingProvider();
+    const providerId = resolveBillingProviderId();
+    if (providerId === 'wompi') {
+      provider = new WompiBillingProvider();
+    } else if (providerId === 'mock') {
+      provider = new MockBillingProvider();
+    } else {
+      provider = new DisabledBillingProvider();
+    }
   }
   return provider;
 }
@@ -249,7 +306,10 @@ export async function processWebhook(params: {
 /** Métricas de suscripción para el panel de negocio. */
 export async function subscriptionMetrics() {
   const subs = await db.subscription.findMany({
-    where: { status: { in: ['ACTIVE', 'TRIALING'] } },
+    where: {
+      status: { in: ['ACTIVE', 'TRIALING'] },
+      currentPeriodEnd: { gt: new Date() },
+    },
     select: { planId: true, interval: true, status: true },
   });
 

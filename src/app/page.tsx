@@ -126,33 +126,33 @@ export default async function LandingPage() {
               <div className="marketing-hero-kicker mb-10">
                 <SimulationPill />
                 <span className="hidden h-4 w-px bg-[var(--color-border-strong)] sm:block" aria-hidden="true" />
-                <span>El laboratorio de criterio para mercados financieros</span>
-                <span className="ml-auto hidden text-[var(--color-subtle)] sm:block">Sin tarjeta · sin depósitos · sin riesgo real</span>
+                <span>Aprende · practica · revisa</span>
+                <span className="hidden text-[var(--color-subtle)] sm:block">Sin tarjeta · sin depósitos · sin dinero real</span>
               </div>
             </Reveal>
 
             <div className="marketing-hero-layout grid items-center gap-16 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:gap-20">
               <Reveal className="relative z-10">
                 <div className="marketing-hero-copy">
-                  <p className="marketing-eyebrow">Tu espacio para aprender trading</p>
+                  <p className="marketing-eyebrow">TradingLab para aprender mercados</p>
                   <h1 className="marketing-hero-title mt-5">
-                    Aprende a decidir.{' '}
-                    <span className="text-[var(--color-blue)]">Antes de arriesgar.</span>
+                    El mercado es complejo.{' '}
+                    <span className="text-[var(--color-blue)]">Aprenderlo no debería serlo.</span>
                   </h1>
 
                   <p className="mt-7 max-w-xl text-[16px] leading-[1.7] text-[var(--color-muted)] sm:text-[18px]">
-                    Una plataforma clara y moderna para estudiar mercados, practicar con capital virtual y convertir cada decisión en aprendizaje real.
+                    Una experiencia clara para entender conceptos, probar hipótesis con capital virtual y mejorar cada decisión sin arriesgar dinero real.
                   </p>
 
                   <div className="mt-9 flex flex-wrap items-center gap-3">
                     <Link href="/crear-cuenta">
-                      <Button size="lg" className="rounded-full px-7">
+                      <Button size="lg" className="rounded-[12px] px-7">
                         Empezar con USD 10.000 virtuales
                         <ArrowRight className="size-4" aria-hidden="true" />
                       </Button>
                     </Link>
                     <Link href="/recursos">
-                      <Button size="lg" variant="outline" className="rounded-full px-6">Ver la academia</Button>
+                      <Button size="lg" variant="outline" className="rounded-[12px] px-6">Explorar una ruta</Button>
                     </Link>
                   </div>
 
@@ -203,9 +203,9 @@ export default async function LandingPage() {
 
             <Reveal delay={0.18}>
               <div className="marketing-signal-rail mt-16">
-                <HeroSignal label="Datos para entender" value="Cotizaciones + contexto" />
-                <HeroSignal label="Capital de práctica" value="USD 10.000 virtuales" />
-                <HeroSignal label="Resultado que importa" value="Tu disciplina" />
+                <HeroSignal label="100 % simulación" value="Sin depósitos ni ejecución real" />
+                <HeroSignal label="Datos con procedencia" value="Fuente y latencia siempre visibles" />
+                <HeroSignal label="Progreso verificable" value="Ruta, práctica y diario conectados" />
               </div>
             </Reveal>
           </div>

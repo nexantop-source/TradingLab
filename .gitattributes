@@ -1,0 +1,9 @@
+*.ai binary
+*.pdf binary
+*.png binary
+*.woff2 binary
+*.zip binary
+
+# Entregables generados de Illustrator: se versionan como arte final y no se
+# usan para revisar cambios de código línea por línea.
+"identidad visual/logo-master-13A-final-2026-08-29/**" -diff

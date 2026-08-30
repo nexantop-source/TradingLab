@@ -1,0 +1,513 @@
+{
+  "brand": "TradingLab",
+  "selection": "13A",
+  "status": "master-final",
+  "generatedAt": "2026-08-30T04:49:43.790Z",
+  "colors": {
+    "ink": "#071324",
+    "blue": "#185ADB",
+    "paper": "#F7F9FC"
+  },
+  "files": [
+    {
+      "path": "Brand-System/manifest.json",
+      "bytes": 14130,
+      "sha256": "10ea06e958a4f9661f53e5ce74896311306dcf0dd9e1750a38ccf8ef435c212e"
+    },
+    {
+      "path": "Brand-System/png/avatar/tradinglab-avatar-1024.png",
+      "bytes": 31189,
+      "sha256": "9ecba7b47af4dc8fd19098cbbb3fc4814f97e64491626c2c72e57f8fdcc09efb"
+    },
+    {
+      "path": "Brand-System/png/avatar/tradinglab-avatar-128.png",
+      "bytes": 3346,
+      "sha256": "ddde938ad83b9c4efbcb8989787a440a3e9de506bc73d728cab2131cc21b2773"
+    },
+    {
+      "path": "Brand-System/png/avatar/tradinglab-avatar-256.png",
+      "bytes": 6941,
+      "sha256": "e7f064d923461ff61819505bc3b25580d3d62b080ddbdf2a3269568aee3e39b4"
+    },
+    {
+      "path": "Brand-System/png/avatar/tradinglab-avatar-32.png",
+      "bytes": 855,
+      "sha256": "2c0c9eb2e8b4d96e9cbc8a2cd3f13c6398ecced93c6c68c1f613199f08de75c9"
+    },
+    {
+      "path": "Brand-System/png/avatar/tradinglab-avatar-512.png",
+      "bytes": 14528,
+      "sha256": "d51993aa956f062ee919a7116c64ae342cdedbcb64e58637eee6c0bf9bcf9e6d"
+    },
+    {
+      "path": "Brand-System/png/avatar/tradinglab-avatar-64.png",
+      "bytes": 1604,
+      "sha256": "7bc0a2f3c808c4db7d35acfdd63d7ec686dd4148df35dc7504e5d9406c0cedbc"
+    },
+    {
+      "path": "Brand-System/png/lockups/tradinglab-lockup-horizontal-1250.png",
+      "bytes": 23673,
+      "sha256": "3df959cc805c57a4f8b9c8f86174984b343a44e3f7e9938b358b56780150da45"
+    },
+    {
+      "path": "Brand-System/png/lockups/tradinglab-lockup-horizontal-2500.png",
+      "bytes": 49518,
+      "sha256": "f0e0af6f203c23725e6a335fdadd4cd8ce036ef4e5d26b1c577e3a88f02e629b"
+    },
+    {
+      "path": "Brand-System/png/lockups/tradinglab-lockup-horizontal-inverse-2500.png",
+      "bytes": 47585,
+      "sha256": "c672e7df5104f1d07f922ced78b5ebd6bcea8ab07a9b3876493f1bbb3f1970c9"
+    },
+    {
+      "path": "Brand-System/png/lockups/tradinglab-lockup-stacked-1200.png",
+      "bytes": 43022,
+      "sha256": "66cc849c036d85061dc59bc9c85d93f179a7af7e7901bd0639bcb95d76505782"
+    },
+    {
+      "path": "Brand-System/png/lockups/tradinglab-lockup-stacked-inverse-1200.png",
+      "bytes": 40970,
+      "sha256": "dfdac44b136f90de8732100018b2526cabd3bc505b0a75c846ce71eda3bc82f2"
+    },
+    {
+      "path": "Brand-System/png/symbols/black/tradinglab-symbol-black-1024.png",
+      "bytes": 19039,
+      "sha256": "a7b596f758fecdd6c844c412447c60e60a4c47ba4a4f93025cf89204828086a4"
+    },
+    {
+      "path": "Brand-System/png/symbols/black/tradinglab-symbol-black-128.png",
+      "bytes": 1616,
+      "sha256": "8deecf1f281b99d2047c1af46d129db87821b511e8aa7033c160289714bb241e"
+    },
+    {
+      "path": "Brand-System/png/symbols/black/tradinglab-symbol-black-16.png",
+      "bytes": 255,
+      "sha256": "b3cdf6582145c3db1a55de984934d27e483e8e50d9dab14c0e74708a5515f48c"
+    },
+    {
+      "path": "Brand-System/png/symbols/black/tradinglab-symbol-black-2048.png",
+      "bytes": 47108,
+      "sha256": "758612a31815086e754ab270a7e94d6831ecfe608ee42f9b3be51b1dbd66ae88"
+    },
+    {
+      "path": "Brand-System/png/symbols/black/tradinglab-symbol-black-24.png",
+      "bytes": 366,
+      "sha256": "d7cfb0d24ffae68737d5efb6e1ee8c16c6206b5464e0fa1fe5f1b0abb9892958"
+    },
+    {
+      "path": "Brand-System/png/symbols/black/tradinglab-symbol-black-256.png",
+      "bytes": 3335,
+      "sha256": "b1dbf36c55b6a05eaae9df260e79035af6a715b0587d38126dcb1aa7c32d33fa"
+    },
+    {
+      "path": "Brand-System/png/symbols/black/tradinglab-symbol-black-32.png",
+      "bytes": 446,
+      "sha256": "9e9757d06ae1126a67922063d0fb20a885032312fd3f7082f7bea460ac530199"
+    },
+    {
+      "path": "Brand-System/png/symbols/black/tradinglab-symbol-black-48.png",
+      "bytes": 628,
+      "sha256": "6284f6a8a058e54c850e48b70dd22b7c6ba62f712c98960293b668bcbeb2cb08"
+    },
+    {
+      "path": "Brand-System/png/symbols/black/tradinglab-symbol-black-512.png",
+      "bytes": 7716,
+      "sha256": "80fb927e07362ffa435acbfefc9591e0d65b7560de6014d1af54bcde735ec6be"
+    },
+    {
+      "path": "Brand-System/png/symbols/black/tradinglab-symbol-black-64.png",
+      "bytes": 848,
+      "sha256": "f62033db7f402648d29d5360b6c48858c6293cbd30a507f381e2f95b9070b29c"
+    },
+    {
+      "path": "Brand-System/png/symbols/duotone/tradinglab-symbol-duotone-1024.png",
+      "bytes": 27435,
+      "sha256": "e2fc421caa8d739796b47d9e47da2b02c894058789f2a105c40825cf590e74f8"
+    },
+    {
+      "path": "Brand-System/png/symbols/duotone/tradinglab-symbol-duotone-128.png",
+      "bytes": 2843,
+      "sha256": "27643836317bab94f8877ada460c0331a65fa05c8cb9b5c2540ad7da99e5d4e2"
+    },
+    {
+      "path": "Brand-System/png/symbols/duotone/tradinglab-symbol-duotone-16.png",
+      "bytes": 425,
+      "sha256": "82967f1f1e2b23814e5c2e5f31be9a975a53e81a280012f23917e30be37994a5"
+    },
+    {
+      "path": "Brand-System/png/symbols/duotone/tradinglab-symbol-duotone-2048.png",
+      "bytes": 63579,
+      "sha256": "4fe7d0ed6f852788ad0d917cc51c9acd9d80c1b8699ac5f99a806d69c3625af8"
+    },
+    {
+      "path": "Brand-System/png/symbols/duotone/tradinglab-symbol-duotone-24.png",
+      "bytes": 572,
+      "sha256": "3797778e3e5ab274da1f366e54b5e333892089c98687ee3b3fe9ceed74bb1662"
+    },
+    {
+      "path": "Brand-System/png/symbols/duotone/tradinglab-symbol-duotone-256.png",
+      "bytes": 5797,
+      "sha256": "9a9fe3400e86df003c129d564165ffee84ea6156c482a2ff14519994a37fc6c6"
+    },
+    {
+      "path": "Brand-System/png/symbols/duotone/tradinglab-symbol-duotone-32.png",
+      "bytes": 742,
+      "sha256": "9e1b06b8440045f982fa55fefef78ab065bc3f8fb87951204a108508ee848edd"
+    },
+    {
+      "path": "Brand-System/png/symbols/duotone/tradinglab-symbol-duotone-48.png",
+      "bytes": 1078,
+      "sha256": "0e4b82e9bc5a25efc8aed286c67e46d1670c226c1941c35da0f61867ef1caea3"
+    },
+    {
+      "path": "Brand-System/png/symbols/duotone/tradinglab-symbol-duotone-512.png",
+      "bytes": 12401,
+      "sha256": "310aa5bd7080ba20c8d6a254e93a1bd0096e96d3daa143e95ac1d3e26e28a470"
+    },
+    {
+      "path": "Brand-System/png/symbols/duotone/tradinglab-symbol-duotone-64.png",
+      "bytes": 1386,
+      "sha256": "b7896c091c3de64bc050ff21a515e26e17df0f91437c3298bdd98889b3c668c2"
+    },
+    {
+      "path": "Brand-System/png/symbols/inverse/tradinglab-symbol-inverse-1024.png",
+      "bytes": 25868,
+      "sha256": "f178e3158aa4fe9baa6aab43311b44bc6e0f52de4d9cc97a7e61895223b5ae5c"
+    },
+    {
+      "path": "Brand-System/png/symbols/inverse/tradinglab-symbol-inverse-128.png",
+      "bytes": 2610,
+      "sha256": "5d077e5c43cc1c913cb1ac22eb535fbf25fab0e77842fbf2c0bdbde55acf16ef"
+    },
+    {
+      "path": "Brand-System/png/symbols/inverse/tradinglab-symbol-inverse-16.png",
+      "bytes": 359,
+      "sha256": "1fdfef9a7ae8c2e481c339715dcbbe00baf9b7dad9f8366d8ffc5548dc826ca1"
+    },
+    {
+      "path": "Brand-System/png/symbols/inverse/tradinglab-symbol-inverse-2048.png",
+      "bytes": 60891,
+      "sha256": "f59ec73e6e2d2350063b295411c02f79f03e65721904853dde8a4f11de8ccbe5"
+    },
+    {
+      "path": "Brand-System/png/symbols/inverse/tradinglab-symbol-inverse-24.png",
+      "bytes": 511,
+      "sha256": "8b50076b1fca3e51e7228fd2c567d84c5b3e91118aeb02c003b5bf74094a0d41"
+    },
+    {
+      "path": "Brand-System/png/symbols/inverse/tradinglab-symbol-inverse-256.png",
+      "bytes": 5399,
+      "sha256": "638d1ea4971c949657fdca38db1584d035c9fd87d3a177598fc5ac6dd275299c"
+    },
+    {
+      "path": "Brand-System/png/symbols/inverse/tradinglab-symbol-inverse-32.png",
+      "bytes": 671,
+      "sha256": "62fa7788c0b6280672ffb90be79e1c492a7b272918308cf16833cd725ab9c707"
+    },
+    {
+      "path": "Brand-System/png/symbols/inverse/tradinglab-symbol-inverse-48.png",
+      "bytes": 968,
+      "sha256": "9ad2cc45ded8f576cf958d710baa27f23de75e583fceaeb0ec2cd85ad1ae1482"
+    },
+    {
+      "path": "Brand-System/png/symbols/inverse/tradinglab-symbol-inverse-512.png",
+      "bytes": 11609,
+      "sha256": "cb691d0f4c62c67371bce7c6cb13b68132d24cae4ab9943887f38939aeed01e8"
+    },
+    {
+      "path": "Brand-System/png/symbols/inverse/tradinglab-symbol-inverse-64.png",
+      "bytes": 1264,
+      "sha256": "2eeb15f68b852df2aa9b6f6f634d9dc6881f31582c13e109827e0d271a54d493"
+    },
+    {
+      "path": "Brand-System/png/symbols/master/tradinglab-symbol-master-1024.png",
+      "bytes": 26790,
+      "sha256": "ab78568463d15a4e600371187ff65b5103ae602e679592d39d64cd4f7d82bbd8"
+    },
+    {
+      "path": "Brand-System/png/symbols/master/tradinglab-symbol-master-128.png",
+      "bytes": 2763,
+      "sha256": "417d5f7219dc100fdb53462afd0f7be8cac853a9013f8d8b0851eb0cd43ae782"
+    },
+    {
+      "path": "Brand-System/png/symbols/master/tradinglab-symbol-master-16.png",
+      "bytes": 392,
+      "sha256": "db102b1d45d29115d7c0c2a84c7ec35a8de18014fe927a2408201dd705e5e820"
+    },
+    {
+      "path": "Brand-System/png/symbols/master/tradinglab-symbol-master-2048.png",
+      "bytes": 62277,
+      "sha256": "544e649213845a81ed140375b92f9c17bea470834402c7a250b5e2072f18e73c"
+    },
+    {
+      "path": "Brand-System/png/symbols/master/tradinglab-symbol-master-24.png",
+      "bytes": 544,
+      "sha256": "99a2dc4fb6434597df96db2d9788bdd249c158a4c77a4a633b8813ed4da3cf7c"
+    },
+    {
+      "path": "Brand-System/png/symbols/master/tradinglab-symbol-master-256.png",
+      "bytes": 5675,
+      "sha256": "e9fde2b22bf5de5df233d9888b4c03dcf19dd3ab61e04af322544bf52ffd3d89"
+    },
+    {
+      "path": "Brand-System/png/symbols/master/tradinglab-symbol-master-32.png",
+      "bytes": 709,
+      "sha256": "dc64560f140e9ade5d56124ad1e4c509adde90fda88edfd24517b525dfc4868a"
+    },
+    {
+      "path": "Brand-System/png/symbols/master/tradinglab-symbol-master-48.png",
+      "bytes": 1027,
+      "sha256": "69d406d6b14bd6b617c50642a3cb28175c9339f3ebcd886a0c12d68eef2c449e"
+    },
+    {
+      "path": "Brand-System/png/symbols/master/tradinglab-symbol-master-512.png",
+      "bytes": 12095,
+      "sha256": "315135ff9cd3a53b74d58584a7a59c7e2589a9ab803d6fd0ec6e7374ac9ccd54"
+    },
+    {
+      "path": "Brand-System/png/symbols/master/tradinglab-symbol-master-64.png",
+      "bytes": 1333,
+      "sha256": "9a25883abc2e80a7f53f2e7693b5bf7734a1d299c9cd66cec288fd9c6692392d"
+    },
+    {
+      "path": "Brand-System/qa/tradinglab-13A-qa.png",
+      "bytes": 206232,
+      "sha256": "402e4776ba5e632d8ca8ce59fe496cc68052a828b9a3683013ed68e950a487cf"
+    },
+    {
+      "path": "Brand-System/qa/tradinglab-13A-qa.svg",
+      "bytes": 19809,
+      "sha256": "09b7d3f87c7793d976b77d9bf4c925e0650f3685507ae9ca7360ca9ca7b4adc5"
+    },
+    {
+      "path": "Brand-System/README.md",
+      "bytes": 2904,
+      "sha256": "4716c3b7931ce0da9ae477d31d5ebbca5f945eab0f127e97ab22686b1a43e005"
+    },
+    {
+      "path": "Brand-System/svg/tradinglab-avatar.svg",
+      "bytes": 952,
+      "sha256": "2688443f734fa433531fc57e4dcb4b581cbe9a29faa2427fdd7c11934ea6d94a"
+    },
+    {
+      "path": "Brand-System/svg/tradinglab-lockup-horizontal-inverse.svg",
+      "bytes": 4200,
+      "sha256": "d147cd608ad724e61a5d1ff59d6a889bd913b395d649c01921ab5331bd5646e1"
+    },
+    {
+      "path": "Brand-System/svg/tradinglab-lockup-horizontal.svg",
+      "bytes": 4192,
+      "sha256": "24b99a1b3e6341299bf5ff2dc298d1cc1860b56edcf5e1bf3d48c64a3f4f7ff2"
+    },
+    {
+      "path": "Brand-System/svg/tradinglab-lockup-stacked-inverse.svg",
+      "bytes": 4192,
+      "sha256": "587fe5bb41878e945468f7b97a1d048e4e3140e0d25bbe7c957a7720e1a06644"
+    },
+    {
+      "path": "Brand-System/svg/tradinglab-lockup-stacked.svg",
+      "bytes": 4184,
+      "sha256": "d952c48dc632e40a56e06e631296e898f9eeb46603ea33e5338f8197d729afae"
+    },
+    {
+      "path": "Brand-System/svg/tradinglab-symbol-black.svg",
+      "bytes": 908,
+      "sha256": "f3b42b2390c31de42739db556cfedbaea43fd044fcd0295ee2253857cf43a25b"
+    },
+    {
+      "path": "Brand-System/svg/tradinglab-symbol-duotone.svg",
+      "bytes": 910,
+      "sha256": "18deced37b9bf3efa016e39fd486d99edc6ae3e093a3e19a0fab54ab7a427dd2"
+    },
+    {
+      "path": "Brand-System/svg/tradinglab-symbol-inverse.svg",
+      "bytes": 910,
+      "sha256": "edaad78a71fd3508c4c0da43e95578210ebafe0515a7eae02beb9a02e9e9263d"
+    },
+    {
+      "path": "Brand-System/svg/tradinglab-symbol-master.svg",
+      "bytes": 916,
+      "sha256": "c32ddc21c40e0a17fb35698402ff8bc442a4d6487afdc60114c4cb40442d765e"
+    },
+    {
+      "path": "Editables-AI/illustrator-export.log",
+      "bytes": 1056,
+      "sha256": "188abd0d2b129e65250e62d1a7e8418281cd435fb66d03ba644bd2ff95b56c1f"
+    },
+    {
+      "path": "Editables-AI/tradinglab-lockup-horizontal-inverse.ai",
+      "bytes": 53490,
+      "sha256": "43b171495752679ba94a2f03b757f0455a5a5cb66b86dfc5d04437be97c79129"
+    },
+    {
+      "path": "Editables-AI/tradinglab-lockup-horizontal.ai",
+      "bytes": 61247,
+      "sha256": "b18100b364cc3905ec5c54c2955d3f6b404e0de2daf40660ef24881cb6314060"
+    },
+    {
+      "path": "Editables-AI/tradinglab-lockup-stacked.ai",
+      "bytes": 71757,
+      "sha256": "c322c131febc857fada15d056528a981dd3731c3685c3c0edeeafcc2960c4a20"
+    },
+    {
+      "path": "Editables-AI/tradinglab-symbol-duotone-micro.ai",
+      "bytes": 67505,
+      "sha256": "ccd07705a353932d5d17df1d3de1acb9bb0a6728648de5e0910d6839f0278a88"
+    },
+    {
+      "path": "Editables-AI/tradinglab-symbol-duotone.ai",
+      "bytes": 67510,
+      "sha256": "749a8132654a22f7e74072c300737029791ee3be400808f9192fb1372f015514"
+    },
+    {
+      "path": "Editables-AI/tradinglab-symbol-master.ai",
+      "bytes": 66740,
+      "sha256": "472d6367089f16844b145045dfc10f1b83f5adfc3c0f5e085474229a375821b8"
+    },
+    {
+      "path": "Editables-AI/tradinglab-symbol-micro.ai",
+      "bytes": 66165,
+      "sha256": "5f968aff6058d192963139e2e43026af133e9266bf2e50060901c3dee4a1286b"
+    },
+    {
+      "path": "LEEME.md",
+      "bytes": 1684,
+      "sha256": "9f2e94f6484c055b40c2678fb0e220d1398eab79f465c2aa672cc324f341bc87"
+    },
+    {
+      "path": "Logo-Master/tradinglab-lockup-horizontal-2500.png",
+      "bytes": 49518,
+      "sha256": "f0e0af6f203c23725e6a335fdadd4cd8ce036ef4e5d26b1c577e3a88f02e629b"
+    },
+    {
+      "path": "Logo-Master/tradinglab-lockup-horizontal.ai",
+      "bytes": 61247,
+      "sha256": "b18100b364cc3905ec5c54c2955d3f6b404e0de2daf40660ef24881cb6314060"
+    },
+    {
+      "path": "Logo-Master/tradinglab-lockup-horizontal.svg",
+      "bytes": 4192,
+      "sha256": "24b99a1b3e6341299bf5ff2dc298d1cc1860b56edcf5e1bf3d48c64a3f4f7ff2"
+    },
+    {
+      "path": "Logo-Master/tradinglab-lockup-stacked.ai",
+      "bytes": 71757,
+      "sha256": "c322c131febc857fada15d056528a981dd3731c3685c3c0edeeafcc2960c4a20"
+    },
+    {
+      "path": "Logo-Master/tradinglab-lockup-stacked.svg",
+      "bytes": 4184,
+      "sha256": "d952c48dc632e40a56e06e631296e898f9eeb46603ea33e5338f8197d729afae"
+    },
+    {
+      "path": "Logo-Master/tradinglab-symbol-black.svg",
+      "bytes": 908,
+      "sha256": "f3b42b2390c31de42739db556cfedbaea43fd044fcd0295ee2253857cf43a25b"
+    },
+    {
+      "path": "Logo-Master/tradinglab-symbol-duotone-2048.png",
+      "bytes": 63579,
+      "sha256": "4fe7d0ed6f852788ad0d917cc51c9acd9d80c1b8699ac5f99a806d69c3625af8"
+    },
+    {
+      "path": "Logo-Master/tradinglab-symbol-duotone.ai",
+      "bytes": 67510,
+      "sha256": "749a8132654a22f7e74072c300737029791ee3be400808f9192fb1372f015514"
+    },
+    {
+      "path": "Logo-Master/tradinglab-symbol-duotone.svg",
+      "bytes": 910,
+      "sha256": "18deced37b9bf3efa016e39fd486d99edc6ae3e093a3e19a0fab54ab7a427dd2"
+    },
+    {
+      "path": "Logo-Master/tradinglab-symbol-inverse.svg",
+      "bytes": 910,
+      "sha256": "edaad78a71fd3508c4c0da43e95578210ebafe0515a7eae02beb9a02e9e9263d"
+    },
+    {
+      "path": "Logo-Master/tradinglab-symbol-master.ai",
+      "bytes": 66740,
+      "sha256": "472d6367089f16844b145045dfc10f1b83f5adfc3c0f5e085474229a375821b8"
+    },
+    {
+      "path": "Logo-Master/tradinglab-symbol-master.svg",
+      "bytes": 916,
+      "sha256": "c32ddc21c40e0a17fb35698402ff8bc442a4d6487afdc60114c4cb40442d765e"
+    },
+    {
+      "path": "Micro-16-24px/png/duotone/tradinglab-symbol-duotone-micro-16.png",
+      "bytes": 432,
+      "sha256": "c8ca91970771210595981a90199589a120b7f76be55e7adbb83567d8dc292aae"
+    },
+    {
+      "path": "Micro-16-24px/png/duotone/tradinglab-symbol-duotone-micro-24.png",
+      "bytes": 586,
+      "sha256": "d2ffea69303592f0dcf67db27735105c0e5930e50e1cd4d231d4e9d274863031"
+    },
+    {
+      "path": "Micro-16-24px/png/duotone/tradinglab-symbol-duotone-micro-32.png",
+      "bytes": 762,
+      "sha256": "b4bfed191dacfc52dde01aede329c252e68da4e5960074cb94d258227fd52f40"
+    },
+    {
+      "path": "Micro-16-24px/png/duotone/tradinglab-symbol-duotone-micro-64.png",
+      "bytes": 1438,
+      "sha256": "6885b7e87cb5c831d1c8586efb44245e84544239ce7bf80efce0d443cc89f6c1"
+    },
+    {
+      "path": "Micro-16-24px/png/mono/tradinglab-symbol-micro-16.png",
+      "bytes": 401,
+      "sha256": "e2f2047a4aa0130237490e4bf4c2917fb8984c8c74043e206ca05266ab29a443"
+    },
+    {
+      "path": "Micro-16-24px/png/mono/tradinglab-symbol-micro-24.png",
+      "bytes": 552,
+      "sha256": "49d9505230ea7cee5976b3f0e1dd8b24ac7e7ab9f2e95ae0f967f2b73fa1be90"
+    },
+    {
+      "path": "Micro-16-24px/png/mono/tradinglab-symbol-micro-32.png",
+      "bytes": 735,
+      "sha256": "38ce0502b9d34d762ce8904596e8f83fe43a5e7cddfde2e8e7128686707dcd07"
+    },
+    {
+      "path": "Micro-16-24px/png/mono/tradinglab-symbol-micro-64.png",
+      "bytes": 1389,
+      "sha256": "6fd19b6b95fcb77072b8c308ea4134640443a3fb9062cac47b6017d5ffe7f3cc"
+    },
+    {
+      "path": "Micro-16-24px/tradinglab-symbol-duotone-micro.svg",
+      "bytes": 677,
+      "sha256": "8f2504b2fc818a5876f5925415411e2eb083ec69d585660260e0a9ba06e84545"
+    },
+    {
+      "path": "Micro-16-24px/tradinglab-symbol-micro.svg",
+      "bytes": 669,
+      "sha256": "3183390962a6e8b71ee4e933411c7b01d6a318e361a79b814f6421514fb14f18"
+    },
+    {
+      "path": "QA/tradinglab-13A-reductions-micro.png",
+      "bytes": 64586,
+      "sha256": "5dba8c4ed9bbe6808085b4c605f2508c4ec08addb6c6d006c0b9548dcdc88ab5"
+    },
+    {
+      "path": "QA/tradinglab-13A-system-qa.png",
+      "bytes": 206232,
+      "sha256": "402e4776ba5e632d8ca8ce59fe496cc68052a828b9a3683013ed68e950a487cf"
+    },
+    {
+      "path": "Source/build-tradinglab-13A-clean.mjs",
+      "bytes": 6888,
+      "sha256": "2a4882be8b1f1fdda2ce68ed354d910056a35b4bb03aee42986aa8e15ae26e7e"
+    },
+    {
+      "path": "Source/build-tradinglab-brand-system.mjs",
+      "bytes": 30259,
+      "sha256": "7deaa488e24c07752e002fab7db2fd869eccc7e22864552b6c7bda1017bf6a33"
+    },
+    {
+      "path": "Source/construction-report.json",
+      "bytes": 707,
+      "sha256": "80948b34840f6ca3f611529d1be3056f39aa5660e4e8909c3d1947634c7b744b"
+    }
+  ]
+}

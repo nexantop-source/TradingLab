@@ -79,7 +79,7 @@ export const LEGAL_DOCS: LegalDocContent[] = [
       },
       {
         heading: '4. Suscripciones y facturación',
-        body: `${DISCLAIMERS.billing} Las suscripciones se renuevan automáticamente al final de cada periodo salvo cancelación previa. Te avisamos por correo antes de cada renovación. Puedes cancelar en cualquier momento desde tu perfil; la cancelación surte efecto al final del periodo ya pagado y conservas el acceso hasta esa fecha. No aplicamos cargos ocultos ni condicionamos la cancelación a contactar con soporte.`,
+        body: `${DISCLAIMERS.billing} Cada compra cubre un único periodo mensual o anual y no genera un cargo automático futuro. Antes de que venza te mostraremos la fecha y podrás adquirir un nuevo periodo de forma expresa. Puedes cancelar la membresía desde tu perfil; la cancelación surte efecto al final del periodo ya pagado y conservas el acceso hasta esa fecha, salvo que la transacción sea anulada por la pasarela. No aplicamos cargos ocultos ni condicionamos la cancelación a contactar con soporte.`,
       },
       {
         heading: '5. Uso aceptable',

@@ -46,10 +46,30 @@ export const FORBIDDEN_SURFACES = [
   'checkout',
 ] as const;
 
+/**
+ * Rutas completas que no admiten publicidad. Se mantienen aparte de los
+ * nombres de superficie para que una variante como `/checkout/resultado` no
+ * pueda eludir una comparación exacta.
+ */
+export const FORBIDDEN_PAGE_PREFIXES = ['terminal', 'checkout', 'pago', 'entrenador'] as const;
+
 export type ForbiddenSurface = (typeof FORBIDDEN_SURFACES)[number];
 
 export function isForbiddenSurface(surface: string): boolean {
-  return (FORBIDDEN_SURFACES as readonly string[]).includes(surface);
+  const normalized = surface
+    .trim()
+    .toLowerCase()
+    .split(/[?#]/, 1)[0]
+    .replace(/^\/+|\/+$/g, '');
+
+  if (!normalized) return false;
+  if ((FORBIDDEN_SURFACES as readonly string[]).includes(normalized)) return true;
+
+  const segments = normalized.split('/');
+  if (segments.some((segment) => (FORBIDDEN_SURFACES as readonly string[]).includes(segment))) return true;
+  return (FORBIDDEN_PAGE_PREFIXES as readonly string[]).some(
+    (prefix) => normalized === prefix || normalized.startsWith(`${prefix}/`),
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -144,14 +164,15 @@ export function selectAd(input: SelectionInput): SelectionResult {
   const eligible = input.candidates.filter((c) => {
     if (c.slotCode !== input.slotCode) return false;
     if (c.status !== 'ACTIVE') return false;
+    if (!/^https:\/\//i.test(c.destinationUrl)) return false;
     if (new Date(c.startsAt).getTime() > input.now) return false;
     if (c.endsAt && new Date(c.endsAt).getTime() < input.now) return false;
     if (c.remainingBudgetCents != null && c.remainingBudgetCents <= 0) return false;
 
-    if (c.countries && t.countryCode && !c.countries.includes(t.countryCode)) return false;
+    if (c.countries && (!t.countryCode || !c.countries.includes(t.countryCode))) return false;
     if (c.locales && !c.locales.includes(t.locale)) return false;
     if (c.devices && !c.devices.includes(t.device)) return false;
-    if (c.topics && t.educationalTopic && !c.topics.includes(t.educationalTopic)) return false;
+    if (c.topics && (!t.educationalTopic || !c.topics.includes(t.educationalTopic))) return false;
     if (c.marketInterests && !c.marketInterests.some((m) => t.marketInterest.includes(m))) return false;
     if (c.hourRange) {
       const [from, to] = c.hourRange;
@@ -174,7 +195,7 @@ export function selectAd(input: SelectionInput): SelectionResult {
 
   // 3. Densidad por plan: Standard ve menos inventario que Free.
   //    Se aplica reduciendo la probabilidad de servir mediante la semilla.
-  if (t.plan === 'STANDARD' && input.rotationSeed % 3 !== 0) {
+  if (t.plan === 'STANDARD' && !standardAdOpportunity(input.rotationSeed)) {
     return { ad: null, reason: 'NO_MATCH' };
   }
 
@@ -199,6 +220,29 @@ export function selectAd(input: SelectionInput): SelectionResult {
     },
     reason: 'SERVED',
   };
+}
+
+/** Una de cada tres oportunidades de Standard puede llenarse. */
+export function standardAdOpportunity(rotationSeed: number): boolean {
+  return Math.abs(Math.trunc(rotationSeed)) % 3 === 0;
+}
+
+/** Hash estable y rápido para rotación; la ruta añade un bucket temporal. */
+export function stableAdSeed(source: string): number {
+  let seed = 2166136261;
+  for (let i = 0; i < source.length; i++) {
+    seed ^= source.charCodeAt(i);
+    seed = Math.imul(seed, 16777619);
+  }
+  return seed >>> 0;
+}
+
+/** Coste CPM acumulado en centavos, redondeado una sola vez sobre el total. */
+export function accruedCpmCents(impressions: number, unitPriceCents: number, budgetCents: number): number {
+  const safeImpressions = Math.max(0, Math.trunc(impressions));
+  const safeUnitPrice = Math.max(0, Math.trunc(unitPriceCents));
+  const safeBudget = Math.max(0, Math.trunc(budgetCents));
+  return Math.min(safeBudget, Math.floor((safeImpressions * safeUnitPrice) / 1000));
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -274,14 +318,17 @@ export interface SponsorPackage {
   description: string;
 }
 
-/** Precios de referencia. Configurables desde el panel administrativo. */
+/**
+ * Precios de referencia para pilotos. La entrega se cotiza únicamente contra
+ * inventario histórico verificado; hasta entonces no se prometen impresiones.
+ */
 export const SPONSOR_PACKAGES: SponsorPackage[] = [
   {
     code: 'starter-sponsor',
     name: 'Starter Sponsor',
     monthlyPriceUsdFrom: 300,
     slots: ['dashboard-side'],
-    impressionsIncluded: 150_000,
+    impressionsIncluded: null,
     reporting: ['Impresiones', 'Clics', 'CTR', 'Reporte mensual'],
     restrictions: ['Una ubicación secundaria', 'Segmentación por página'],
     description: 'Presencia estable en una ubicación secundaria, con reporte mensual y segmentación por página.',
@@ -291,7 +338,7 @@ export const SPONSOR_PACKAGES: SponsorPackage[] = [
     name: 'Market Sponsor',
     monthlyPriceUsdFrom: 750,
     slots: ['dashboard-banner', 'news-native'],
-    impressionsIncluded: 500_000,
+    impressionsIncluded: null,
     reporting: ['Impresiones', 'Clics', 'CTR', 'Viewability', 'Reporte mensual'],
     restrictions: ['Segmentación por mercado de interés', 'Identificación visible como patrocinador'],
     description: 'Banner principal más tarjeta nativa, con segmentación por mercado y reporte de viewability.',

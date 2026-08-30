@@ -1,0 +1,44 @@
+{
+  "$schema": "https://design-tokens.github.io/community-group/format/",
+  "name": "TradingLab Brand Tokens",
+  "version": "2.0.0",
+  "color": {
+    "deep-ink": { "$type": "color", "$value": "#1D1D1F" },
+    "paper": { "$type": "color", "$value": "#F5F5F7" },
+    "surface": { "$type": "color", "$value": "#FFFFFF" },
+    "decision-blue": { "$type": "color", "$value": "#0071E3" },
+    "lab-cyan": { "$type": "color", "$value": "#56B4FF" },
+    "signal-lime": { "$type": "color", "$value": "#547B00" },
+    "slate": { "$type": "color", "$value": "#6E6E73" },
+    "success": { "$type": "color", "$value": "#16834B" },
+    "risk": { "$type": "color", "$value": "#D70015" },
+    "warning": { "$type": "color", "$value": "#9A6700" }
+  },
+  "font": {
+    "sans": { "$type": "fontFamily", "$value": ["-apple-system", "BlinkMacSystemFont", "SF Pro Text", "Instrument Sans", "Arial", "sans-serif"] },
+    "serif": { "$type": "fontFamily", "$value": ["-apple-system", "BlinkMacSystemFont", "SF Pro Display", "Instrument Sans", "Arial", "sans-serif"] },
+    "mono": { "$type": "fontFamily", "$value": ["JetBrains Mono", "Consolas", "monospace"] }
+  },
+  "space": {
+    "1": { "$type": "dimension", "$value": "4px" },
+    "2": { "$type": "dimension", "$value": "8px" },
+    "3": { "$type": "dimension", "$value": "12px" },
+    "4": { "$type": "dimension", "$value": "16px" },
+    "6": { "$type": "dimension", "$value": "24px" },
+    "8": { "$type": "dimension", "$value": "32px" },
+    "12": { "$type": "dimension", "$value": "48px" },
+    "16": { "$type": "dimension", "$value": "64px" },
+    "24": { "$type": "dimension", "$value": "96px" }
+  },
+  "radius": {
+    "control": { "$type": "dimension", "$value": "17px" },
+    "card": { "$type": "dimension", "$value": "22px" },
+    "panel": { "$type": "dimension", "$value": "30px" },
+    "pill": { "$type": "dimension", "$value": "999px" }
+  },
+  "motion": {
+    "fast": { "$type": "duration", "$value": "180ms" },
+    "standard": { "$type": "duration", "$value": "240ms" },
+    "ease-out": { "$type": "cubicBezier", "$value": [0.2, 0.8, 0.2, 1] }
+  }
+}

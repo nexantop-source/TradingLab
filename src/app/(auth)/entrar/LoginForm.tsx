@@ -4,8 +4,9 @@ import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Field, Input, Callout } from '@tl/ui';
 import { apiFetch, ApiRequestError } from '@/lib/client-api';
+import { checkoutPath, onboardingPath, type CheckoutIntent } from '@/lib/checkout-intent';
 
-export function LoginForm() {
+export function LoginForm({ intent = null }: { intent?: CheckoutIntent | null }) {
   const router = useRouter();
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -27,7 +28,12 @@ export function LoginForm() {
           password: String(data.get('password') ?? ''),
         },
       });
-      router.push(result.next);
+      const next = intent
+        ? result.next === '/onboarding'
+          ? onboardingPath(intent)
+          : checkoutPath(intent)
+        : result.next;
+      router.push(next);
       router.refresh();
     } catch (err) {
       if (err instanceof ApiRequestError) {

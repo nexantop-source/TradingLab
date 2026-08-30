@@ -4,14 +4,25 @@ import { clientIp, detectDevice, handleError, ok } from '@/lib/api';
 import { getAuth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { fromJson } from '@/lib/json';
-import { selectAd, type CandidateCreative } from '@tl/ads';
+import {
+  AD_SLOT_BY_CODE,
+  isForbiddenSurface,
+  selectAd,
+  stableAdSeed,
+  type CandidateCreative,
+} from '@tl/ads';
+import {
+  adEventSecretConfigured,
+  adViewerBinding,
+  issueAdEventToken,
+} from '@/components/ads/ad-event-security';
 import { track } from '@/lib/analytics';
 import { ANALYTICS_EVENTS } from '@tl/analytics';
 
 const querySchema = z.object({
-  slot: z.string().min(1).max(60),
-  page: z.string().max(120).default('/'),
-  topic: z.string().max(60).optional(),
+  slot: z.string().trim().min(1).max(60).regex(/^[A-Za-z0-9_-]+$/),
+  page: z.string().trim().min(1).max(120).regex(/^[A-Za-z0-9/_-]+$/).default('/'),
+  topic: z.string().trim().max(60).regex(/^[^\u0000-\u001F\u007F]*$/).optional(),
 });
 
 /**
@@ -23,6 +34,14 @@ const querySchema = z.object({
  */
 export async function GET(req: NextRequest) {
   try {
+    const provider = (
+      process.env.ADS_PROVIDER ?? (process.env.NODE_ENV === 'production' ? 'off' : 'internal')
+    )
+      .trim()
+      .toLowerCase();
+    if (provider !== 'internal') {
+      return ok({ ad: null, reason: 'INTERNAL_PROVIDER_DISABLED' });
+    }
     const params = querySchema.parse(Object.fromEntries(req.nextUrl.searchParams));
     const auth = await getAuth();
     const plan = auth?.user.plan ?? 'FREE';
@@ -33,14 +52,27 @@ export async function GET(req: NextRequest) {
       return ok({ ad: null, reason: 'PLAN_PREMIUM_NO_ADS' });
     }
 
-    const day = new Date().toISOString().slice(0, 10);
+    const descriptor = AD_SLOT_BY_CODE.get(params.slot);
+    if (!descriptor) return ok({ ad: null, reason: 'UNKNOWN_SLOT' });
+    if (isForbiddenSurface(descriptor.surface) || isForbiddenSurface(params.page)) {
+      return ok({ ad: null, reason: 'FORBIDDEN_SURFACE' });
+    }
+
+    // Sin secreto no se entrega una creatividad cuyos eventos no puedan
+    // autenticarse. El motor queda desactivado de forma segura.
+    if (!adEventSecretConfigured()) {
+      return ok({ ad: null, reason: 'ADS_SIGNING_NOT_CONFIGURED' });
+    }
+
+    const now = Date.now();
+    const day = new Date(now).toISOString().slice(0, 10);
 
     const [creatives, impressionsToday, profile] = await Promise.all([
       db.creative.findMany({
         where: {
           reviewStatus: 'APPROVED',
-          placement: { adUnitId: params.slot, active: true },
-          campaign: { status: 'ACTIVE' },
+          placement: { adUnitId: params.slot, page: params.page, active: true, adUnit: { active: true } },
+          campaign: { status: 'ACTIVE', advertiser: { status: 'APPROVED' } },
         },
         include: { campaign: { include: { advertiser: true } } },
       }),
@@ -95,13 +127,13 @@ export async function GET(req: NextRequest) {
       };
     });
 
-    // Semilla de rotación estable por usuario y día: reparte el inventario sin
-    // recurrir a aleatoriedad, de modo que la elección sea reproducible.
-    const seedSource = `${auth?.user.id ?? clientIp(req) ?? 'anon'}:${day}:${params.slot}`;
-    let rotationSeed = 0;
-    for (let i = 0; i < seedSource.length; i++) {
-      rotationSeed = (rotationSeed * 31 + seedSource.charCodeAt(i)) >>> 0;
-    }
+    // Bucket de diez minutos: Standard rota de forma determinística a lo largo
+    // del día en vez de quedar bloqueado con el mismo resultado durante 24 h.
+    const opportunityBucket = Math.floor(now / (10 * 60 * 1000));
+    const viewerSource = auth
+      ? `user:${auth.user.id}:session:${auth.sessionId}`
+      : `anon:${clientIp(req) ?? 'unknown'}:ua:${req.headers.get('user-agent') ?? 'unknown'}`;
+    const rotationSeed = stableAdSeed(`${viewerSource}:${day}:${params.slot}:${opportunityBucket}`);
 
     const result = selectAd({
       slotCode: params.slot,
@@ -117,7 +149,7 @@ export async function GET(req: NextRequest) {
       },
       candidates,
       impressionsToday: impressionMap,
-      now: Date.now(),
+      now,
       rotationSeed,
     });
 
@@ -125,12 +157,23 @@ export async function GET(req: NextRequest) {
       await track(ANALYTICS_EVENTS.AD_NO_FILL, { slot: params.slot, reason: result.reason }, { userId: auth?.user.id });
     }
 
-    return ok({
-      ad: result.ad,
-      reason: result.reason,
-      /** Alto reservado: el cliente lo aplica siempre, haya anuncio o no. */
-      reservedHeight: creatives[0] ? undefined : undefined,
-    });
+    if (!result.ad) return ok({ ad: null, reason: result.reason });
+
+    const secret = process.env.ADS_EVENT_TOKEN_SECRET as string;
+    const viewer = await adViewerBinding(secret, viewerSource);
+    const eventToken = await issueAdEventToken(
+      secret,
+      {
+        creativeId: result.ad.creativeId,
+        campaignId: result.ad.campaignId,
+        slotCode: params.slot,
+        page: params.page,
+        viewer,
+      },
+      now,
+    );
+
+    return ok({ ad: { ...result.ad, eventToken }, reason: result.reason });
   } catch (error) {
     return handleError(error);
   }

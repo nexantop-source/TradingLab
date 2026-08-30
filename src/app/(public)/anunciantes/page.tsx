@@ -21,18 +21,29 @@ const FORBIDDEN_LABELS: Record<string, string> = {
   checkout: 'En el proceso de pago',
 };
 
+const LIVE_AD_SLOT_CODES = new Set([
+  'dashboard-banner',
+  'dashboard-side',
+  'academy-footer',
+  'lesson-sponsor',
+  'calendar-sponsor',
+  'news-native',
+  'challenge-sponsor',
+]);
+
 export default function AdvertisersPage() {
   return (
     <div className="mx-auto max-w-5xl px-5 py-12">
       <header className="max-w-2xl">
-        <Badge tone="blue">Anunciantes</Badge>
+        <Badge tone="blue">Inventario piloto</Badge>
         <h1 className="mt-4 text-3xl font-semibold tracking-[-0.03em]">
           Publicidad que no interfiere con el aprendizaje
         </h1>
         <p className="mt-4 text-[15px] leading-relaxed text-[var(--color-muted)]">
-          Aceptamos publicidad porque nos permite mantener un plan gratuito con contenido completo. A cambio
-          aplicamos normas estrictas: todo espacio comercial se etiqueta, nunca se coloca sobre elementos de
-          decisión y los anunciantes financieros pasan revisión manual de cumplimiento.
+          Hemos diseñado espacios publicitarios para sostener el plan gratuito sin interferir con el aprendizaje.
+          La entrega facturable todavía no está habilitada: primero activaremos AdSense, validaremos tráfico real y
+          completaremos la medición persistente. Cuando abra el piloto, todo espacio se etiquetará y los anunciantes
+          financieros pasarán revisión manual de cumplimiento.
         </p>
       </header>
 
@@ -40,7 +51,9 @@ export default function AdvertisersPage() {
       <section className="mt-14">
         <h2 className="text-xl font-semibold tracking-tight">Paquetes de patrocinio</h2>
         <p className="mt-2 text-[13px] text-[var(--color-muted)]">
-          Precios de referencia, configurables según tráfico, país, audiencia y demanda.
+          Referencias de planificación para un futuro piloto; no constituyen una oferta activa. La propuesta final
+          se calculará solo con inventario histórico verificado, sin garantizar volumen antes de medir tráfico,
+          país, audiencia y demanda.
         </p>
         <div className="mt-6 grid gap-4 lg:grid-cols-3">
           {SPONSOR_PACKAGES.map((p) => (
@@ -58,9 +71,11 @@ export default function AdvertisersPage() {
                   <dd className="num mt-1 text-[var(--color-muted)]">{p.slots.join(', ')}</dd>
                 </div>
                 <div>
-                  <dt className="text-[var(--color-subtle)]">Impresiones incluidas</dt>
+                  <dt className="text-[var(--color-subtle)]">Entrega estimada</dt>
                   <dd className="num mt-1 text-[var(--color-muted)]">
-                    {p.impressionsIncluded ? p.impressionsIncluded.toLocaleString('es-ES') : 'Según ruta patrocinada'}
+                    {p.impressionsIncluded
+                      ? `${p.impressionsIncluded.toLocaleString('es-ES')} impresiones sujetas a inventario`
+                      : 'Se cotiza con inventario histórico verificado'}
                   </dd>
                 </div>
                 <div>
@@ -82,14 +97,15 @@ export default function AdvertisersPage() {
           ))}
         </div>
         <p className="mt-4 text-[12px] text-[var(--color-subtle)]">
-          También admitimos venta directa por CPM, CPC, precio fijo por campaña, patrocinio mensual, paquete
-          multiformato, patrocinio de curso, de evento y de newsletter.
+          El piloto evaluará CPM, CPC, precio fijo y patrocinios solo después de habilitar medición verificable.
+          Actualmente no contratamos ni facturamos impresiones; tampoco prometemos inventario que el producto aún
+          no haya demostrado.
         </p>
       </section>
 
       {/* Inventario */}
       <section className="mt-16">
-        <h2 className="text-xl font-semibold tracking-tight">Inventario disponible</h2>
+        <h2 className="text-xl font-semibold tracking-tight">Inventario diseñado · pendiente de activación</h2>
         <div className="mt-6 overflow-x-auto">
           <table className="w-full min-w-[36rem] text-[13px]">
             <caption className="sr-only">Espacios publicitarios disponibles</caption>
@@ -102,7 +118,7 @@ export default function AdvertisersPage() {
               </tr>
             </thead>
             <tbody>
-              {AD_SLOTS.map((s) => (
+              {AD_SLOTS.filter((slot) => LIVE_AD_SLOT_CODES.has(slot.code)).map((s) => (
                 <tr key={s.code} className="border-b border-[var(--color-border)]">
                   <td className="px-3 py-2.5">
                     <span className="block font-medium">{s.label}</span>
@@ -120,7 +136,8 @@ export default function AdvertisersPage() {
         </div>
         <p className="mt-3 text-[12px] leading-relaxed text-[var(--color-subtle)]">
           Todos los espacios reservan su alto antes de solicitar la creatividad, de modo que la publicidad nunca
-          desplaza el contenido. Si no hay relleno, el espacio se colapsa en lugar de dejar un hueco vacío.
+          desplaza el contenido. Si no hay relleno, aparece contenido propio contextual sin seguimiento y se conserva
+          la geometría de la página.
         </p>
       </section>
 
@@ -169,12 +186,12 @@ export default function AdvertisersPage() {
       <section className="mt-14 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-8 text-center">
         <h2 className="text-xl font-semibold tracking-tight">¿Te encaja este marco?</h2>
         <p className="mx-auto mt-3 max-w-xl text-[14px] leading-relaxed text-[var(--color-muted)]">
-          Escríbenos con tu producto, tu audiencia objetivo y el formato que te interesa. Respondemos con
-          disponibilidad de inventario y una propuesta concreta.
+          Escríbenos con tu producto, audiencia y formato para entrar en la lista del piloto. Te contactaremos
+          cuando AdSense o la medición directa estén aprobados y exista inventario histórico verificable.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Link href="/contacto">
-            <Button size="lg">Contactar con el equipo comercial</Button>
+            <Button size="lg">Solicitar acceso al piloto</Button>
           </Link>
           <Link href="/legal/publicidad">
             <Button size="lg" variant="outline">

@@ -5,8 +5,8 @@
 | Entorno | Base de datos | Datos de mercado | IA | Pagos | Publicidad |
 |---|---|---|---|---|---|
 | Local | SQLite | Motor determinístico | Determinístico local | Simulada | Servidor interno |
-| Staging | PostgreSQL | Proveedor real, plan básico | OpenAI con tope bajo | Stripe en modo prueba | Servidor interno |
-| Producción | PostgreSQL + réplica | Proveedor real con licencia | OpenAI con tope | Stripe real | Interno o Ad Manager |
+| Staging | PostgreSQL | Proveedor real, plan básico | OpenAI con tope bajo | Wompi Sandbox | Servidor interno |
+| Producción | PostgreSQL + réplica | Proveedor real con licencia | OpenAI con tope | Wompi Producción | Interno o AdSense manual |
 
 ## 1. Migrar a PostgreSQL
 
@@ -64,9 +64,16 @@ MARKET_DATA_PROVIDER=synthetic   # synthetic | twelvedata | finnhub
 TWELVEDATA_API_KEY=
 MARKET_DATA_DELAY_SECONDS=0      # latencia declarada del plan contratado
 
-BILLING_PROVIDER=mock            # mock | stripe
-STRIPE_SECRET_KEY=
-STRIPE_WEBHOOK_SECRET=
+BILLING_PROVIDER=disabled        # disabled | wompi; mock únicamente en desarrollo local
+WOMPI_ENVIRONMENT=sandbox        # sandbox | production
+WOMPI_PUBLIC_KEY=
+WOMPI_PRIVATE_KEY=               # solo para API/tokenización futura
+WOMPI_INTEGRITY_SECRET=
+WOMPI_EVENTS_SECRET=
+WOMPI_STANDARD_MONTHLY_AMOUNT_IN_CENTS=
+WOMPI_STANDARD_YEARLY_AMOUNT_IN_CENTS=
+WOMPI_PREMIUM_MONTHLY_AMOUNT_IN_CENTS=
+WOMPI_PREMIUM_YEARLY_AMOUNT_IN_CENTS=
 
 RESTRICTED_COUNTRIES=            # ISO-3166 alfa-2 separados por coma
 SENTRY_DSN=
@@ -81,29 +88,83 @@ Al contratar, comprueba: latencia del plan, límite de peticiones, si permite us
 atribución visible y si cubre las clases de activo del catálogo. La latencia contratada debe
 reflejarse en `MARKET_DATA_DELAY_SECONDS` para que la interfaz la declare con honestidad.
 
-## 4. Conectar Stripe
+## 4. Conectar Wompi
 
-`lib/billing.ts` define `BillingProvider`. Implementa `StripeBillingProvider` con los mismos tres
-métodos y regístralo:
+La implementación usa el **Checkout Web oficial**. TradingLab genera en servidor una referencia
+opaca única, congela el importe de las variables `WOMPI_*_AMOUNT_IN_CENTS`, define una expiración
+de 30 minutos, firma `<referencia><importe>COP<expiración><secreto-de-integridad>` y redirige a
+`https://checkout.wompi.co/p/`.
+Wompi solo admite COP en este flujo. No se convierte desde USD ni se acepta un importe enviado por
+el navegador. Referencias oficiales: [Checkout Web](https://docs.wompi.co/docs/colombia/widget-checkout-web/),
+[eventos](https://docs.wompi.co/docs/colombia/eventos/) y
+[transacciones](https://docs.wompi.co/docs/colombia/transacciones/).
 
-```ts
-export function billingProvider(): BillingProvider {
-  if (!provider) {
-    provider = process.env.BILLING_PROVIDER === 'stripe'
-      ? new StripeBillingProvider()
-      : new MockBillingProvider();
-  }
-  return provider;
-}
+1. En el Dashboard de comercios copia las cuatro credenciales del ambiente correspondiente. Los
+   secretos de integridad y eventos son diferentes de las llaves pública y privada.
+2. Define `BILLING_PROVIDER=wompi`, `WOMPI_ENVIRONMENT` y los cuatro precios fijos. Un importe está
+   expresado en centavos: COP 59.900 se configura como `5990000`.
+3. `NEXT_PUBLIC_APP_URL` debe ser el origen HTTPS público. Wompi vuelve a
+   `/perfil?checkout=wompi&id=<ID>`. La UI puede consultar de forma autenticada y de solo lectura
+   `/api/billing/status?id=<ID>`; esta consulta **nunca activa** una membresía.
+4. Configura la URL de eventos HTTPS como `https://tu-dominio/api/billing/webhook`. Usa una URL y
+   credenciales distintas para Sandbox y Producción. El evento procesado es `transaction.updated`.
+5. Ejecuta una compra aprobada, una rechazada, una anulada y reenvía el mismo evento para comprobar
+   que no se duplica ni prolonga el periodo.
+
+En Firebase App Hosting, mantén `BILLING_PROVIDER=disabled` hasta que existan los tres secretos
+usados por Checkout Web y eventos. `mock` está bloqueado por código cuando `NODE_ENV=production`:
+una configuración incompleta no puede regalar planes. Crea los secretos y concede acceso al backend:
+
+```bash
+firebase apphosting:secrets:set WOMPI_PUBLIC_KEY --project nexant-87204
+firebase apphosting:secrets:set WOMPI_INTEGRITY_SECRET --project nexant-87204
+firebase apphosting:secrets:set WOMPI_EVENTS_SECRET --project nexant-87204
+firebase apphosting:secrets:grantaccess WOMPI_PUBLIC_KEY,WOMPI_INTEGRITY_SECRET,WOMPI_EVENTS_SECRET \
+  --backend tradinglab --project nexant-87204
 ```
 
-Crea en Stripe los cuatro precios (Standard mensual y anual, Premium mensual y anual) y ponlos en
-las variables correspondientes. Configura el webhook apuntando a `/api/billing/webhook` con los
-eventos `invoice.paid`, `invoice.payment_failed` y `customer.subscription.deleted`. El endpoint ya
-verifica la firma y procesa de forma idempotente.
+Después referencia esos nombres como secretos `RUNTIME` en `apphosting.yaml`, configura allí
+`WOMPI_ENVIRONMENT` y los cuatro importes COP, cambia `BILLING_PROVIDER` a `wompi` y despliega
+primero en Sandbox. `WOMPI_PRIVATE_KEY` no se necesita para Checkout Web ni para consultar una
+transacción y no debe añadirse hasta implementar tokenización/cargos API con un alcance aprobado.
 
-**No elimines la comprobación de idempotencia.** Es lo que impide cobrar dos veces cuando Stripe
-reintenta un webhook, algo que ocurre con normalidad.
+El webhook limita el tamaño, exige JSON, valida el ambiente y calcula SHA-256 usando la lista
+**dinámica** `signature.properties`, el `timestamp` y `WOMPI_EVENTS_SECRET`. Si llega
+`X-Event-Checksum`, también debe coincidir en tiempo constante con el checksum del cuerpo. Después
+de validar la firma, el servidor consulta `GET /v1/transactions/{id}` directamente a Wompi y exige
+que identificador, referencia, COP e importe coincidan con el `Payment` creado por TradingLab. Solo
+esa respuesta autoritativa puede activar o anular acceso.
+
+Estados: `APPROVED` activa una vez y calcula el periodo en servidor; `DECLINED`/`ERROR` fallan el
+intento sin tocar otro periodo vigente; `PENDING` no degrada estados finales; `VOIDED` cancela solo
+la membresía cuyo `externalId` corresponde exactamente a esa compra. Los payloads almacenados para
+auditoría se reducen a campos operativos y no conservan email ni datos del método de pago.
+
+Solo puede existir un checkout pendiente por cuenta. La URL y su firma expiran juntas a los 30
+minutos. Un intento expirado que nunca produjo un `transaction.id` se marca `SUPERSEDED`; si Wompi
+reportara una aprobación tardía o coexistiera otro periodo activo, el pago pasa a
+`REVIEW_REQUIRED`, genera una alerta de soporte y **no** reemplaza ni extiende la membresía. El
+importe se valida contra el snapshot inmutable guardado en `Payment`, por lo que cambiar precios no
+invalida compras ya abiertas.
+
+Wompi puede generar un segundo ID de transacción con la **misma referencia** cuando el pagador usa
+su reintento oficial tras un rechazo. La reconciliación admite que ese segundo ID aprobado sustituya
+al fallido únicamente si referencia, COP e importe servidor coinciden. Un segundo `APPROVED` no
+extiende de nuevo y un `VOIDED` cuyo ID no sea el de la membresía activa no la cancela. Consulta
+[Reintento de pagos](https://docs.wompi.co/docs/colombia/reintento-de-pago/).
+
+### Alcance de renovación
+
+Este Checkout cobra **un periodo por compra**. Cancelar evita mantener el acceso más allá del
+periodo, pero no existe todavía un cargo automático futuro. Para renovación automática real hay que
+implementar Fuentes de Pago/Tokenización con aceptación explícita de los contratos de Wompi,
+guardar únicamente el `payment_source_id` (nunca PAN/CVC), añadir un job de cobro y confirmar con
+Wompi la habilitación 3DS/3RI aplicable. Consulta
+[Fuentes de Pago](https://docs.wompi.co/docs/colombia/fuentes-de-pago/). No actives ese flujo usando
+solo la llave privada.
+
+**No elimines la idempotencia ni la reconciliación server-to-server.** Wompi reintenta eventos y el
+navegador de retorno no es una fuente confiable para conceder acceso.
 
 ## 5. Construir y desplegar
 

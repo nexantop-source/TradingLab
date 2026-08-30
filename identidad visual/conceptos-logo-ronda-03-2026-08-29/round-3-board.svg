@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1800" height="1400" viewBox="0 0 1800 1400">
+  <rect width="1800" height="1400" fill="#071324"/>
+  <text x="90" y="105" fill="#F7F9FC" font-family="Segoe UI, Arial, sans-serif" font-size="52" font-weight="700" letter-spacing="-1">TradingLab — Logo explorations</text>
+  <text x="90" y="155" fill="#9AA7BA" font-family="Segoe UI, Arial, sans-serif" font-size="24">Ronda 03 · seis símbolos para una marca que convierte práctica en criterio</text>
+  <rect x="90" y="193" width="1620" height="2" fill="#185ADB"/>
+
+  <g>
+    <rect x="90" y="235" width="500" height="500" rx="30" fill="#F7F9FC"/>
+    <circle cx="135" cy="280" r="22" fill="#185ADB"/>
+    <text x="135" y="288" fill="#FFFFFF" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="700">09</text>
+    <image x="165" y="285" width="350" height="350" href="09-axiom-cut.png" xlink:href="09-axiom-cut.png" preserveAspectRatio="xMidYMid meet"/>
+    <text x="130" y="672" fill="#071324" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="700">Axiom Cut</text>
+    <text x="130" y="704" fill="#526276" font-family="Segoe UI, Arial, sans-serif" font-size="19">Decidir es recortar ruido.</text>
+  </g>
+
+  <g>
+    <rect x="650" y="235" width="500" height="500" rx="30" fill="#F7F9FC"/>
+    <circle cx="695" cy="280" r="22" fill="#185ADB"/>
+    <text x="695" y="288" fill="#FFFFFF" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="700">10</text>
+    <image x="715" y="310" width="370" height="300" href="10-proof-brackets.png" xlink:href="10-proof-brackets.png" preserveAspectRatio="xMidYMid meet"/>
+    <text x="690" y="672" fill="#071324" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="700">Proof Brackets</text>
+    <text x="690" y="704" fill="#526276" font-family="Segoe UI, Arial, sans-serif" font-size="19">La evidencia en el centro.</text>
+  </g>
+
+  <g>
+    <rect x="1210" y="235" width="500" height="500" rx="30" fill="#F7F9FC"/>
+    <circle cx="1255" cy="280" r="22" fill="#185ADB"/>
+    <text x="1255" y="288" fill="#FFFFFF" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="700">11</text>
+    <image x="1285" y="285" width="350" height="350" href="11-revision.png" xlink:href="11-revision.png" preserveAspectRatio="xMidYMid meet"/>
+    <text x="1250" y="672" fill="#071324" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="700">Revision</text>
+    <text x="1250" y="704" fill="#526276" font-family="Segoe UI, Arial, sans-serif" font-size="19">Revisar antes de ejecutar.</text>
+  </g>
+
+  <g>
+    <rect x="90" y="795" width="500" height="500" rx="30" fill="#F7F9FC"/>
+    <circle cx="135" cy="840" r="22" fill="#185ADB"/>
+    <text x="135" y="848" fill="#FFFFFF" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="700">12</text>
+    <image x="165" y="845" width="350" height="350" href="12-tl-axis.png" xlink:href="12-tl-axis.png" preserveAspectRatio="xMidYMid meet"/>
+    <text x="130" y="1232" fill="#071324" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="700">TL Axis</text>
+    <text x="130" y="1264" fill="#526276" font-family="Segoe UI, Arial, sans-serif" font-size="19">Estructura propia, lectura inmediata.</text>
+  </g>
+
+  <g>
+    <rect x="650" y="795" width="500" height="500" rx="30" fill="#F7F9FC"/>
+    <circle cx="695" cy="840" r="22" fill="#185ADB"/>
+    <text x="695" y="848" fill="#FFFFFF" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="700">13</text>
+    <image x="725" y="845" width="350" height="350" href="13-evidence-fold.png" xlink:href="13-evidence-fold.png" preserveAspectRatio="xMidYMid meet"/>
+    <text x="690" y="1232" fill="#071324" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="700">Evidence Fold</text>
+    <text x="690" y="1264" fill="#526276" font-family="Segoe UI, Arial, sans-serif" font-size="19">Dos planos revelan la señal.</text>
+  </g>
+
+  <g>
+    <rect x="1210" y="795" width="500" height="500" rx="30" fill="#F7F9FC"/>
+    <circle cx="1255" cy="840" r="22" fill="#185ADB"/>
+    <text x="1255" y="848" fill="#FFFFFF" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="700">14</text>
+    <image x="1285" y="845" width="350" height="350" href="14-method-tiles.png" xlink:href="14-method-tiles.png" preserveAspectRatio="xMidYMid meet"/>
+    <text x="1250" y="1232" fill="#071324" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="700">Method Tiles</text>
+    <text x="1250" y="1264" fill="#526276" font-family="Segoe UI, Arial, sans-serif" font-size="19">Un sistema que acepta ajuste.</text>
+  </g>
+
+  <text x="90" y="1355" fill="#718096" font-family="Segoe UI, Arial, sans-serif" font-size="18">Conceptos preliminares · no sustituyen el arte maestro vectorial</text>
+  <text x="1710" y="1355" fill="#718096" text-anchor="end" font-family="Segoe UI, Arial, sans-serif" font-size="18">#071324 · #185ADB · #F7F9FC</text>
+</svg>

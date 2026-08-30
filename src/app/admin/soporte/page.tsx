@@ -2,10 +2,10 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { getAuth } from '@/lib/auth';
 import { can } from '@/lib/rbac';
-import { db } from '@/lib/db';
 import { Badge, Card, EmptyState } from '@tl/ui';
 import { formatDateTime } from '@/lib/format';
 import { LifeBuoy } from 'lucide-react';
+import { prioritizedSupportTickets } from '@/lib/support-queue';
 
 export const metadata: Metadata = { title: 'Soporte' };
 export const dynamic = 'force-dynamic';
@@ -14,11 +14,7 @@ export default async function AdminSupportPage() {
   const auth = await getAuth();
   if (!auth || !can(auth.user.role, 'support:read')) redirect('/panel');
 
-  const tickets = await db.supportTicket.findMany({
-    orderBy: [{ priority: 'desc' }, { createdAt: 'desc' }],
-    take: 60,
-    include: { user: { select: { email: true, name: true } } },
-  });
+  const tickets = await prioritizedSupportTickets(60);
 
   const byStatus = tickets.reduce<Record<string, number>>((acc, t) => {
     acc[t.status] = (acc[t.status] ?? 0) + 1;

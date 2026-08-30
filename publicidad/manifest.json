@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "brand": "TradingLab",
+  "campaign": "Criterio antes que certeza",
+  "generatedOn": "2026-08-29",
+  "disclaimer": "Simulación educativa · Saldo DEMO sin valor monetario · No es asesoramiento financiero.",
+  "assets": [
+    {
+      "concept": "01-aprende-antes-de-arriesgar",
+      "format": "square",
+      "svg": "publicidad/01-aprende-antes-de-arriesgar/cuadrado-1080x1080.svg",
+      "png": "publicidad/01-aprende-antes-de-arriesgar/cuadrado-1080x1080.png",
+      "width": 1080,
+      "height": 1080,
+      "sha256": "c02baa1838330e87abfa9660706ca1b37c2ca431f306dc24b147c812c422f3a3"
+    },
+    {
+      "concept": "01-aprende-antes-de-arriesgar",
+      "format": "vertical",
+      "svg": "publicidad/01-aprende-antes-de-arriesgar/vertical-1080x1350.svg",
+      "png": "publicidad/01-aprende-antes-de-arriesgar/vertical-1080x1350.png",
+      "width": 1080,
+      "height": 1350,
+      "sha256": "8dba2ef14563ed6a3ade3e9b79c4a3b0c22df04bc2e3230e472c9439c89b3ef4"
+    },
+    {
+      "concept": "01-aprende-antes-de-arriesgar",
+      "format": "horizontal",
+      "svg": "publicidad/01-aprende-antes-de-arriesgar/horizontal-1200x628.svg",
+      "png": "publicidad/01-aprende-antes-de-arriesgar/horizontal-1200x628.png",
+      "width": 1200,
+      "height": 628,
+      "sha256": "d5a8383436add40a66bbf6e15f1ba0b0a62dd0dea18b427980e420bcff4d46f5"
+    },
+    {
+      "concept": "02-ia-sin-senales",
+      "format": "square",
+      "svg": "publicidad/02-ia-sin-senales/cuadrado-1080x1080.svg",
+      "png": "publicidad/02-ia-sin-senales/cuadrado-1080x1080.png",
+      "width": 1080,
+      "height": 1080,
+      "sha256": "937dbc8d09d8c320ca0d640cfc7139cd4b5ed50bafce15c0e78ecf9066a4a154"
+    },
+    {
+      "concept": "02-ia-sin-senales",
+      "format": "vertical",
+      "svg": "publicidad/02-ia-sin-senales/vertical-1080x1350.svg",
+      "png": "publicidad/02-ia-sin-senales/vertical-1080x1350.png",
+      "width": 1080,
+      "height": 1350,
+      "sha256": "472b1b9ce6d17fb06fc8d5864e00e9c8fd72c7b3f63451cccdc783426aee76fc"
+    },
+    {
+      "concept": "02-ia-sin-senales",
+      "format": "horizontal",
+      "svg": "publicidad/02-ia-sin-senales/horizontal-1200x628.svg",
+      "png": "publicidad/02-ia-sin-senales/horizontal-1200x628.png",
+      "width": 1200,
+      "height": 628,
+      "sha256": "5e1925de6d211049577135d6d79d7094617131553eeb8a88a190681b9f59764f"
+    },
+    {
+      "concept": "03-ciclo-de-aprendizaje",
+      "format": "square",
+      "svg": "publicidad/03-ciclo-de-aprendizaje/cuadrado-1080x1080.svg",
+      "png": "publicidad/03-ciclo-de-aprendizaje/cuadrado-1080x1080.png",
+      "width": 1080,
+      "height": 1080,
+      "sha256": "9d9508c6a5a1015e4d6bf256d51c0992a81a7282b88810a0587c8b3241a840f0"
+    },
+    {
+      "concept": "03-ciclo-de-aprendizaje",
+      "format": "vertical",
+      "svg": "publicidad/03-ciclo-de-aprendizaje/vertical-1080x1350.svg",
+      "png": "publicidad/03-ciclo-de-aprendizaje/vertical-1080x1350.png",
+      "width": 1080,
+      "height": 1350,
+      "sha256": "00f03aebd1d9617742123a472fe06190fee6cb127f299db09cc4d67f5fbc5b42"
+    },
+    {
+      "concept": "03-ciclo-de-aprendizaje",
+      "format": "horizontal",
+      "svg": "publicidad/03-ciclo-de-aprendizaje/horizontal-1200x628.svg",
+      "png": "publicidad/03-ciclo-de-aprendizaje/horizontal-1200x628.png",
+      "width": 1200,
+      "height": 628,
+      "sha256": "559768b6e3e5917a055e6e9943881470853a299fcd982e8e9ba76a217c54b616"
+    },
+    {
+      "concept": "04-disciplina-y-proceso",
+      "format": "square",
+      "svg": "publicidad/04-disciplina-y-proceso/cuadrado-1080x1080.svg",
+      "png": "publicidad/04-disciplina-y-proceso/cuadrado-1080x1080.png",
+      "width": 1080,
+      "height": 1080,
+      "sha256": "55cb920b4cd9dd997d41db2160eac68cec18b1e2eadde0a74ba4788e2fb1120b"
+    },
+    {
+      "concept": "04-disciplina-y-proceso",
+      "format": "vertical",
+      "svg": "publicidad/04-disciplina-y-proceso/vertical-1080x1350.svg",
+      "png": "publicidad/04-disciplina-y-proceso/vertical-1080x1350.png",
+      "width": 1080,
+      "height": 1350,
+      "sha256": "2582ecd03bbcae891368c4bd43ad3601b1f99c1d6c88b732c4d78a34d88617bb"
+    },
+    {
+      "concept": "04-disciplina-y-proceso",
+      "format": "horizontal",
+      "svg": "publicidad/04-disciplina-y-proceso/horizontal-1200x628.svg",
+      "png": "publicidad/04-disciplina-y-proceso/horizontal-1200x628.png",
+      "width": 1200,
+      "height": 628,
+      "sha256": "78b748c39d28712a0b10556d0af522ba90e79eee57bda79856dea7540e2339c0"
+    },
+    {
+      "concept": "05-plan-free-transparente",
+      "format": "square",
+      "svg": "publicidad/05-plan-free-transparente/cuadrado-1080x1080.svg",
+      "png": "publicidad/05-plan-free-transparente/cuadrado-1080x1080.png",
+      "width": 1080,
+      "height": 1080,
+      "sha256": "8dca34ec936be242c89bf6d923bf626e179a2114186de9264a38071ffeb81fa4"
+    },
+    {
+      "concept": "05-plan-free-transparente",
+      "format": "vertical",
+      "svg": "publicidad/05-plan-free-transparente/vertical-1080x1350.svg",
+      "png": "publicidad/05-plan-free-transparente/vertical-1080x1350.png",
+      "width": 1080,
+      "height": 1350,
+      "sha256": "d3d3ce1dd47b8d0197d03e61a0d2a101bb090f19045b7d12a5cd4ab91c9ee4ef"
+    },
+    {
+      "concept": "05-plan-free-transparente",
+      "format": "horizontal",
+      "svg": "publicidad/05-plan-free-transparente/horizontal-1200x628.svg",
+      "png": "publicidad/05-plan-free-transparente/horizontal-1200x628.png",
+      "width": 1200,
+      "height": 628,
+      "sha256": "ad87f3fc0c7dcc61fec121e4384cf5734f9057729fbb9515a479e562eb23ee65"
+    }
+  ],
+  "brandAssets": [
+    { "file": "identidad visual/logos/tradinglab-logo-principal.png", "width": 1200, "height": 360, "sha256": "e7aa0db6ad5fa718b2142f4c0b48563c946b64ba5aaf93bfee5c8846f5243c5f" },
+    { "file": "identidad visual/logos/tradinglab-logo-horizontal.png", "width": 1000, "height": 220, "sha256": "e46bde0784a9debe3fa011f0f0aba68f2b05a31e25ba25f8b5e6e7c78de9932d" },
+    { "file": "identidad visual/logos/tradinglab-simbolo.png", "width": 512, "height": 512, "sha256": "3c6207fab77b796ad337895c8d1432d31163f16d28542b060b929eda549a12b4" },
+    { "file": "identidad visual/logos/tradinglab-monocromo-positivo.png", "width": 1200, "height": 360, "sha256": "f09033616fcc792d04067f40a3515731d75a1c60d52c1d13a30e6b998baa2802" },
+    { "file": "identidad visual/logos/tradinglab-monocromo-negativo.png", "width": 1200, "height": 360, "sha256": "65128a732e023fe3b41c5ab249469e3e8c92dd1ddf171e09af2d85400e6fea3e" },
+    { "file": "identidad visual/logos/tradinglab-favicon.png", "width": 512, "height": 512, "sha256": "216787e5d1281620e80650243e776d4757ac1839c393aa148e7f7f0dd115c9f9" }
+  ],
+  "fontAssets": [
+    { "file": "identidad visual/fuentes/instrument-sans-latin.woff2", "bytes": 29904, "sha256": "6219bc4bfdfc5d9b2201dcdf046218b122a758f932e25ed5f168f929b7ca2311" },
+    { "file": "identidad visual/fuentes/instrument-serif-italic-latin.woff2", "bytes": 15684, "sha256": "6ee678c33f388dd7ba59700ebea635deb98821baafd817b09891f7927177f702" },
+    { "file": "identidad visual/fuentes/instrument-serif-regular-latin.woff2", "bytes": 15040, "sha256": "60c06664b5a95c7de6cc3e00d1f9034d78bd1e40b564016b241674449a067d4d" },
+    { "file": "identidad visual/fuentes/jetbrains-mono-latin.woff2", "bytes": 40480, "sha256": "1e06740a02a443fb7f3eeda8fcaa685a0f6c620e3f01e6666e847295469ce3ad" }
+  ],
+  "campaignMaster": {
+    "file": "identidad visual/recursos/textura-campana-master.png",
+    "sha256": "dbd4e47d540df71f06ff7bf415e9fe7d148e449849162a1b1f8ccaad5ec61fb6"
+  }
+}

@@ -1,16 +1,64 @@
 import { NextRequest } from 'next/server';
-import { handleError, ok } from '@/lib/api';
+import { fail, handleError, ok } from '@/lib/api';
 import { requireAuth } from '@/lib/auth';
 import { subscribeSchema } from '@/lib/validation';
 import { billingProvider } from '@/lib/billing';
 import { track } from '@/lib/analytics';
 import { ANALYTICS_EVENTS } from '@tl/analytics';
 import { DISCLAIMERS } from '@tl/types/compliance';
+import { WompiError } from '@/lib/wompi';
+import { enforce } from '@/lib/rate-limit';
+import { db } from '@/lib/db';
+
+const MAX_CHECKOUT_BYTES = 8 * 1024;
+
+function sameOrigin(req: NextRequest): boolean {
+  const fetchSite = req.headers.get('sec-fetch-site');
+  if (fetchSite && fetchSite !== 'same-origin') return false;
+  const origin = req.headers.get('origin');
+  return !origin || origin === req.nextUrl.origin;
+}
 
 export async function POST(req: NextRequest) {
   try {
+    if (!sameOrigin(req)) return fail('CROSS_SITE_REQUEST', 'Solicitud de pago no permitida.', 403);
+    if (!req.headers.get('content-type')?.toLowerCase().startsWith('application/json')) {
+      return fail('UNSUPPORTED_MEDIA_TYPE', 'El checkout debe enviarse como JSON.', 415);
+    }
+    const declaredLength = Number(req.headers.get('content-length') ?? '0');
+    if (Number.isFinite(declaredLength) && declaredLength > MAX_CHECKOUT_BYTES) {
+      return fail('PAYLOAD_TOO_LARGE', 'La solicitud de checkout supera el tamaño permitido.', 413);
+    }
+
     const { user } = await requireAuth();
-    const input = subscribeSchema.parse(await req.json());
+    await enforce(`billing-checkout:${user.id}`, { limit: 8, windowSeconds: 300 });
+    const raw = await req.text();
+    if (Buffer.byteLength(raw, 'utf8') > MAX_CHECKOUT_BYTES) {
+      return fail('PAYLOAD_TOO_LARGE', 'La solicitud de checkout supera el tamaño permitido.', 413);
+    }
+    let payload: unknown;
+    try {
+      payload = JSON.parse(raw);
+    } catch {
+      return fail('VALIDATION_ERROR', 'La solicitud de checkout no contiene JSON válido.', 422);
+    }
+    const input = subscribeSchema.parse(payload);
+
+    const activeSubscription = await db.subscription.findUnique({
+      where: { userId: user.id },
+      select: { status: true, currentPeriodEnd: true },
+    });
+    if (
+      activeSubscription &&
+      ['ACTIVE', 'TRIALING'].includes(activeSubscription.status) &&
+      activeSubscription.currentPeriodEnd > new Date()
+    ) {
+      return fail(
+        'SUBSCRIPTION_ALREADY_ACTIVE',
+        'Ya tienes un periodo de pago activo. Para evitar un doble cobro, espera a que finalice antes de comprar otro.',
+        409,
+      );
+    }
 
     await track(
       ANALYTICS_EVENTS.CHECKOUT_STARTED,
@@ -32,6 +80,9 @@ export async function POST(req: NextRequest) {
       notice: DISCLAIMERS.billing,
     });
   } catch (error) {
+    if (error instanceof WompiError) {
+      return fail(error.code, error.message, error.status);
+    }
     return handleError(error);
   }
 }

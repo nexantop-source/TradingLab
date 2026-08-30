@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350" role="img" aria-labelledby="title-01-vertical desc-01-vertical">
+  <title id="title-01-vertical">Aprende antes de arriesgar.</title>
+  <desc id="desc-01-vertical">Ensaya una hipótesis. Define qué la invalidaría. Revisa tu proceso con saldo DEMO. Simulación educativa con saldo DEMO.</desc>
+  <metadata>TradingLab / concepto 01 / 1080x1350 / versión 1.0</metadata>
+  <defs><linearGradient id="bg-01-vertical" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#071324"/><stop offset=".72" stop-color="#0D2550"/><stop offset="1" stop-color="#185ADB"/></linearGradient><pattern id="pat-01-vertical" width="36" height="36" patternUnits="userSpaceOnUse"><path d="M36 0H0V36" fill="none" stroke="#32C5FF" stroke-opacity=".09"/></pattern><filter id="shadow-01-vertical" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#071324" flood-opacity=".18"/></filter></defs>
+  <rect width="1080" height="1350" fill="url(#bg-01-vertical)"/>
+  <rect width="1080" height="1350" fill="url(#pat-01-vertical)"/>
+  <text x="965" y="118" text-anchor="middle" fill="#F7F9FC" fill-opacity=".09" font-family="'JetBrains Mono', monospace" font-size="104" font-weight="700">01</text>
+  <g transform="translate(72 52) scale(1)">
+    <path d="M0 13H16M16 13L29 0M16 13L29 26" fill="none" stroke="#F7F9FC" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="16" cy="13" r="4.6" fill="#C4F04D" stroke="#F7F9FC" stroke-width="2"/>
+    <circle cx="31" cy="-2" r="4.6" fill="#32C5FF"/>
+    <circle cx="31" cy="28" r="4.6" fill="#C4F04D"/>
+    <text x="47" y="21" fill="#F7F9FC" font-family="'Instrument Sans', Arial, sans-serif" font-size="22" font-weight="680" letter-spacing="-0.7">TradingLab</text>
+  </g>
+  <text x="72" y="126" fill="#C4F04D" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="650" letter-spacing="2.6">LABORATORIO DE DECISIONES</text>
+  <text x="72" y="205" fill="#F7F9FC" font-family="'Instrument Sans', Arial, sans-serif" font-size="80" font-weight="650" letter-spacing="-1.8"><tspan x="72" dy="0">Aprende antes</tspan><tspan x="72" dy="84" font-family="'Instrument Serif', Georgia, serif" font-style="italic" font-weight="400">de arriesgar.</tspan></text>
+  <text x="72" y="392" fill="#B8C5D6" font-family="'Instrument Sans', Arial, sans-serif" font-size="31" font-weight="430" letter-spacing="-0.25"><tspan x="72" dy="0">Ensaya una hipótesis. Define qué la invalidaría.</tspan><tspan x="72" dy="40">Revisa tu proceso con saldo DEMO.</tspan></text>
+  <g transform="translate(72 525) scale(1.56 1.3055555555555556)">
+    <rect x="4" y="4" width="592" height="352" rx="30" fill="#F7F9FC" fill-opacity=".07" stroke="#F7F9FC" stroke-opacity=".2" stroke-width="2"/>
+    <text x="34" y="46" fill="#B8C5D6" font-family="'JetBrains Mono', monospace" font-size="15" letter-spacing="2.4">MAPA DE ESCENARIOS / DEMO</text>
+    <path d="M70 184H244M244 184L390 92M244 184L390 276" fill="none" stroke="#F7F9FC" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="244" cy="184" r="25" fill="#185ADB" stroke="#F7F9FC" stroke-width="8"/>
+    <circle cx="404" cy="83" r="24" fill="#32C5FF"/><circle cx="404" cy="285" r="24" fill="#C4F04D"/>
+    <rect x="438" y="48" width="124" height="67" rx="18" fill="#32C5FF" fill-opacity=".14" stroke="#32C5FF" stroke-width="2"/>
+    <text x="500" y="74" text-anchor="middle" fill="#F7F9FC" font-family="'JetBrains Mono', monospace" font-size="12">ESCENARIO A</text>
+    <text x="500" y="97" text-anchor="middle" fill="#32C5FF" font-family="'Instrument Sans', Arial, sans-serif" font-size="17" font-weight="650">SE SOSTIENE</text>
+    <rect x="438" y="252" width="124" height="67" rx="18" fill="#C4F04D" fill-opacity=".12" stroke="#C4F04D" stroke-width="2"/>
+    <text x="500" y="278" text-anchor="middle" fill="#F7F9FC" font-family="'JetBrains Mono', monospace" font-size="12">ESCENARIO B</text>
+    <text x="500" y="301" text-anchor="middle" fill="#C4F04D" font-family="'Instrument Sans', Arial, sans-serif" font-size="17" font-weight="650">SE REVISA</text>
+    <text x="244" y="232" text-anchor="middle" fill="#B8C5D6" font-family="'JetBrains Mono', monospace" font-size="12">EVIDENCIA</text>
+  </g>
+  <g transform="translate(72 1095)"><rect width="333" height="62" rx="31" fill="#C4F04D"/><text x="166.5" y="39" text-anchor="middle" fill="#071324" font-family="'Instrument Sans', Arial, sans-serif" font-size="19" font-weight="680">Abrir simulador gratis</text></g>
+  <rect x="72" y="1257" width="936" height="46" rx="23" fill="#071324" fill-opacity=".96"/>
+  <text x="540" y="1288" text-anchor="middle" fill="#F7F9FC" font-family="'Instrument Sans', Arial, sans-serif" font-size="17" font-weight="560">Simulación educativa · Saldo DEMO sin valor monetario · No es asesoramiento financiero.</text>
+</svg>

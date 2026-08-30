@@ -7,7 +7,7 @@ import { subscriptionMetrics } from '@/lib/billing';
 import { PLAN_ENTITLEMENTS } from '@tl/types/plans';
 import { PLANS } from '@tl/types';
 import { Badge, Card } from '@tl/ui';
-import { formatDateTime, formatUsd } from '@/lib/format';
+import { formatCurrency, formatDateTime, formatUsd } from '@/lib/format';
 
 export const metadata: Metadata = { title: 'Suscripciones' };
 export const dynamic = 'force-dynamic';
@@ -33,14 +33,14 @@ export default async function AdminSubscriptionsPage() {
       <header>
         <h1 className="text-2xl font-semibold tracking-[-0.02em]">Suscripciones</h1>
         <p className="mt-1.5 text-[13px] text-[var(--color-muted)]">
-          Planes, ingresos recurrentes, pagos y cupones. Los pagos son idempotentes por clave y los webhooks no se
-          procesan dos veces.
+          Planes, valor mensualizado, pagos y cupones. Los pagos son idempotentes por clave y los webhooks no se
+          procesan dos veces. Wompi cobra un periodo por compra; no hay débito automático futuro.
         </p>
       </header>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat label="MRR" value={formatUsd(metrics.mrrUsd)} />
-        <Stat label="ARR" value={formatUsd(metrics.arrUsd)} />
+        <Stat label="Valor mensualizado" value={formatUsd(metrics.mrrUsd)} />
+        <Stat label="Valor anualizado" value={formatUsd(metrics.arrUsd)} />
         <Stat label="Suscriptores" value={String(metrics.activePaying)} hint={`${metrics.trialing} en prueba`} />
         <Stat label="Churn 30 d" value={`${metrics.churnPercent} %`} hint={`ARPU ${formatUsd(metrics.arpuUsd)}`} />
       </div>
@@ -99,7 +99,7 @@ export default async function AdminSubscriptionsPage() {
               <th scope="col" className="px-4 py-2.5 text-left font-medium">Plan</th>
               <th scope="col" className="px-4 py-2.5 text-left font-medium">Periodicidad</th>
               <th scope="col" className="px-4 py-2.5 text-left font-medium">Estado</th>
-              <th scope="col" className="px-4 py-2.5 text-left font-medium">Renueva</th>
+              <th scope="col" className="px-4 py-2.5 text-left font-medium">Acceso hasta</th>
               <th scope="col" className="px-4 py-2.5 text-left font-medium">Cupón</th>
             </tr>
           </thead>
@@ -147,8 +147,8 @@ export default async function AdminSubscriptionsPage() {
             {payments.map((p) => (
               <li key={p.id} className="flex flex-wrap items-center gap-2 text-[12px]">
                 <span className="min-w-0 flex-1 truncate text-[var(--color-muted)]">{p.user.email}</span>
-                <span className="num">{formatUsd(p.amountCents / 100)}</span>
-                <Badge tone={p.status === 'SUCCEEDED' ? 'positive' : p.status === 'REFUNDED' ? 'gold' : 'negative'}>
+                <span className="num">{formatCurrency(p.amountCents / 100, p.currency)}</span>
+                <Badge tone={p.status === 'SUCCEEDED' ? 'positive' : ['REFUNDED', 'REVIEW_REQUIRED'].includes(p.status) ? 'gold' : 'negative'}>
                   {p.status}
                 </Badge>
               </li>

@@ -119,13 +119,15 @@ export const adEventSchema = z.object({
   page: z.string().max(120).default('/'),
 });
 
-export const subscribeSchema = z.object({
-  planId: z.enum(['STANDARD', 'PREMIUM']),
-  interval: z.enum(['MONTHLY', 'YEARLY']).default('MONTHLY'),
-  couponCode: z.string().max(40).optional(),
-  /** Clave de idempotencia generada por el cliente. */
-  idempotencyKey: z.string().min(8).max(80),
-});
+export const subscribeSchema = z
+  .object({
+    planId: z.enum(['STANDARD', 'PREMIUM']),
+    interval: z.enum(['MONTHLY', 'YEARLY']).default('MONTHLY'),
+    couponCode: z.string().trim().min(1).max(40).regex(/^[A-Za-z0-9_-]+$/).optional(),
+    /** Token de idempotencia generado por el cliente; nunca decide monto ni plan. */
+    idempotencyKey: z.string().trim().min(8).max(80).regex(/^[A-Za-z0-9_-]+$/),
+  })
+  .strict();
 
 export const supportTicketSchema = z.object({
   subject: z.string().trim().min(4).max(140),

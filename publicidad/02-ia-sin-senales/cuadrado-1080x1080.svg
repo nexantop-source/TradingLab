@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080" role="img" aria-labelledby="title-02-cuadrado desc-02-cuadrado">
+  <title id="title-02-cuadrado">IA para pensar. No para obedecer.</title>
+  <desc id="desc-02-cuadrado">Contexto, preguntas y límites visibles. Sin señales de compra o venta. Simulación educativa con saldo DEMO.</desc>
+  <metadata>TradingLab / concepto 02 / 1080x1080 / versión 1.0</metadata>
+  <defs><radialGradient id="bg-02-cuadrado" cx=".9" cy=".1" r="1"><stop stop-color="#DFF5FF"/><stop offset=".42" stop-color="#F7F9FC"/></radialGradient><pattern id="pat-02-cuadrado" width="32" height="32" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="2" fill="#185ADB" opacity=".08"/></pattern><filter id="shadow-02-cuadrado" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#071324" flood-opacity=".18"/></filter></defs>
+  <rect width="1080" height="1080" fill="url(#bg-02-cuadrado)"/>
+  <rect width="1080" height="1080" fill="url(#pat-02-cuadrado)"/>
+  <text x="965" y="118" text-anchor="middle" fill="#071324" fill-opacity=".09" font-family="'JetBrains Mono', monospace" font-size="104" font-weight="700">02</text>
+  <g transform="translate(72 52) scale(1)">
+    <path d="M0 13H16M16 13L29 0M16 13L29 26" fill="none" stroke="#071324" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="16" cy="13" r="4.6" fill="#185ADB" stroke="#071324" stroke-width="2"/>
+    <circle cx="31" cy="-2" r="4.6" fill="#32C5FF"/>
+    <circle cx="31" cy="28" r="4.6" fill="#C4F04D"/>
+    <text x="47" y="21" fill="#071324" font-family="'Instrument Sans', Arial, sans-serif" font-size="22" font-weight="680" letter-spacing="-0.7">TradingLab</text>
+  </g>
+  <text x="72" y="126" fill="#185ADB" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="650" letter-spacing="2.6">ASISTENTE EDUCATIVO</text>
+  <text x="72" y="180" fill="#071324" font-family="'Instrument Sans', Arial, sans-serif" font-size="72" font-weight="650" letter-spacing="-1.8"><tspan x="72" dy="0">IA para pensar.</tspan><tspan x="72" dy="76" font-family="'Instrument Serif', Georgia, serif" font-style="italic" font-weight="400">No para obedecer.</tspan></text>
+  <text x="72" y="350" fill="#5A6A80" font-family="'Instrument Sans', Arial, sans-serif" font-size="29" font-weight="430" letter-spacing="-0.25"><tspan x="72" dy="0">Contexto, preguntas y límites visibles.</tspan><tspan x="72" dy="38">Sin señales de compra o venta.</tspan></text>
+  <g transform="translate(72 445) scale(1.56 1)">
+    <rect x="18" y="10" width="564" height="340" rx="34" fill="#071324" filter="url(#shadow-02)"/>
+    <g transform="translate(42 34)"><rect width="86" height="34" rx="17" fill="#185ADB"/><text x="43" y="23" text-anchor="middle" fill="#F7F9FC" font-family="'JetBrains Mono', monospace" font-size="13">TL · IA</text><text x="106" y="23" fill="#9EB0C7" font-family="'Instrument Sans', Arial, sans-serif" font-size="16">Asistente educativo</text></g>
+    <g transform="translate(42 92)"><rect width="516" height="61" rx="17" fill="#10243E" stroke="#32C5FF" stroke-opacity=".45"/><text x="20" y="25" fill="#32C5FF" font-family="'JetBrains Mono', monospace" font-size="12">CONTEXTO</text><text x="20" y="47" fill="#F7F9FC" font-family="'Instrument Sans', Arial, sans-serif" font-size="17">¿Qué evidencia sostiene tu hipótesis?</text></g>
+    <g transform="translate(74 171)"><rect width="484" height="61" rx="17" fill="#F7F9FC"/><text x="20" y="25" fill="#185ADB" font-family="'JetBrains Mono', monospace" font-size="12">PREGUNTA</text><text x="20" y="47" fill="#071324" font-family="'Instrument Sans', Arial, sans-serif" font-size="17">¿Qué dato haría que la revisaras?</text></g>
+    <g transform="translate(42 250)"><rect width="516" height="61" rx="17" fill="#C4F04D"/><text x="20" y="25" fill="#071324" font-family="'JetBrains Mono', monospace" font-size="12">LÍMITE VISIBLE</text><text x="20" y="48" fill="#071324" font-family="'Instrument Sans', Arial, sans-serif" font-size="17" font-weight="650">Sin señal · Sin orden · Tú decides</text></g>
+  </g>
+  <g transform="translate(72 860)"><rect width="345.5" height="62" rx="31" fill="#185ADB"/><text x="172.75" y="39" text-anchor="middle" fill="#F7F9FC" font-family="'Instrument Sans', Arial, sans-serif" font-size="19" font-weight="680">Probar tutor contextual</text></g>
+  <rect x="72" y="991" width="936" height="46" rx="23" fill="#F7F9FC" fill-opacity=".96"/>
+  <text x="540" y="1022" text-anchor="middle" fill="#071324" font-family="'Instrument Sans', Arial, sans-serif" font-size="17" font-weight="560">Simulación educativa · Saldo DEMO sin valor monetario · No es asesoramiento financiero.</text>
+</svg>

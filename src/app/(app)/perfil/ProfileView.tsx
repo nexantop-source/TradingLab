@@ -8,10 +8,30 @@ import { VirtualBalance } from '@tl/ui/compliance';
 import { THEME_OPTIONS, useTheme } from '@tl/ui/ThemeProvider';
 import type { SessionUser, ThemeId } from '@tl/types';
 import { ASSET_CLASS_LABEL } from '@tl/types';
-import { apiFetch, ApiRequestError, idempotencyKey } from '@/lib/client-api';
-import { formatDateTime, formatUsd } from '@/lib/format';
+import { apiFetch, ApiRequestError } from '@/lib/client-api';
+import { formatCurrency, formatDateTime, formatPaymentDescription } from '@/lib/format';
+import { AdPrivacyControl } from '@/components/ads/AdPrivacy';
+
+const PAYMENT_STATUS_META = {
+  PENDING: { label: 'Pendiente', tone: 'blue' },
+  SUCCEEDED: { label: 'Confirmado', tone: 'positive' },
+  FAILED: { label: 'No aprobado', tone: 'negative' },
+  REFUNDED: { label: 'Anulado o reembolsado', tone: 'gold' },
+  SUPERSEDED: { label: 'Checkout vencido', tone: 'neutral' },
+  REVIEW_REQUIRED: { label: 'Revisión requerida', tone: 'gold' },
+} as const;
+
+function paymentStatusMeta(status: string) {
+  return (
+    PAYMENT_STATUS_META[status as keyof typeof PAYMENT_STATUS_META] ?? {
+      label: 'Estado por revisar',
+      tone: 'neutral' as const,
+    }
+  );
+}
 
 export function ProfileView({
+  checkoutTransactionId,
   user,
   profile,
   subscription,
@@ -23,6 +43,7 @@ export function ProfileView({
   payments,
   certificates,
 }: {
+  checkoutTransactionId?: string | null;
   user: SessionUser;
   profile: {
     theme: string;
@@ -56,7 +77,14 @@ export function ProfileView({
     yearlyDiscount: number;
   };
   sessions: Array<{ id: string; userAgent: string | null; createdAt: string; current: boolean }>;
-  payments: Array<{ id: string; amountCents: number; description: string; status: string; createdAt: string }>;
+  payments: Array<{
+    id: string;
+    amountCents: number;
+    currency: string;
+    description: string;
+    status: string;
+    createdAt: string;
+  }>;
   certificates: Array<{ id: string; trackTitle: string; verificationCode: string; verified: boolean; issuedAt: string }>;
 }) {
   const router = useRouter();
@@ -66,6 +94,7 @@ export function ProfileView({
   const [confirmReset, setConfirmReset] = React.useState(false);
   const [confirmCancel, setConfirmCancel] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
+  const paidPeriodActive = subscription != null;
 
   async function resetBalance() {
     setBusy(true);
@@ -106,23 +135,8 @@ export function ProfileView({
     }
   }
 
-  async function subscribe(planId: 'STANDARD' | 'PREMIUM', interval: 'MONTHLY' | 'YEARLY') {
-    setBusy(true);
-    try {
-      await apiFetch('/api/billing/subscribe', {
-        method: 'POST',
-        json: { planId, interval, idempotencyKey: idempotencyKey() },
-      });
-      setMessage({ tone: 'ok', text: `Tu plan ${planId} está activo.` });
-      router.refresh();
-    } catch (err) {
-      setMessage({
-        tone: 'error',
-        text: err instanceof ApiRequestError ? err.message : 'No se ha podido activar el plan.',
-      });
-    } finally {
-      setBusy(false);
-    }
+  function subscribe(planId: 'STANDARD' | 'PREMIUM', interval: 'MONTHLY' | 'YEARLY') {
+    router.push(`/pago?plan=${planId}&interval=${interval}`);
   }
 
   return (
@@ -137,6 +151,8 @@ export function ProfileView({
       {message && (
         <Callout tone={message.tone === 'ok' ? 'success' : 'danger'}>{message.text}</Callout>
       )}
+
+      {checkoutTransactionId && <PaymentReturnStatus transactionId={checkoutTransactionId} />}
 
       <Tabs
         ariaLabel="Secciones del perfil"
@@ -230,12 +246,12 @@ export function ProfileView({
                 {subscription ? (
                   <p className="mt-1 text-[13px] text-[var(--color-muted)]">
                     {subscription.status === 'TRIALING' ? 'En periodo de prueba' : 'Activo'} ·{' '}
-                    {subscription.interval === 'YEARLY' ? 'facturación anual' : 'facturación mensual'} · renueva el{' '}
+                    {subscription.interval === 'YEARLY' ? 'periodo anual' : 'periodo mensual'} · acceso hasta el{' '}
                     {formatDateTime(subscription.currentPeriodEnd, user.timezone)}
                   </p>
                 ) : (
                   <p className="mt-1 text-[13px] text-[var(--color-muted)]">
-                    Plan gratuito. Sin fecha de renovación ni cargos.
+                    Plan gratuito. Sin vencimiento ni cargos.
                   </p>
                 )}
               </div>
@@ -245,8 +261,8 @@ export function ProfileView({
             </div>
 
             {subscription?.cancelAtPeriodEnd && (
-              <Callout tone="warning" className="mt-4" title="Cancelación programada">
-                Tu suscripción no se renovará. Conservas el acceso hasta el{' '}
+              <Callout tone="warning" className="mt-4" title="Finalización al cierre del periodo">
+                No se comprará otro periodo de forma automática. Conservas el acceso hasta el{' '}
                 {formatDateTime(subscription.currentPeriodEnd, user.timezone)}.
               </Callout>
             )}
@@ -260,43 +276,57 @@ export function ProfileView({
 
           {user.plan !== 'PREMIUM' && (
             <Card className="p-5">
-              <h2 className="text-[14px] font-semibold">Mejorar de plan</h2>
+              <h2 className="text-[14px] font-semibold">
+                {paidPeriodActive ? 'Plan del siguiente periodo' : 'Mejorar de plan'}
+              </h2>
               <p className="mt-1 text-[13px] leading-relaxed text-[var(--color-muted)]">
                 La suscripción da acceso a contenido educativo y a herramientas de simulación. No otorga acceso a
                 mercados reales, no constituye una inversión y no genera rendimiento alguno.
               </p>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                {(['STANDARD', 'PREMIUM'] as const)
-                  .filter((p) => p !== user.plan)
-                  .map((p) => (
-                    <div key={p} className="rounded-[var(--radius-md)] border border-[var(--color-border)] p-4">
-                      <p className="text-[14px] font-semibold">{p === 'STANDARD' ? 'Standard' : 'Premium'}</p>
-                      <p className="num mt-1 text-[13px] text-[var(--color-muted)]">
-                        USD {p === 'STANDARD' ? '14,99' : '29,99'} al mes
-                      </p>
-                      <div className="mt-3 space-y-2">
-                        <Button size="sm" fullWidth loading={busy} onClick={() => subscribe(p, 'MONTHLY')}>
-                          Activar mensual
-                        </Button>
-                        <Button
-                          size="sm"
-                          fullWidth
-                          variant="secondary"
-                          loading={busy}
-                          onClick={() => subscribe(p, 'YEARLY')}
-                        >
-                          Activar anual
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-              <p className="mt-3 text-[11px] text-[var(--color-subtle)]">
-                En este entorno la pasarela funciona en modo de demostración: no se realiza ningún cargo real.{' '}
-                <Link href="/precios" className="underline">
-                  Ver comparación completa
-                </Link>
-              </p>
+              {paidPeriodActive ? (
+                <Callout tone="info" className="mt-4" title="Sin compras superpuestas">
+                  Para evitar un doble cobro, podrás elegir el siguiente plan cuando termine el periodo vigente.{' '}
+                  <Link href="/precios" className="underline">
+                    Comparar planes
+                  </Link>
+                  .
+                </Callout>
+              ) : (
+                <>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    {(['STANDARD', 'PREMIUM'] as const)
+                      .filter((p) => p !== user.plan)
+                      .map((p) => (
+                        <div key={p} className="rounded-[var(--radius-md)] border border-[var(--color-border)] p-4">
+                          <p className="text-[14px] font-semibold">{p === 'STANDARD' ? 'Standard' : 'Premium'}</p>
+                          <p className="num mt-1 text-[13px] text-[var(--color-muted)]">
+                            USD {p === 'STANDARD' ? '14,99' : '29,99'} al mes
+                          </p>
+                          <div className="mt-3 space-y-2">
+                            <Button size="sm" fullWidth onClick={() => subscribe(p, 'MONTHLY')}>
+                              Revisar mensual
+                            </Button>
+                            <Button
+                              size="sm"
+                              fullWidth
+                              variant="secondary"
+                              onClick={() => subscribe(p, 'YEARLY')}
+                            >
+                              Revisar anual
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                  <p className="mt-3 text-[11px] text-[var(--color-subtle)]">
+                    El importe final se muestra en COP antes de abrir el checkout de Wompi. Ningún retorno del
+                    navegador activa el plan por sí solo.{' '}
+                    <Link href="/precios" className="underline">
+                      Ver comparación completa
+                    </Link>
+                  </p>
+                </>
+              )}
             </Card>
           )}
 
@@ -306,18 +336,23 @@ export function ProfileView({
                 <h2 className="text-[14px] font-semibold">Historial de facturación</h2>
               </div>
               <ul className="divide-y divide-[var(--color-border)]">
-                {payments.map((p) => (
-                  <li key={p.id} className="flex items-center gap-3 px-5 py-3">
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-[13px]">{p.description}</span>
-                      <span className="block text-[11px] text-[var(--color-subtle)]">
-                        {formatDateTime(p.createdAt, user.timezone)}
+                {payments.map((p) => {
+                  const status = paymentStatusMeta(p.status);
+                  return (
+                    <li key={p.id} className="flex items-center gap-3 px-5 py-3">
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-[13px]">{formatPaymentDescription(p.description)}</span>
+                        <span className="block text-[11px] text-[var(--color-subtle)]">
+                          {formatDateTime(p.createdAt, user.timezone)}
+                        </span>
                       </span>
-                    </span>
-                    <span className="num text-[13px]">{formatUsd(p.amountCents / 100)}</span>
-                    <Badge tone={p.status === 'SUCCEEDED' ? 'positive' : 'gold'}>{p.status}</Badge>
-                  </li>
-                ))}
+                      <span className="num text-[13px]">
+                        {formatCurrency(p.amountCents / 100, p.currency)}
+                      </span>
+                      <Badge tone={status.tone}>{status.label}</Badge>
+                    </li>
+                  );
+                })}
               </ul>
             </Card>
           )}
@@ -440,6 +475,16 @@ export function ProfileView({
           </Card>
 
           <Card className="p-5">
+            <h2 className="text-[14px] font-semibold">Publicidad programática</h2>
+            <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--color-muted)]">
+              Google permanece apagado por defecto. Cuando el entorno esté aprobado y configurado, puedes aceptar o retirar aquí el permiso local sin afectar las funciones esenciales.
+            </p>
+            <div className="mt-4">
+              <AdPrivacyControl />
+            </div>
+          </Card>
+
+          <Card className="p-5">
             <h2 className="text-[14px] font-semibold">Tus datos</h2>
             <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--color-muted)]">
               Puedes exportar toda tu información o solicitar la eliminación de tu cuenta. La eliminación borra o
@@ -500,7 +545,7 @@ export function ProfileView({
         open={confirmCancel}
         onClose={() => setConfirmCancel(false)}
         title="Cancelar tu suscripción"
-        description="La cancelación es inmediata y no requiere contactar con soporte."
+        description="La solicitud se completa en un paso y no requiere contactar con soporte."
         footer={
           <>
             <Button variant="secondary" onClick={() => setConfirmCancel(false)}>
@@ -513,11 +558,126 @@ export function ProfileView({
         }
       >
         <p className="text-[13px] leading-relaxed text-[var(--color-muted)]">
-          Conservarás el acceso a las funciones de tu plan hasta el final del periodo que ya has abonado. No se
-          realizará ningún cargo adicional y no perderás tu historial educativo, tu diario ni tus certificados.
+          Conservarás el acceso a las funciones de tu plan hasta el final del periodo que ya has abonado. No existe
+          un cobro automático futuro y no perderás tu historial educativo, tu diario ni tus certificados.
         </p>
       </Modal>
     </div>
+  );
+}
+
+function PaymentReturnStatus({ transactionId }: { transactionId: string }) {
+  const router = useRouter();
+  const [state, setState] = React.useState<{
+    loading: boolean;
+    error: string | null;
+    transactionStatus?: string;
+    paymentStatus?: string;
+    planId?: string;
+    interval?: string;
+    amountInCents?: number;
+    currency?: string;
+    membershipActive?: boolean;
+    reviewRequired?: boolean;
+    pendingActivation?: boolean;
+  }>({ loading: true, error: null });
+
+  React.useEffect(() => {
+    let canceled = false;
+    let attempts = 0;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    async function verify() {
+      attempts += 1;
+      try {
+        const result = await apiFetch<Omit<typeof state, 'loading' | 'error'>>(
+          `/api/billing/status?id=${encodeURIComponent(transactionId)}`,
+        );
+        if (canceled) return;
+        setState({ ...result, loading: false, error: null });
+
+        if (
+          result.planId &&
+          result.interval &&
+          (
+            result.membershipActive ||
+            result.reviewRequired ||
+            ['DECLINED', 'ERROR', 'VOIDED'].includes(result.transactionStatus ?? '')
+          )
+        ) {
+          window.sessionStorage.removeItem(`tl-checkout:${result.planId}:${result.interval}`);
+        }
+
+        if ((result.transactionStatus === 'PENDING' || result.pendingActivation) && attempts < 6) {
+          timer = setTimeout(verify, 3000);
+        } else if (result.membershipActive) {
+          router.refresh();
+        }
+      } catch (error) {
+        if (canceled) return;
+        setState({
+          loading: false,
+          error: error instanceof ApiRequestError ? error.message : 'No pudimos consultar el estado del pago.',
+        });
+      }
+    }
+
+    void verify();
+    return () => {
+      canceled = true;
+      if (timer) clearTimeout(timer);
+    };
+  }, [router, transactionId]);
+
+  if (state.loading) {
+    return <Callout tone="info" title="Verificando con Wompi">Estamos consultando el estado de la transacción directamente en la pasarela.</Callout>;
+  }
+  if (state.error) return <Callout tone="danger" title="No pudimos verificar el pago">{state.error}</Callout>;
+
+  const status = state.transactionStatus ?? 'PENDING';
+  const amount = state.currency === 'COP' && state.amountInCents != null
+    ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(state.amountInCents / 100)
+    : null;
+
+  if (state.membershipActive) {
+    return (
+      <Callout tone="success" title={`Membresía ${state.planId ?? ''} activa`}>
+        Wompi confirmó la transacción{amount ? ` por ${amount}` : ''} y el webhook activó tu acceso. El evento no puede volver a extender el período si se repite.
+      </Callout>
+    );
+  }
+  if (state.reviewRequired) {
+    return (
+      <Callout tone="danger" title="Pago recibido; revisión requerida">
+        Wompi confirmó el cobro{amount ? ` por ${amount}` : ''}, pero detectamos otro periodo activo o un
+        checkout reemplazado. Por seguridad no modificamos tu membresía. No hagas otro pago y abre un caso en{' '}
+        <Link href="/soporte" className="font-semibold underline underline-offset-2">
+          soporte
+        </Link>
+        .
+      </Callout>
+    );
+  }
+  if (status === 'APPROVED' && state.pendingActivation) {
+    return (
+      <Callout tone="warning" title="Pago aprobado; activación en curso">
+        Wompi ya confirma el pago{amount ? ` por ${amount}` : ''}. Esperamos el evento firmado para activar el plan; recarga esta página en unos segundos si el estado no cambia.
+      </Callout>
+    );
+  }
+  if (status === 'PENDING') {
+    return <Callout tone="info" title="Pago pendiente">Wompi todavía procesa la transacción. No se activó ningún plan antes de la confirmación final.</Callout>;
+  }
+
+  return (
+    <Callout tone="danger" title="Pago no aprobado">
+      Wompi reporta el estado {status}. Tu membresía no fue activada y no confiamos en el retorno del navegador como prueba de pago.{' '}
+      {state.planId && state.interval && (
+        <Link href={`/pago?plan=${state.planId}&interval=${state.interval}`} className="font-semibold text-[var(--color-negative)] underline underline-offset-2">
+          Crear un nuevo intento
+        </Link>
+      )}
+    </Callout>
   );
 }
 

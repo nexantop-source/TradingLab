@@ -48,6 +48,23 @@ export function formatUsd(value: number, locale = 'es-ES'): string {
   return nf(locale, { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(value);
 }
 
+/** Importe monetario real. A diferencia del saldo DEMO, conserva la moneda del pago. */
+export function formatCurrency(value: number, currency: string, locale?: string): string {
+  const normalized = /^[A-Z]{3}$/.test(currency) ? currency : 'USD';
+  return nf(locale ?? (normalized === 'COP' ? 'es-CO' : 'es-ES'), {
+    style: 'currency',
+    currency: normalized,
+    maximumFractionDigits: normalized === 'COP' ? 0 : 2,
+  }).format(value);
+}
+
+/** Oculta metadatos de conciliación sin alterar el valor persistido. */
+export function formatPaymentDescription(description: string): string {
+  return description
+    .replace(/\s*\[tl:wompi:v1:(?:STANDARD|PREMIUM):(?:MONTHLY|YEARLY)\]\s*$/, '')
+    .trim();
+}
+
 /** Fecha y hora en la zona indicada. Se usa la zona del perfil del usuario. */
 export function formatDateTime(
   value: Date | string | number,

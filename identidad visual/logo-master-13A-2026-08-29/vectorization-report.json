@@ -1,0 +1,30 @@
+{
+  "source": "identidad visual\\refinamiento-logo-13-2026-08-29\\13A-core.png",
+  "threshold": 128,
+  "simplifyTolerance": 1.25,
+  "sourceDimensions": {
+    "width": 1254,
+    "height": 1254
+  },
+  "sourceBounds": {
+    "minX": 194,
+    "minY": 74,
+    "maxX": 1059,
+    "maxY": 1162
+  },
+  "componentAreas": {
+    "upper": 232323,
+    "lower": 231113
+  },
+  "pathPoints": {
+    "upper": 75,
+    "lower": 77
+  },
+  "normalizedViewBox": "0 0 1000 1000",
+  "palette": {
+    "ink": "#071324",
+    "blue": "#185ADB",
+    "paper": "#F7F9FC"
+  },
+  "note": "The master symbol contains two independently addressable plane paths for motion design."
+}

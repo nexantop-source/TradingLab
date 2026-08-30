@@ -470,24 +470,32 @@ export function PhilosophySection() {
   );
 }
 
-export function PricingSection({ compact = false }: { compact?: boolean }) {
+export function PricingSection({
+  compact = false,
+  showHeading = true,
+}: {
+  compact?: boolean;
+  showHeading?: boolean;
+}) {
   return (
     <section id="precios" className="marketing-band">
       <div className="mx-auto max-w-7xl px-5 py-28 sm:px-8">
-        <Reveal>
-          <SectionHeading
-            eyebrow="Planes"
-            title={
-              <>
-                Empieza sin fricción.{' '}
-                <span className="text-[var(--color-blue)]">Crece cuando estés listo.</span>
-              </>
-            }
-            description="Sin cargos ocultos, sin patrones oscuros y con cancelación en dos clics desde tu perfil."
-          />
-        </Reveal>
+        {showHeading && (
+          <Reveal>
+            <SectionHeading
+              eyebrow="Planes"
+              title={
+                <>
+                  Empieza sin fricción.{' '}
+                  <span className="text-[var(--color-blue)]">Crece cuando estés listo.</span>
+                </>
+              }
+              description="Sin cargos ocultos, sin patrones oscuros y con cancelación en dos clics desde tu perfil."
+            />
+          </Reveal>
+        )}
 
-        <Stagger className="mt-14 grid gap-3 lg:grid-cols-3">
+        <Stagger className={cn(showHeading && 'mt-14', 'grid gap-3 lg:grid-cols-3')}>
           {PLANS.map((id) => {
             const plan = PLAN_ENTITLEMENTS[id];
             const featured = id === 'STANDARD';
@@ -501,7 +509,7 @@ export function PricingSection({ compact = false }: { compact?: boolean }) {
                     featured && 'marketing-plan-featured',
                   )}
                 >
-                  {featured && <span className="marketing-plan-ribbon">El más elegido</span>}
+                  {featured && <span className="marketing-plan-ribbon">Recomendado</span>}
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="num text-[10px] uppercase tracking-[0.16em] text-[var(--color-subtle)]">{id}</p>
@@ -517,9 +525,14 @@ export function PricingSection({ compact = false }: { compact?: boolean }) {
                     {plan.priceMonthlyUsd > 0 && <span className="text-[12px] text-[var(--color-muted)]">/ mes</span>}
                   </div>
                   {plan.priceYearlyUsd > 0 && (
-                    <p className="mt-1 text-[11px] text-[var(--color-muted)]">
-                      o USD {plan.priceYearlyUsd} al año <span className="text-[var(--color-positive)]">({discount}% de descuento)</span>
-                    </p>
+                    <>
+                      <p className="mt-1 text-[11px] text-[var(--color-muted)]">
+                        o USD {plan.priceYearlyUsd} al año <span className="text-[var(--color-positive)]">({discount}% de descuento)</span>
+                      </p>
+                      <p className="mt-2 text-[10px] leading-relaxed text-[var(--color-subtle)]">
+                        Precio publicado de referencia. Antes de pagar verás el importe fijo firmado en COP.
+                      </p>
+                    </>
                   )}
                   <ul className="mt-7 flex-1 space-y-3">
                     {(compact ? plan.highlights.slice(0, 7) : plan.highlights).map((highlight) => (
@@ -529,12 +542,25 @@ export function PricingSection({ compact = false }: { compact?: boolean }) {
                       </li>
                     ))}
                   </ul>
-                  <Link href="/crear-cuenta" className="mt-8 block">
-                    <Button variant={featured ? 'primary' : 'secondary'} fullWidth>
-                      {id === 'FREE' ? 'Crear mi cuenta DEMO' : `Comenzar con ${plan.name}`}
-                      <ArrowRight className="size-3.5" aria-hidden="true" />
-                    </Button>
-                  </Link>
+                  <div className="mt-8 space-y-2">
+                    <Link
+                      href={id === 'FREE' ? '/crear-cuenta' : `/crear-cuenta?plan=${id}&interval=MONTHLY`}
+                      className="block"
+                    >
+                      <Button variant={featured ? 'primary' : 'secondary'} fullWidth>
+                        {id === 'FREE' ? 'Crear mi cuenta DEMO' : `Elegir ${plan.name} mensual`}
+                        <ArrowRight className="size-3.5" aria-hidden="true" />
+                      </Button>
+                    </Link>
+                    {id !== 'FREE' && (
+                      <Link
+                        href={`/crear-cuenta?plan=${id}&interval=YEARLY`}
+                        className="block rounded-[var(--radius-sm)] px-3 py-2 text-center text-[11px] font-semibold text-[var(--color-blue)] transition-colors hover:bg-[var(--color-blue-soft)]"
+                      >
+                        Elegir anual · ahorrar {discount}%
+                      </Link>
+                    )}
+                  </div>
                 </Card>
               </Lift>
             );
@@ -576,7 +602,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: '¿Qué incluye cada plan?',
-    a: 'Free incluye USD 10.000 virtuales, academia básica y simulaciones limitadas. Standard añade herramientas de riesgo, diario completo y estadísticas. Premium añade análisis avanzados, informes y cero publicidad.',
+    a: 'Free incluye USD 10.000 virtuales, academia básica, diario y simulaciones limitadas. Standard amplía la práctica, el historial, los indicadores y las estadísticas. Premium eleva el cupo del entrenador, conserva diez años de historial y elimina toda la publicidad.',
   },
 ] as const;
 
@@ -621,13 +647,13 @@ export function FinalCTA() {
           </p>
           <div className="mt-9 flex flex-wrap justify-center gap-3">
             <Link href="/crear-cuenta">
-              <Button size="lg" className="rounded-full px-7">
+              <Button size="lg" className="rounded-[12px] px-7">
                 Crear mi cuenta DEMO
                 <ArrowRight className="size-4" aria-hidden="true" />
               </Button>
             </Link>
             <Link href="/recursos">
-              <Button size="lg" variant="outline" className="rounded-full px-7">Explorar la academia</Button>
+              <Button size="lg" variant="outline" className="rounded-[12px] px-7">Explorar la academia</Button>
             </Link>
           </div>
         </Reveal>

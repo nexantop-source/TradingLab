@@ -1,72 +1,97 @@
 'use client';
 
 import * as React from 'react';
-import type { ServedAd } from '@tl/types';
+import type { PlanId, ServedAd } from '@tl/types';
 import { AD_SLOT_BY_CODE, isForbiddenSurface } from '@tl/ads';
 import { cn } from '@tl/ui';
+import { GoogleAdSlot } from '@/components/ads/GoogleAdSlot';
+import { HouseAd } from '@/components/ads/HouseAd';
 
-/**
- * Espacio publicitario.
- *
- * Garantías implementadas en el propio componente:
- *  · Reserva el alto declarado antes de pedir el anuncio, de modo que nunca
- *    se produce desplazamiento del contenido (CLS).
- *  · Si no hay anuncio, colapsa el espacio en lugar de dejar un hueco vacío.
- *  · La etiqueta «Publicidad» es parte del marcado y no se puede desactivar.
- *  · Se niega a renderizar en superficies prohibidas, incluso si alguien pasa
- *    el código de un emplazamiento por error.
- *  · Registra la impresión solo cuando el bloque entra realmente en pantalla,
- *    y la marca como visible tras un segundo continuo.
- */
-export function AdSlot({
-  code,
-  page,
-  topic,
-  className,
-}: {
+type SecureServedAd = ServedAd & { eventToken: string };
+
+export interface AdSlotProps {
   code: string;
   page: string;
   topic?: string;
   className?: string;
-}) {
+  /**
+   * Obligatorio para Google. La ausencia falla cerrada en ese proveedor para
+   * impedir que un usuario Premium provoque siquiera una petición externa.
+   */
+  plan?: PlanId;
+}
+/**
+ * Punto único de publicidad. El proveedor se decide al compilar con
+ * NEXT_PUBLIC_ADS_PROVIDER: `internal`, `google` u `off`.
+ */
+export function AdSlot(props: AdSlotProps) {
+  const provider = (process.env.NEXT_PUBLIC_ADS_PROVIDER ?? 'internal').trim().toLowerCase();
+  if (provider === 'off') return null;
+  if (provider === 'google') {
+    return <GoogleAdSlot code={props.code} page={props.page} plan={props.plan} className={props.className} />;
+  }
+  return <InternalAdSlot {...props} />;
+}
+
+function InternalAdSlot({ code, page, topic, className, plan }: AdSlotProps) {
   const descriptor = AD_SLOT_BY_CODE.get(code);
-  const [ad, setAd] = React.useState<ServedAd | null>(null);
-  const [state, setState] = React.useState<'loading' | 'filled' | 'empty'>('loading');
+  const [ad, setAd] = React.useState<SecureServedAd | null>(null);
+  const [state, setState] = React.useState<'idle' | 'loading' | 'filled' | 'empty'>('idle');
   const ref = React.useRef<HTMLDivElement>(null);
-  const reported = React.useRef(false);
+  const requested = React.useRef(false);
+  const impressionPromise = React.useRef<Promise<string | null> | null>(null);
+  const viewableReported = React.useRef(false);
 
-  const forbidden = !descriptor || isForbiddenSurface(descriptor.surface) || isForbiddenSurface(page);
+  const forbidden =
+    plan === 'PREMIUM' || !descriptor || isForbiddenSurface(descriptor.surface) || isForbiddenSurface(page);
 
+  // Pide inventario solo cuando el espacio está a 700 px del viewport.
   React.useEffect(() => {
-    if (forbidden) return;
-    let cancelled = false;
+    if (forbidden || !ref.current) return;
+    const element = ref.current;
+    const controller = new AbortController();
+    requested.current = false;
+    setAd(null);
+    setState('idle');
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting) || requested.current) return;
+        requested.current = true;
+        setState('loading');
 
-    const params = new URLSearchParams({ slot: code, page });
-    if (topic) params.set('topic', topic);
+        const params = new URLSearchParams({ slot: code, page });
+        if (topic) params.set('topic', topic);
 
-    fetch(`/api/ads/serve?${params}`)
-      .then((r) => r.json())
-      .then((json) => {
-        if (cancelled) return;
-        if (json?.ok && json.data?.ad) {
-          setAd(json.data.ad);
-          setState('filled');
-        } else {
-          setState('empty');
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setState('empty');
-      });
-
+        fetch(`/api/ads/serve?${params}`, { credentials: 'same-origin', signal: controller.signal })
+          .then((response) => response.json())
+          .then((json) => {
+            const served = json?.ok ? (json.data?.ad as SecureServedAd | null | undefined) : null;
+            if (served?.eventToken) {
+              setAd(served);
+              setState('filled');
+            } else {
+              setState('empty');
+            }
+          })
+          .catch(() => {
+            if (!controller.signal.aborted) setState('empty');
+          });
+        observer.disconnect();
+      },
+      { rootMargin: '700px 0px', threshold: 0 },
+    );
+    observer.observe(element);
     return () => {
-      cancelled = true;
+      controller.abort();
+      observer.disconnect();
     };
   }, [code, page, topic, forbidden]);
 
-  // Medición de impresión y viewability.
+  // Registra una sola impresión y asocia la viewability a esa fila exacta.
   React.useEffect(() => {
-    if (!ad || !ref.current || reported.current) return;
+    if (!ad || !ref.current) return;
+    impressionPromise.current = null;
+    viewableReported.current = false;
     const element = ref.current;
     let viewableTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -74,13 +99,17 @@ export function AdSlot({
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
-            if (!reported.current) {
-              reported.current = true;
-              void sendEvent('IMPRESSION', ad, code, page);
+            impressionPromise.current ??= sendEvent('IMPRESSION', ad, code, page).then(
+              (result) => result?.impressionId ?? null,
+            );
+            if (!viewableReported.current && !viewableTimer) {
+              viewableTimer = setTimeout(() => {
+                viewableReported.current = true;
+                void impressionPromise.current?.then((impressionId) => {
+                  if (impressionId) void sendEvent('VIEWABLE', ad, code, page, impressionId);
+                });
+              }, 1000);
             }
-            viewableTimer = setTimeout(() => {
-              void sendEvent('VIEWABLE', ad, code, page);
-            }, 1000);
           } else if (viewableTimer) {
             clearTimeout(viewableTimer);
             viewableTimer = null;
@@ -97,41 +126,47 @@ export function AdSlot({
     };
   }, [ad, code, page]);
 
-  if (forbidden) {
-    if (process.env.NODE_ENV === 'development') {
-      console.warn(`[AdSlot] Se ha intentado renderizar publicidad en una superficie prohibida: ${code} / ${page}`);
+  if (forbidden || !descriptor) {
+    if (process.env.NODE_ENV === 'development' && plan !== 'PREMIUM') {
+      console.warn(`[AdSlot] Publicidad bloqueada en superficie prohibida: ${code} / ${page}`);
     }
     return null;
   }
-
-  // Sin relleno: se colapsa. Un hueco vacío reservado es peor que no reservarlo.
-  if (state === 'empty') return null;
 
   return (
     <div
       ref={ref}
       className={cn('w-full', className)}
-      style={{ minHeight: state === 'loading' ? descriptor.reservedHeight : undefined }}
+      style={{ minHeight: descriptor.reservedHeight }}
       role="complementary"
       aria-label="Espacio publicitario"
+      data-ad-slot={code}
     >
-      {state === 'loading' && (
+      {(state === 'idle' || state === 'loading') && (
         <div
-          className="skeleton h-full w-full rounded-[var(--radius-md)]"
+          className="relative w-full overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-border)]"
           style={{ height: descriptor.reservedHeight }}
-        />
+        >
+          <span className="absolute left-3 top-2 z-10 text-[9px] font-semibold uppercase tracking-wider text-[var(--color-subtle)]">
+            Publicidad
+          </span>
+          <div className="skeleton size-full" aria-hidden="true" />
+        </div>
       )}
 
-      {ad && (
+      {state === 'empty' && <HouseAd code={code} minHeight={descriptor.reservedHeight} />}
+
+      {ad && state === 'filled' && (
         <a
           href={ad.destinationUrl}
           target="_blank"
           rel="noopener noreferrer sponsored"
           onClick={() => void sendEvent('CLICK', ad, code, page)}
           className={cn(
-            'group block rounded-[var(--radius-md)] border border-[var(--color-border)]',
+            'group flex flex-col justify-center rounded-[var(--radius-md)] border border-[var(--color-border)]',
             'bg-[var(--color-surface)] p-4 transition-colors hover:border-[var(--color-border-strong)]',
           )}
+          style={{ minHeight: descriptor.reservedHeight }}
         >
           <div className="flex items-center justify-between gap-2">
             <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-overlay)] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-[var(--color-subtle)]">
@@ -153,13 +188,33 @@ export function AdSlot({
   );
 }
 
-function sendEvent(type: 'IMPRESSION' | 'CLICK' | 'VIEWABLE', ad: ServedAd, slotCode: string, page: string) {
-  return fetch('/api/ads/event', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ creativeId: ad.creativeId, campaignId: ad.campaignId, slotCode, type, page }),
-    keepalive: true,
-  }).catch(() => {
-    /* La telemetría publicitaria nunca debe romper la experiencia. */
-  });
+async function sendEvent(
+  type: 'IMPRESSION' | 'CLICK' | 'VIEWABLE',
+  ad: SecureServedAd,
+  slotCode: string,
+  page: string,
+  impressionId?: string,
+): Promise<{ recorded: boolean; impressionId?: string } | null> {
+  try {
+    const response = await fetch('/api/ads/event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        creativeId: ad.creativeId,
+        campaignId: ad.campaignId,
+        slotCode,
+        type,
+        page,
+        eventToken: ad.eventToken,
+        impressionId,
+      }),
+      credentials: 'same-origin',
+      keepalive: true,
+    });
+    const json = await response.json();
+    return json?.ok ? json.data : null;
+  } catch {
+    // La telemetría publicitaria nunca debe romper la experiencia.
+    return null;
+  }
 }

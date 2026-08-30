@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
+  <title id="title">TradingLab — logo principal</title>
+  <desc id="desc">Símbolo de dos escenarios equilibrados junto al nombre TradingLab y la frase Criterio antes que certeza.</desc>
+  <g transform="translate(70 70)">
+    <rect width="220" height="220" rx="54" fill="#071324"/>
+    <path d="M45 110H104M104 110L157 58M104 110L157 162" fill="none" stroke="#F7F9FC" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="104" cy="110" r="17" fill="#185ADB" stroke="#F7F9FC" stroke-width="7"/>
+    <circle cx="163" cy="52" r="17" fill="#32C5FF"/>
+    <circle cx="163" cy="168" r="17" fill="#C4F04D"/>
+  </g>
+  <g transform="translate(350 95)">
+    <text x="0" y="93" fill="#071324" font-family="'Instrument Sans', Arial, sans-serif" font-size="104" font-weight="680" letter-spacing="-4">Trading</text>
+    <text x="392" y="93" fill="#185ADB" font-family="'Instrument Serif', Georgia, serif" font-size="108" font-style="italic">Lab</text>
+    <path d="M2 133H724" stroke="#DCE4EF" stroke-width="2"/>
+    <text x="2" y="179" fill="#5A6A80" font-family="'Instrument Sans', Arial, sans-serif" font-size="27" font-weight="600" letter-spacing="5">CRITERIO ANTES QUE CERTEZA</text>
+  </g>
+</svg>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1254" height="1254" viewBox="0 0 1254 1254">
+  <defs>
+    <clipPath id="upper-left">
+      <polygon points="0,0 1254,0 0,1254"/>
+    </clipPath>
+    <clipPath id="lower-right">
+      <polygon points="1254,1254 1254,0 0,1254"/>
+    </clipPath>
+    <filter id="ink" x="0" y="0" width="1254" height="1254" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-color="#071324" result="tone"/>
+      <feComposite in="tone" in2="SourceAlpha" operator="in"/>
+    </filter>
+    <filter id="blue" x="0" y="0" width="1254" height="1254" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-color="#185ADB" result="tone"/>
+      <feComposite in="tone" in2="SourceAlpha" operator="in"/>
+    </filter>
+  </defs>
+  <image href="13A-core.png" xlink:href="13A-core.png" width="1254" height="1254" clip-path="url(#upper-left)" filter="url(#ink)"/>
+  <image href="13A-core.png" xlink:href="13A-core.png" width="1254" height="1254" clip-path="url(#lower-right)" filter="url(#blue)"/>
+</svg>

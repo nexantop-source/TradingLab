@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350" role="img" aria-labelledby="title-03-vertical desc-03-vertical">
+  <title id="title-03-vertical">Aprende. Observa. Formula. Revisa.</title>
+  <desc id="desc-03-vertical">Convierte información dispersa en un proceso que puedes revisar. Simulación educativa con saldo DEMO.</desc>
+  <metadata>TradingLab / concepto 03 / 1080x1350 / versión 1.0</metadata>
+  <defs><linearGradient id="bg-03-vertical" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#185ADB"/><stop offset=".62" stop-color="#0D3B9A"/><stop offset="1" stop-color="#071324"/></linearGradient><pattern id="pat-03-vertical" width="52" height="52" patternUnits="userSpaceOnUse"><circle cx="26" cy="26" r="19" fill="none" stroke="#F7F9FC" stroke-opacity=".045"/></pattern><filter id="shadow-03-vertical" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#071324" flood-opacity=".18"/></filter></defs>
+  <rect width="1080" height="1350" fill="url(#bg-03-vertical)"/>
+  <rect width="1080" height="1350" fill="url(#pat-03-vertical)"/>
+  <text x="965" y="118" text-anchor="middle" fill="#F7F9FC" fill-opacity=".09" font-family="'JetBrains Mono', monospace" font-size="104" font-weight="700">03</text>
+  <g transform="translate(72 52) scale(1)">
+    <path d="M0 13H16M16 13L29 0M16 13L29 26" fill="none" stroke="#F7F9FC" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="16" cy="13" r="4.6" fill="#C4F04D" stroke="#F7F9FC" stroke-width="2"/>
+    <circle cx="31" cy="-2" r="4.6" fill="#32C5FF"/>
+    <circle cx="31" cy="28" r="4.6" fill="#C4F04D"/>
+    <text x="47" y="21" fill="#F7F9FC" font-family="'Instrument Sans', Arial, sans-serif" font-size="22" font-weight="680" letter-spacing="-0.7">TradingLab</text>
+  </g>
+  <text x="72" y="126" fill="#C4F04D" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="650" letter-spacing="2.6">UN PROCESO REPETIBLE</text>
+  <text x="72" y="205" fill="#F7F9FC" font-family="'Instrument Sans', Arial, sans-serif" font-size="80" font-weight="650" letter-spacing="-1.8"><tspan x="72" dy="0">Aprende. Observa.</tspan><tspan x="72" dy="84">Formula. Revisa.</tspan></text>
+  <text x="72" y="392" fill="#D6E6FF" font-family="'Instrument Sans', Arial, sans-serif" font-size="31" font-weight="430" letter-spacing="-0.25"><tspan x="72" dy="0">Convierte información dispersa</tspan><tspan x="72" dy="40">en un proceso que puedes revisar.</tspan></text>
+  <g transform="translate(72 525) scale(1.56 1.3055555555555556)">
+    <rect x="10" y="6" width="580" height="348" rx="34" fill="#071324" fill-opacity=".42" stroke="#F7F9FC" stroke-opacity=".16"/>
+    <circle cx="300" cy="180" r="112" fill="none" stroke="#F7F9FC" stroke-opacity=".22" stroke-width="20" stroke-dasharray="146 30"/>
+    <circle cx="300" cy="180" r="54" fill="#F7F9FC"/><text x="300" y="173" text-anchor="middle" fill="#185ADB" font-family="'JetBrains Mono', monospace" font-size="13">CRITERIO</text><text x="300" y="199" text-anchor="middle" fill="#071324" font-family="'Instrument Sans', Arial, sans-serif" font-size="20" font-weight="680">en práctica</text>
+    <g font-family="'Instrument Sans', Arial, sans-serif" text-anchor="middle">
+      <circle cx="300" cy="45" r="38" fill="#C4F04D"/><text x="300" y="42" fill="#071324" font-family="'JetBrains Mono', monospace" font-size="12">01</text><text x="300" y="61" fill="#071324" font-size="14" font-weight="680">Aprende</text>
+      <circle cx="443" cy="180" r="38" fill="#32C5FF"/><text x="443" y="177" fill="#071324" font-family="'JetBrains Mono', monospace" font-size="12">02</text><text x="443" y="196" fill="#071324" font-size="14" font-weight="680">Observa</text>
+      <circle cx="300" cy="315" r="38" fill="#F7F9FC"/><text x="300" y="312" fill="#185ADB" font-family="'JetBrains Mono', monospace" font-size="12">03</text><text x="300" y="331" fill="#071324" font-size="14" font-weight="680">Formula</text>
+      <circle cx="157" cy="180" r="38" fill="#185ADB" stroke="#F7F9FC" stroke-width="2"/><text x="157" y="177" fill="#F7F9FC" font-family="'JetBrains Mono', monospace" font-size="12">04</text><text x="157" y="196" fill="#F7F9FC" font-size="14" font-weight="680">Revisa</text>
+    </g>
+  </g>
+  <g transform="translate(72 1095)"><rect width="270.5" height="62" rx="31" fill="#C4F04D"/><text x="135.25" y="39" text-anchor="middle" fill="#071324" font-family="'Instrument Sans', Arial, sans-serif" font-size="19" font-weight="680">Explorar una ruta</text></g>
+  <rect x="72" y="1257" width="936" height="46" rx="23" fill="#071324" fill-opacity=".96"/>
+  <text x="540" y="1288" text-anchor="middle" fill="#F7F9FC" font-family="'Instrument Sans', Arial, sans-serif" font-size="17" font-weight="560">Simulación educativa · Saldo DEMO sin valor monetario · No es asesoramiento financiero.</text>
+</svg>

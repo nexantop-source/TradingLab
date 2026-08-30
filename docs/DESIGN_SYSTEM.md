@@ -2,12 +2,13 @@
 
 ## 1. Dirección visual
 
-La referencia no es una plataforma de trading: es un producto editorial serio con datos densos.
-Minimalismo financiero, fondos oscuros profundos, degradados mesh muy contenidos, superficies
-translúcidas con blur moderado, profundidad por sombra suave y jerarquía tipográfica fuerte.
+El concepto rector sigue siendo **«Criterio antes que certeza»**, expresado ahora con una dirección
+de producto silenciosa: tipografía de sistema protagonista, fondos neutros, superficies blancas,
+materiales translúcidos, grandes radios y movimiento mínimo. La inspiración es el nivel de claridad
+y jerarquía de Apple, sin copiar sus activos, componentes ni identidad.
 
-Lo que se evita deliberadamente: neón saturado, exceso de tarjetas y bordes, confeti, mecánicas de
-casino, cifras de usuarios inventadas y testimonios ficticios.
+Se eliminan rejillas decorativas, órbitas dominantes, neón saturado, exceso de bordes, confeti,
+mecánicas de casino, cifras de usuarios inventadas y testimonios ficticios.
 
 ## 2. Tokens
 
@@ -18,34 +19,35 @@ literales: siempre `var(--color-*)`.
 
 | Token | Oscuro | Claro | Uso |
 |---|---|---|---|
-| `--color-bg` | `#070A12` | `#F7F9FC` | Fondo de la aplicación |
-| `--color-surface` | `#0D1320` | `#FFFFFF` | Tarjetas y paneles |
-| `--color-elevated` | `#131B2B` | `#FFFFFF` | Modales, menús, elementos flotantes |
+| `--color-bg` | `#000000` | `#F5F5F7` | Fondo de la aplicación |
+| `--color-surface` | `#1C1C1E` | `#FFFFFF` | Tarjetas y paneles |
+| `--color-elevated` | `#242426` | `#FFFFFF` | Modales, menús, elementos flotantes |
 | `--color-border` | blanco 8 % | tinta 8 % | Separadores |
 | `--color-border-strong` | blanco 12 % | tinta 14 % | Bordes de control |
-| `--color-text` | `#F8FAFC` | `#0B1220` | Texto principal |
-| `--color-muted` | `#98A4B7` | `#55647C` | Texto secundario |
-| `--color-subtle` | `#64748B` | `#7B8AA1` | Texto terciario y metadatos |
-| `--color-blue` | `#5B8CFF` | `#2F62E8` | Acción primaria, enlaces |
-| `--color-violet` | `#8B5CF6` | `#7038D6` | Inteligencia artificial, gamificación |
-| `--color-positive` | `#20D6A2` | `#0F9F78` | Alcista, correcto |
-| `--color-negative` | `#FF6178` | `#D92B48` | Bajista, incorrecto |
-| `--color-gold` | `#F3B95F` | `#B47C19` | DEMO, advertencias, patrocinios |
+| `--color-text` | `#F5F5F7` | `#1D1D1F` | Texto principal |
+| `--color-muted` | `#A1A1A6` | `#6E6E73` | Texto secundario |
+| `--color-subtle` | `#86868B` | `#86868B` | Texto terciario y metadatos |
+| `--color-blue` | `#0A84FF` | `#0071E3` | Decisión y acción primaria |
+| `--color-violet` | `#7D7AFF` | `#5856D6` | Contexto y entrenador |
+| `--color-positive` | `#30D158` | `#16834B` | Estado correcto |
+| `--color-negative` | `#FF453A` | `#D70015` | Riesgo/error, siempre con texto o icono |
+| `--color-gold` | `#FFD60A` | `#9A6700` | DEMO y advertencias |
+| `--color-lime` | `#B7F34A` | `#547B00` | Acento educativo puntual |
 
 Cada color tiene su variante `-soft` para fondos, generada con opacidad. El modo de alto contraste
 sustituye todos los valores por una paleta de contraste reforzado sobre negro puro.
 
 ### Tipografía
 
-- **Instrument Sans** — toda la interfaz.
-- **Instrument Serif** — solo titulares editoriales de la landing, en cursiva, como acento.
+- **Tipografía de sistema** — `-apple-system`, `BlinkMacSystemFont`, SF Pro si está disponible e Instrument Sans como respaldo.
+- **Display sans** — la misma familia con mayor peso y tracking negativo; sin cursiva decorativa.
 - **JetBrains Mono** — precios, porcentajes, indicadores, identificadores y cualquier dato
   financiero. Se aplica con la utilidad `.num`, que además activa `tabular-nums` para que las
   columnas de cifras no bailen.
 
 ### Radios, sombras y curvas
 
-`--radius-xs` 6 px · `sm` 10 px · `md` 14 px · `lg` 20 px · `xl` 28 px.
+`--radius-xs` 10 px · `sm` 13 px · `md` 17 px · `lg` 22 px · `xl` 30 px.
 
 Tres sombras: `soft` (tarjetas), `lifted` (elementos flotantes), `glow-blue` (acción primaria). En
 alto contraste se sustituyen por bordes sólidos.
@@ -241,6 +243,6 @@ Objetivo: WCAG 2.1 AA.
 - La lista de seguimiento es deslizable.
 - Las tablas se convierten en tarjetas.
 - **Nunca coexisten dos barras de navegación**: la barra inferior desaparece en la terminal.
-- Los anuncios reservan su alto antes de solicitarse y se colapsan si no hay relleno; nunca cubren
-  controles.
+- Los anuncios reservan su alto antes de solicitarse y muestran contenido propio contextual si no
+  hay relleno; nunca cubren controles.
 - PWA instalable con accesos directos a terminal, academia y diario.

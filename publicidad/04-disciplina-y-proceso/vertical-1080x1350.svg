@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350" role="img" aria-labelledby="title-04-vertical desc-04-vertical">
+  <title id="title-04-vertical">El método también se entrena.</title>
+  <desc id="desc-04-vertical">Checklist, diario y reglas antes de decidir. Simulación educativa con saldo DEMO.</desc>
+  <metadata>TradingLab / concepto 04 / 1080x1350 / versión 1.0</metadata>
+  <defs><linearGradient id="bg-04-vertical" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#FFFFFF"/><stop offset="1" stop-color="#EEF3F8"/></linearGradient><pattern id="pat-04-vertical" width="48" height="48" patternUnits="userSpaceOnUse"><path d="M0 47.5H48" stroke="#185ADB" stroke-opacity=".055"/></pattern><filter id="shadow-04-vertical" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#071324" flood-opacity=".18"/></filter></defs>
+  <rect width="1080" height="1350" fill="url(#bg-04-vertical)"/>
+  <rect width="1080" height="1350" fill="url(#pat-04-vertical)"/>
+  <text x="965" y="118" text-anchor="middle" fill="#071324" fill-opacity=".09" font-family="'JetBrains Mono', monospace" font-size="104" font-weight="700">04</text>
+  <g transform="translate(72 52) scale(1)">
+    <path d="M0 13H16M16 13L29 0M16 13L29 26" fill="none" stroke="#071324" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="16" cy="13" r="4.6" fill="#087A5B" stroke="#071324" stroke-width="2"/>
+    <circle cx="31" cy="-2" r="4.6" fill="#32C5FF"/>
+    <circle cx="31" cy="28" r="4.6" fill="#C4F04D"/>
+    <text x="47" y="21" fill="#071324" font-family="'Instrument Sans', Arial, sans-serif" font-size="22" font-weight="680" letter-spacing="-0.7">TradingLab</text>
+  </g>
+  <text x="72" y="126" fill="#087A5B" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="650" letter-spacing="2.6">DISCIPLINA, NO IMPULSO</text>
+  <text x="72" y="205" fill="#071324" font-family="'Instrument Sans', Arial, sans-serif" font-size="80" font-weight="650" letter-spacing="-1.8"><tspan x="72" dy="0">El método también</tspan><tspan x="72" dy="84">se entrena.</tspan></text>
+  <text x="72" y="392" fill="#5A6A80" font-family="'Instrument Sans', Arial, sans-serif" font-size="31" font-weight="430" letter-spacing="-0.25"><tspan x="72" dy="0">Checklist, diario y reglas</tspan><tspan x="72" dy="40">antes de decidir.</tspan></text>
+  <g transform="translate(72 525) scale(1.56 1.3055555555555556)">
+    <rect x="30" y="10" width="540" height="340" rx="28" fill="#FFFFFF" stroke="#DCE4EF" stroke-width="2" filter="url(#shadow-04)"/>
+    <rect x="30" y="10" width="100" height="340" rx="28" fill="#071324"/><path d="M130 10V350" stroke="#DCE4EF" stroke-width="2"/>
+    <text x="80" y="61" text-anchor="middle" fill="#C4F04D" font-family="'JetBrains Mono', monospace" font-size="16">04/04</text>
+    <text x="80" y="173" text-anchor="middle" fill="#F7F9FC" font-family="'Instrument Sans', Arial, sans-serif" font-size="15" font-weight="650" transform="rotate(-90 80 173)" letter-spacing="2.5">PROCESO VISIBLE</text>
+    <text x="164" y="55" fill="#071324" font-family="'Instrument Sans', Arial, sans-serif" font-size="22" font-weight="680">Checklist antes de decidir</text><text x="164" y="78" fill="#5A6A80" font-family="'JetBrains Mono', monospace" font-size="12">REGISTRO DEMO · HOY</text>
+    <g font-family="'Instrument Sans', Arial, sans-serif" font-size="18">
+      <rect x="164" y="112" width="28" height="28" rx="8" fill="#087A5B"/><path d="M172 126L180 134L190 119" fill="none" stroke="#F7F9FC" stroke-width="4" stroke-linecap="round"/><text x="210" y="133" fill="#071324">Hipótesis escrita</text>
+      <rect x="164" y="169" width="28" height="28" rx="8" fill="#087A5B"/><path d="M172 183L180 191L190 176" fill="none" stroke="#F7F9FC" stroke-width="4" stroke-linecap="round"/><text x="210" y="190" fill="#071324">Regla de invalidación</text>
+      <rect x="164" y="226" width="28" height="28" rx="8" fill="#F7F9FC" stroke="#8EA0B7" stroke-width="2"/><text x="210" y="247" fill="#071324">Revisión posterior</text>
+    </g>
+    <rect x="164" y="285" width="356" height="36" rx="18" fill="#EAF6F1"/><text x="184" y="309" fill="#087A5B" font-family="'JetBrains Mono', monospace" font-size="13">2/3 · EL PROCESO CONTINÚA</text>
+  </g>
+  <g transform="translate(72 1095)"><rect width="295.5" height="62" rx="31" fill="#087A5B"/><text x="147.75" y="39" text-anchor="middle" fill="#F7F9FC" font-family="'Instrument Sans', Arial, sans-serif" font-size="19" font-weight="680">Entrenar disciplina</text></g>
+  <rect x="72" y="1257" width="936" height="46" rx="23" fill="#F7F9FC" fill-opacity=".96"/>
+  <text x="540" y="1288" text-anchor="middle" fill="#071324" font-family="'Instrument Sans', Arial, sans-serif" font-size="17" font-weight="560">Simulación educativa · Saldo DEMO sin valor monetario · No es asesoramiento financiero.</text>
+</svg>

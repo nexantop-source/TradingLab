@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">TradingLab — favicon</title>
+  <desc id="desc">Bifurcación simplificada de dos escenarios.</desc>
+  <rect width="512" height="512" rx="128" fill="#071324"/>
+  <path d="M104 256H236M236 256L344 148M236 256L344 364" fill="none" stroke="#F7F9FC" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="356" cy="136" r="38" fill="#32C5FF"/>
+  <circle cx="356" cy="376" r="38" fill="#C4F04D"/>
+</svg>

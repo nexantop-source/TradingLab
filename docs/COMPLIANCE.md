@@ -161,10 +161,10 @@ operaciones impulsivas obtiene una puntuación de disciplina **baja**.
 
 - Cancelación en un paso desde el perfil, sin encuestas obligatorias ni necesidad de contactar con
   soporte.
-- Aviso antes de cada renovación.
+- Aviso antes del vencimiento para que la compra del siguiente periodo sea una decisión explícita.
 - Sin cargos ocultos ni patrones oscuros.
 - Descuento anual visible en porcentaje junto al precio.
-- Prueba de Premium de siete días, una vez por cuenta, sin promesas de resultados.
+- La prueba de Premium solo existe en el proveedor `mock` de desarrollo; Wompi no activa acceso sin pago aprobado.
 - El acceso se conserva hasta el final del periodo abonado tras cancelar.
 - Cancelar no borra historial, diario, certificados ni insignias.
 

@@ -1,0 +1,22 @@
+:root {
+  --tl-deep-ink: #1d1d1f;
+  --tl-paper: #f5f5f7;
+  --tl-surface: #ffffff;
+  --tl-decision-blue: #0071e3;
+  --tl-lab-cyan: #56b4ff;
+  --tl-signal-lime: #547b00;
+  --tl-slate: #6e6e73;
+  --tl-success: #16834b;
+  --tl-risk: #d70015;
+  --tl-warning: #9a6700;
+  --tl-font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Instrument Sans", Arial, sans-serif;
+  --tl-font-serif: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Instrument Sans", Arial, sans-serif;
+  --tl-font-mono: "JetBrains Mono", Consolas, monospace;
+  --tl-radius-control: 17px;
+  --tl-radius-card: 22px;
+  --tl-radius-panel: 30px;
+  --tl-shadow-card: 0 1px 2px rgb(0 0 0 / 0.03), 0 12px 40px rgb(0 0 0 / 0.04);
+  --tl-motion-fast: 180ms;
+  --tl-motion-standard: 240ms;
+  --tl-ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+}

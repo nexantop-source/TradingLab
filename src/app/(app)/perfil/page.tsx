@@ -11,9 +11,18 @@ import { ProfileView } from './ProfileView';
 export const metadata: Metadata = { title: 'Perfil y ajustes' };
 export const dynamic = 'force-dynamic';
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ checkout?: string; id?: string }>;
+}) {
   const auth = await getAuth();
   if (!auth) redirect('/entrar');
+  const params = await searchParams;
+  const checkoutTransactionId =
+    params.checkout === 'wompi' && params.id && /^[A-Za-z0-9_-]{6,120}$/.test(params.id)
+      ? params.id
+      : null;
 
   const [profile, subscription, account, usage, sessions, payments, certificates] = await Promise.all([
     db.profile.findUnique({ where: { userId: auth.user.id } }),
@@ -30,9 +39,16 @@ export default async function ProfilePage() {
   ]);
 
   const plan = entitlements(auth.user.plan);
+  const liveSubscription =
+    subscription &&
+    ['ACTIVE', 'TRIALING'].includes(subscription.status) &&
+    subscription.currentPeriodEnd > new Date()
+      ? subscription
+      : null;
 
   return (
     <ProfileView
+      checkoutTransactionId={checkoutTransactionId}
       user={auth.user}
       profile={{
         theme: profile?.theme ?? 'system',
@@ -45,15 +61,15 @@ export default async function ProfilePage() {
         riskKnowledgeScore: profile?.riskKnowledgeScore ?? 0,
       }}
       subscription={
-        subscription
+        liveSubscription
           ? {
-              planId: subscription.planId,
-              planName: subscription.plan.name,
-              status: subscription.status,
-              interval: subscription.interval,
-              currentPeriodEnd: subscription.currentPeriodEnd.toISOString(),
-              cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
-              trialEndsAt: subscription.trialEndsAt?.toISOString() ?? null,
+              planId: liveSubscription.planId,
+              planName: liveSubscription.plan.name,
+              status: liveSubscription.status,
+              interval: liveSubscription.interval,
+              currentPeriodEnd: liveSubscription.currentPeriodEnd.toISOString(),
+              cancelAtPeriodEnd: liveSubscription.cancelAtPeriodEnd,
+              trialEndsAt: liveSubscription.trialEndsAt?.toISOString() ?? null,
             }
           : null
       }
@@ -78,6 +94,7 @@ export default async function ProfilePage() {
       payments={payments.map((p) => ({
         id: p.id,
         amountCents: p.amountCents,
+        currency: p.currency,
         description: p.description,
         status: p.status,
         createdAt: p.createdAt.toISOString(),

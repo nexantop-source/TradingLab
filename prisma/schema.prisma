@@ -167,7 +167,7 @@ model Payment {
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   amountCents    Int
   currency       String   @default("USD")
-  status         String   @default("PENDING") // PENDING | SUCCEEDED | FAILED | REFUNDED
+    status         String   @default("PENDING") // PENDING | SUCCEEDED | FAILED | REFUNDED | SUPERSEDED | REVIEW_REQUIRED
   description    String
   /// Clave de idempotencia del webhook. Impide procesar dos veces el mismo evento.
   idempotencyKey String   @unique

@@ -402,7 +402,7 @@ export default async function DashboardPage() {
             )}
           </Card>
 
-          <AdSlot code="dashboard-side" page="dashboard" />
+          <AdSlot code="dashboard-side" page="dashboard" plan={auth.user.plan} />
 
           {/* Mercados observados */}
           <Card>
@@ -540,7 +540,7 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <AdSlot code="dashboard-banner" page="dashboard" />
+      <AdSlot code="dashboard-banner" page="dashboard" plan={auth.user.plan} />
     </div>
   );
 }

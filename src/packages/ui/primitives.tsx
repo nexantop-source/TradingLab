@@ -15,21 +15,21 @@ type ButtonSize = 'sm' | 'md' | 'lg';
 
 const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
   primary:
-    'bg-[var(--color-blue)] text-white hover:brightness-110 active:brightness-95 shadow-[var(--shadow-glow-blue)]',
+    'bg-[var(--color-blue)] text-white hover:bg-[var(--color-blue-hover)] active:scale-[0.985] shadow-[var(--shadow-button)]',
   secondary:
-    'bg-[var(--color-elevated)] text-[var(--color-text)] border border-[var(--color-border-strong)] hover:bg-[color-mix(in_srgb,var(--color-elevated)_80%,var(--color-text))]',
-  ghost: 'text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-overlay)]',
+    'bg-[var(--color-text)] text-[var(--color-bg)] hover:opacity-[0.88] active:scale-[0.985] shadow-[var(--shadow-button)]',
+  ghost: 'text-[var(--color-text)] hover:bg-[var(--color-overlay)] active:scale-[0.985]',
   outline:
-    'border border-[var(--color-border-strong)] text-[var(--color-text)] hover:border-[var(--color-blue)] hover:text-[var(--color-blue)]',
+    'border border-[var(--color-border-strong)] bg-[color-mix(in_srgb,var(--color-surface)_82%,transparent)] text-[var(--color-text)] hover:bg-[var(--color-overlay)] active:scale-[0.985]',
   positive: 'bg-[var(--color-positive)] text-[#04231b] hover:brightness-110 font-semibold',
   negative: 'bg-[var(--color-negative)] text-[#2a0710] hover:brightness-110 font-semibold',
   gold: 'bg-[var(--color-gold)] text-[#2a1c05] hover:brightness-110 font-semibold',
 };
 
 const BUTTON_SIZES: Record<ButtonSize, string> = {
-  sm: 'h-9 px-3.5 text-[13px] rounded-[var(--radius-sm)] gap-1.5',
-  md: 'h-11 px-5 text-sm rounded-[var(--radius-md)] gap-2',
-  lg: 'h-13 px-7 text-[15px] rounded-[var(--radius-md)] gap-2.5',
+  sm: 'h-9 px-4 text-[13px] rounded-full gap-1.5',
+  md: 'h-11 px-5 text-sm rounded-full gap-2',
+  lg: 'h-13 px-7 text-[15px] rounded-full gap-2.5',
 };
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -50,7 +50,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function 
       aria-busy={loading || undefined}
       className={cn(
         'inline-flex items-center justify-center font-medium whitespace-nowrap',
-        'transition-[background-color,border-color,color,filter,box-shadow] duration-200',
+        'transition-[background-color,border-color,color,filter,box-shadow,transform,opacity] duration-200 ease-[var(--ease-out-soft)]',
         'disabled:opacity-45 disabled:pointer-events-none select-none',
         BUTTON_VARIANTS[variant],
         BUTTON_SIZES[size],
@@ -84,7 +84,7 @@ export function Card({
   return (
     <div
       className={cn(
-        'rounded-[var(--radius-lg)] border border-[var(--color-border)] shadow-[var(--shadow-soft)]',
+        'rounded-[var(--radius-xl)] border border-[var(--color-border)] shadow-[var(--shadow-soft)]',
         elevated
           ? 'bg-[var(--color-elevated)] shadow-[var(--shadow-soft)]'
           : 'bg-[var(--color-surface)]',
@@ -188,7 +188,7 @@ export function Field({ label, htmlFor, hint, error, required, children, classNa
 }
 
 const FIELD_BASE =
-  'w-full rounded-[var(--radius-sm)] border border-[var(--color-border-strong)] bg-[var(--color-bg)] px-3.5 text-sm text-[var(--color-text)] placeholder:text-[var(--color-subtle)] transition-colors focus:border-[var(--color-blue)] disabled:opacity-50 aria-[invalid=true]:border-[var(--color-negative)]';
+  'w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-field)] px-4 text-sm text-[var(--color-text)] placeholder:text-[var(--color-subtle)] shadow-[inset_0_1px_0_rgb(255_255_255_/_0.04)] transition-[background-color,border-color,box-shadow] focus:border-[var(--color-blue)] focus:bg-[var(--color-surface)] focus:shadow-[0_0_0_4px_var(--color-blue-soft)] disabled:opacity-50 aria-[invalid=true]:border-[var(--color-negative)]';
 
 export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
   function Input({ className, ...props }, ref) {

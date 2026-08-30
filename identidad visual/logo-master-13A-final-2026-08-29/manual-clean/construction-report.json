@@ -1,0 +1,50 @@
+{
+  "geometry": "hand-authored rotationally balanced cubic Bezier construction",
+  "viewBox": "0 0 1000 1000",
+  "paths": 2,
+  "anchorsPerPlane": 14,
+  "curvesPerPlane": 4,
+  "centerDiamond": {
+    "top": [
+      500,
+      405
+    ],
+    "right": [
+      605,
+      500
+    ],
+    "bottom": [
+      500,
+      595
+    ],
+    "left": [
+      395,
+      500
+    ]
+  },
+  "microCenterDiamond": {
+    "top": [
+      500,
+      386
+    ],
+    "right": [
+      626,
+      500
+    ],
+    "bottom": [
+      500,
+      614
+    ],
+    "left": [
+      374,
+      500
+    ]
+  },
+  "connectorThickness": 18,
+  "palette": {
+    "ink": "#071324",
+    "blue": "#185ADB",
+    "paper": "#F7F9FC"
+  },
+  "pureVector": true
+}

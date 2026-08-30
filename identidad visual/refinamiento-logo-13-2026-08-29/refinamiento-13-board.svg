@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1920" height="1300" viewBox="0 0 1920 1300">
+  <defs>
+    <filter id="paper-tint" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feFlood flood-color="#F7F9FC" result="tone"/>
+      <feComposite in="tone" in2="SourceAlpha" operator="in"/>
+    </filter>
+  </defs>
+  <rect width="1920" height="1300" fill="#071324"/>
+  <text x="90" y="82" fill="#F7F9FC" font-family="Segoe UI, Arial, sans-serif" font-size="48" font-weight="700" letter-spacing="-1">TradingLab — refinamiento del concepto 13</text>
+  <text x="90" y="130" fill="#9AA7BA" font-family="Segoe UI, Arial, sans-serif" font-size="23">Evidence Fold · tres decisiones sobre el mismo ADN, no tres logos desconectados</text>
+  <rect x="90" y="162" width="1740" height="2" fill="#185ADB"/>
+
+  <g transform="translate(90 0)">
+    <rect x="0" y="205" width="540" height="985" rx="32" fill="#F7F9FC"/>
+    <rect x="28" y="231" width="162" height="38" rx="19" fill="#185ADB"/>
+    <text x="109" y="257" fill="#FFFFFF" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="1.2">RECOMENDADA</text>
+    <image x="83" y="270" width="374" height="374" href="13A-core.png" xlink:href="13A-core.png" preserveAspectRatio="xMidYMid meet"/>
+    <text x="42" y="694" fill="#071324" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="700">13A · Core</text>
+    <text x="42" y="731" fill="#526276" font-family="Segoe UI, Arial, sans-serif" font-size="20">La lectura más pura: dos planos</text>
+    <text x="42" y="759" fill="#526276" font-family="Segoe UI, Arial, sans-serif" font-size="20">revelan una decisión en negativo.</text>
+    <text x="42" y="813" fill="#071324" font-family="Segoe UI, Arial, sans-serif" font-size="44" font-weight="650" letter-spacing="-1">TradingLab</text>
+    <rect x="28" y="852" width="484" height="306" rx="24" fill="#071324"/>
+    <image x="60" y="903" width="128" height="128" href="13A-core.png" xlink:href="13A-core.png" preserveAspectRatio="xMidYMid meet" filter="url(#paper-tint)"/>
+    <text x="202" y="975" fill="#F7F9FC" font-family="Segoe UI, Arial, sans-serif" font-size="41" font-weight="650" letter-spacing="-1">TradingLab</text>
+    <text x="202" y="1010" fill="#93A1B5" font-family="Segoe UI, Arial, sans-serif" font-size="17">Práctica que construye criterio.</text>
+    <text x="60" y="1119" fill="#718096" font-family="Segoe UI, Arial, sans-serif" font-size="15">Prueba monocromática inversa</text>
+  </g>
+
+  <g transform="translate(690 0)">
+    <rect x="0" y="205" width="540" height="985" rx="32" fill="#F7F9FC"/>
+    <rect x="28" y="231" width="172" height="38" rx="19" fill="#071324"/>
+    <text x="114" y="257" fill="#F7F9FC" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="1.2">DIGITAL / MOTION</text>
+    <image x="83" y="270" width="374" height="374" href="13B-signal.png" xlink:href="13B-signal.png" preserveAspectRatio="xMidYMid meet"/>
+    <text x="42" y="694" fill="#071324" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="700">13B · Signal</text>
+    <text x="42" y="731" fill="#526276" font-family="Segoe UI, Arial, sans-serif" font-size="20">El rombo azul actúa como señal,</text>
+    <text x="42" y="759" fill="#526276" font-family="Segoe UI, Arial, sans-serif" font-size="20">pulso o confirmación del sistema.</text>
+    <text x="42" y="813" fill="#071324" font-family="Segoe UI, Arial, sans-serif" font-size="44" font-weight="650" letter-spacing="-1">TradingLab</text>
+    <rect x="28" y="852" width="484" height="306" rx="24" fill="#071324"/>
+    <image x="60" y="903" width="128" height="128" href="13B-signal.png" xlink:href="13B-signal.png" preserveAspectRatio="xMidYMid meet" filter="url(#paper-tint)"/>
+    <text x="202" y="975" fill="#F7F9FC" font-family="Segoe UI, Arial, sans-serif" font-size="41" font-weight="650" letter-spacing="-1">TradingLab</text>
+    <text x="202" y="1010" fill="#93A1B5" font-family="Segoe UI, Arial, sans-serif" font-size="17">Práctica que construye criterio.</text>
+    <text x="60" y="1119" fill="#718096" font-family="Segoe UI, Arial, sans-serif" font-size="15">Prueba monocromática inversa</text>
+  </g>
+
+  <g transform="translate(1290 0)">
+    <rect x="0" y="205" width="540" height="985" rx="32" fill="#F7F9FC"/>
+    <rect x="28" y="231" width="118" height="38" rx="19" fill="#071324"/>
+    <text x="87" y="257" fill="#F7F9FC" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="1.2">COLORWAY</text>
+    <image x="83" y="270" width="374" height="374" href="13C-duotone.png" xlink:href="13C-duotone.png" preserveAspectRatio="xMidYMid meet"/>
+    <text x="42" y="694" fill="#071324" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="700">13C · Duotone</text>
+    <text x="42" y="731" fill="#526276" font-family="Segoe UI, Arial, sans-serif" font-size="20">Misma geometría que Core, con</text>
+    <text x="42" y="759" fill="#526276" font-family="Segoe UI, Arial, sans-serif" font-size="20">el segundo plano en Decision Blue.</text>
+    <text x="42" y="813" fill="#071324" font-family="Segoe UI, Arial, sans-serif" font-size="44" font-weight="650" letter-spacing="-1">TradingLab</text>
+    <rect x="28" y="852" width="484" height="306" rx="24" fill="#071324"/>
+    <image x="60" y="903" width="128" height="128" href="13C-duotone.png" xlink:href="13C-duotone.png" preserveAspectRatio="xMidYMid meet" filter="url(#paper-tint)"/>
+    <text x="202" y="975" fill="#F7F9FC" font-family="Segoe UI, Arial, sans-serif" font-size="41" font-weight="650" letter-spacing="-1">TradingLab</text>
+    <text x="202" y="1010" fill="#93A1B5" font-family="Segoe UI, Arial, sans-serif" font-size="17">Práctica que construye criterio.</text>
+    <text x="60" y="1119" fill="#718096" font-family="Segoe UI, Arial, sans-serif" font-size="15">Prueba monocromática inversa</text>
+  </g>
+
+  <text x="90" y="1252" fill="#718096" font-family="Segoe UI, Arial, sans-serif" font-size="18">La tipografía es una prueba de lockup, no el wordmark definitivo.</text>
+  <text x="1830" y="1252" fill="#718096" text-anchor="end" font-family="Segoe UI, Arial, sans-serif" font-size="18">#071324 · #185ADB · #F7F9FC</text>
+</svg>

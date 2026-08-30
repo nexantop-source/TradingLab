@@ -49,7 +49,7 @@ export default async function CalendarPage() {
         .
       </Callout>
 
-      <AdSlot code="calendar-sponsor" page="calendar" />
+      <AdSlot code="calendar-sponsor" page="calendar" plan={auth.user.plan} />
 
       <div className="space-y-5">
         {Array.from(byDay.entries()).map(([day, dayEvents]) => (

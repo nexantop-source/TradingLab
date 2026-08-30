@@ -4,17 +4,24 @@ import { getAuth } from '@/lib/auth';
 import { OnboardingFlow } from './OnboardingFlow';
 import { ASSESSMENT, EDUCATIONAL_GOALS, WEEKLY_AVAILABILITY } from '@/content/assessment';
 import { TRACKS, trackStats } from '@/content/academy';
+import { checkoutPath, parseCheckoutIntent } from '@/lib/checkout-intent';
 
 export const metadata: Metadata = { title: 'Configuración inicial' };
 
-export default async function OnboardingPage() {
+export default async function OnboardingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ plan?: string; interval?: string }>;
+}) {
+  const intent = parseCheckoutIntent(await searchParams);
   const auth = await getAuth();
   if (!auth) redirect('/entrar');
-  if (auth.user.onboardingCompleted) redirect('/panel');
+  if (auth.user.onboardingCompleted) redirect(intent ? checkoutPath(intent) : '/panel');
 
   return (
     <OnboardingFlow
       userName={auth.user.name}
+      checkoutIntent={intent}
       questions={ASSESSMENT.map((q) => ({
         id: q.id,
         prompt: q.prompt,

@@ -4,7 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Check, ArrowLeft, ArrowRight, Lightbulb, Target, ListChecks, AlertTriangle } from 'lucide-react';
-import type { Candle, LessonBlock } from '@tl/types';
+import type { Candle, LessonBlock, PlanId } from '@tl/types';
 import { Badge, Button, Callout, Card, PriceChart, Progress, cn } from '@tl/ui';
 import { apiFetch, ApiRequestError } from '@/lib/client-api';
 import { AdSlot } from '@/components/AdSlot';
@@ -45,6 +45,7 @@ export function LessonView({
   chartData,
   previous,
   next,
+  plan,
 }: {
   lesson: {
     slug: string;
@@ -66,6 +67,7 @@ export function LessonView({
   chartData: Record<string, { candles: Candle[]; precision: number; name: string }>;
   previous: { slug: string; title: string } | null;
   next: { slug: string; title: string } | null;
+  plan: PlanId;
 }) {
   const router = useRouter();
   const [answers, setAnswers] = React.useState<number[]>(Array(quiz?.questions.length ?? 0).fill(-1));
@@ -300,7 +302,7 @@ export function LessonView({
         )}
       </section>
 
-      <AdSlot code="lesson-sponsor" page="lesson" topic={lesson.topic} className="mt-8" />
+      <AdSlot code="lesson-sponsor" page="lesson" topic={lesson.topic} plan={plan} className="mt-8" />
 
       {/* ── Navegación ────────────────────────────────────────────────── */}
       <nav aria-label="Lecciones" className="mt-8 flex flex-wrap gap-3 border-t border-[var(--color-border)] pt-6">

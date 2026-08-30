@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1600" viewBox="0 0 1600 1600" role="img" aria-labelledby="title desc">
+  <title id="title">TradingLab — exploración de símbolos, ronda 2</title>
+  <desc id="desc">Comparación de cuatro conceptos: Evidence Pebble, Practice Gate, TL Fold y The Second Look.</desc>
+  <rect width="1600" height="1600" fill="#071324"/>
+  <text x="80" y="86" fill="#F7F9FC" font-family="Instrument Sans, Arial, sans-serif" font-size="44" font-weight="650">TradingLab · Ronda 02</text>
+  <text x="80" y="132" fill="#A9B5C5" font-family="Instrument Sans, Arial, sans-serif" font-size="22">Silueta · espacio negativo · lectura a escala pequeña</text>
+
+  <g>
+    <rect x="80" y="180" width="700" height="620" rx="48" fill="#F7F9FC"/>
+    <image href="05-evidence-pebble.png" x="150" y="205" width="560" height="560" preserveAspectRatio="xMidYMid meet"/>
+    <text x="130" y="742" fill="#071324" font-family="Instrument Sans, Arial, sans-serif" font-size="28" font-weight="650">05 · Evidence Pebble</text>
+    <text x="130" y="774" fill="#5A6A80" font-family="Instrument Sans, Arial, sans-serif" font-size="18">Evidencia central · dos interpretaciones</text>
+  </g>
+
+  <g>
+    <rect x="820" y="180" width="700" height="620" rx="48" fill="#F7F9FC"/>
+    <image href="06-practice-gate.png" x="890" y="205" width="560" height="560" preserveAspectRatio="xMidYMid meet"/>
+    <text x="870" y="742" fill="#071324" font-family="Instrument Sans, Arial, sans-serif" font-size="28" font-weight="650">06 · Practice Gate</text>
+    <text x="870" y="774" fill="#5A6A80" font-family="Instrument Sans, Arial, sans-serif" font-size="18">Practicar antes del riesgo real</text>
+  </g>
+
+  <g>
+    <rect x="80" y="840" width="700" height="620" rx="48" fill="#F7F9FC"/>
+    <image href="07-tl-fold.png" x="150" y="865" width="560" height="560" preserveAspectRatio="xMidYMid meet"/>
+    <text x="130" y="1402" fill="#071324" font-family="Instrument Sans, Arial, sans-serif" font-size="28" font-weight="650">07 · TL Fold</text>
+    <text x="130" y="1434" fill="#5A6A80" font-family="Instrument Sans, Arial, sans-serif" font-size="18">T inmediata · L en segunda lectura</text>
+  </g>
+
+  <g>
+    <rect x="820" y="840" width="700" height="620" rx="48" fill="#F7F9FC"/>
+    <image href="08-the-second-look.png" x="890" y="865" width="560" height="560" preserveAspectRatio="xMidYMid meet"/>
+    <text x="870" y="1402" fill="#071324" font-family="Instrument Sans, Arial, sans-serif" font-size="28" font-weight="650">08 · The Second Look</text>
+    <text x="870" y="1434" fill="#5A6A80" font-family="Instrument Sans, Arial, sans-serif" font-size="18">Pausa · dos caminos equivalentes</text>
+  </g>
+
+  <text x="80" y="1532" fill="#A9B5C5" font-family="JetBrains Mono, Consolas, monospace" font-size="17">Exploración conceptual · no sustituye el master oficial</text>
+</svg>

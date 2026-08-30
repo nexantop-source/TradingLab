@@ -119,7 +119,7 @@ export default async function AcademyPage() {
         ))}
       </div>
 
-      <AdSlot code="academy-footer" page="academy" />
+      <AdSlot code="academy-footer" page="academy" plan={auth.user.plan} />
     </div>
   );
 }

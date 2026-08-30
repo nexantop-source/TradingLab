@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="220" viewBox="0 0 1000 220" role="img" aria-labelledby="title desc">
+  <title id="title">TradingLab — logo horizontal</title>
+  <desc id="desc">Símbolo de escenarios equilibrados y nombre TradingLab.</desc>
+  <g transform="translate(38 30)">
+    <rect width="160" height="160" rx="40" fill="#071324"/>
+    <path d="M31 80H75M75 80L115 42M75 80L115 118" fill="none" stroke="#F7F9FC" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="75" cy="80" r="13" fill="#185ADB" stroke="#F7F9FC" stroke-width="5"/>
+    <circle cx="120" cy="38" r="13" fill="#32C5FF"/>
+    <circle cx="120" cy="122" r="13" fill="#C4F04D"/>
+  </g>
+  <text x="244" y="139" fill="#071324" font-family="'Instrument Sans', Arial, sans-serif" font-size="104" font-weight="680" letter-spacing="-4">Trading</text>
+  <text x="636" y="139" fill="#185ADB" font-family="'Instrument Serif', Georgia, serif" font-size="108" font-style="italic">Lab</text>
+</svg>

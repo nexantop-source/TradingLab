@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
+  <title id="title">TradingLab — logotipo monocromo positivo</title>
+  <desc id="desc">Versión de una tinta Deep Ink para fondos claros.</desc>
+  <g transform="translate(74 76)" fill="none" stroke="#071324" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 104H116M116 104L196 24M116 104L196 184" stroke-width="22"/>
+    <circle cx="116" cy="104" r="24" fill="#071324" stroke-width="0"/>
+    <circle cx="202" cy="18" r="24" fill="#071324" stroke-width="0"/>
+    <circle cx="202" cy="190" r="24" fill="#071324" stroke-width="0"/>
+  </g>
+  <text x="350" y="215" fill="#071324" font-family="'Instrument Sans', Arial, sans-serif" font-size="122" font-weight="680" letter-spacing="-5">TradingLab</text>
+</svg>

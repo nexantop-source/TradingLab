@@ -3,15 +3,24 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { LoginForm } from './LoginForm';
 import { getAuth } from '@/lib/auth';
+import { checkoutPath, checkoutQuery, onboardingPath, parseCheckoutIntent } from '@/lib/checkout-intent';
 
 export const metadata: Metadata = {
   title: 'Iniciar sesión',
   description: 'Accede a tu cuenta educativa de TradingLab.',
 };
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ plan?: string; interval?: string }>;
+}) {
+  const intent = parseCheckoutIntent(await searchParams);
   const auth = await getAuth();
-  if (auth) redirect(auth.user.onboardingCompleted ? '/panel' : '/onboarding');
+  if (auth) {
+    if (auth.user.onboardingCompleted) redirect(intent ? checkoutPath(intent) : '/panel');
+    redirect(onboardingPath(intent));
+  }
 
   return (
     <div className="rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-[var(--color-surface)] p-7 shadow-[var(--shadow-soft)]">
@@ -20,11 +29,11 @@ export default async function LoginPage() {
         Continúa con tu ruta educativa y tu cuenta DEMO.
       </p>
 
-      <LoginForm />
+      <LoginForm intent={intent} />
 
       <p className="mt-6 border-t border-[var(--color-border)] pt-5 text-center text-[13px] text-[var(--color-muted)]">
         ¿Todavía no tienes cuenta?{' '}
-        <Link href="/crear-cuenta" className="font-medium text-[var(--color-blue)] hover:underline">
+        <Link href={`/crear-cuenta${checkoutQuery(intent)}`} className="font-medium text-[var(--color-blue)] hover:underline">
           Crea tu cuenta DEMO gratis
         </Link>
       </p>

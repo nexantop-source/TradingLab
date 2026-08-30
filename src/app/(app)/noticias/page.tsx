@@ -45,7 +45,7 @@ export default async function NewsPage() {
         ))}
       </div>
 
-      <AdSlot code="news-native" page="news" />
+      <AdSlot code="news-native" page="news" plan={auth.user.plan} />
     </div>
   );
 }

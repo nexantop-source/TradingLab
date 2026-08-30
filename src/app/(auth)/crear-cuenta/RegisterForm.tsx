@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button, Callout, Checkbox, Field, Input, Select } from '@tl/ui';
 import { apiFetch, ApiRequestError } from '@/lib/client-api';
+import { onboardingPath, type CheckoutIntent } from '@/lib/checkout-intent';
 
 /** Países con mayor presencia hispanohablante, más una entrada libre. */
 const COUNTRIES = [
@@ -31,7 +32,7 @@ const COUNTRIES = [
   { code: 'OT', name: 'Otro país' },
 ];
 
-export function RegisterForm() {
+export function RegisterForm({ intent = null }: { intent?: CheckoutIntent | null }) {
   const router = useRouter();
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -70,7 +71,7 @@ export function RegisterForm() {
           marketingOptIn: data.get('marketingOptIn') === 'on',
         },
       });
-      router.push('/onboarding');
+      router.push(onboardingPath(intent));
       router.refresh();
     } catch (err) {
       if (err instanceof ApiRequestError) {

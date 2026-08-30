@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { marketData, listProviders } from '@tl/market-data';
 import { isAIConfigured } from '@tl/ai';
 import { Badge, Card } from '@tl/ui';
+import { readWompiConfig, wompiAmountInCents } from '@/lib/wompi';
 
 export const metadata: Metadata = {
   title: 'Estado del servicio',
@@ -18,6 +19,21 @@ export default async function StatusPage() {
     message: 'No se ha podido comprobar el proveedor.',
   }));
 
+  const billingProvider = (process.env.BILLING_PROVIDER ?? 'disabled').trim().toLowerCase();
+  let billingOperational = false;
+  if (billingProvider === 'wompi') {
+    try {
+      readWompiConfig(process.env, { requireIntegrity: true, requireEvents: true });
+      wompiAmountInCents('STANDARD', 'MONTHLY');
+      wompiAmountInCents('STANDARD', 'YEARLY');
+      wompiAmountInCents('PREMIUM', 'MONTHLY');
+      wompiAmountInCents('PREMIUM', 'YEARLY');
+      const appUrl = new URL(process.env.NEXT_PUBLIC_APP_URL ?? '');
+      billingOperational = appUrl.protocol === 'https:';
+    } catch {
+      billingOperational = false;
+    }
+  }
   const components = [
     {
       name: 'Aplicación web',
@@ -43,11 +59,15 @@ export default async function StatusPage() {
     },
     {
       name: 'Suscripciones',
-      status: process.env.BILLING_PROVIDER === 'mock' ? ('degraded' as const) : ('ok' as const),
+      status: billingOperational ? ('ok' as const) : ('degraded' as const),
       detail:
-        process.env.BILLING_PROVIDER === 'mock'
-          ? 'Pasarela en modo de demostración: no se procesan cargos reales.'
-          : 'Pasarela de pagos operativa.',
+        billingProvider === 'mock'
+          ? 'Pasarela simulada de desarrollo: no se procesan cargos reales.'
+          : billingOperational
+            ? 'Wompi seleccionado y configuración local completa. La disponibilidad externa se confirma al pagar.'
+            : billingProvider === 'wompi'
+              ? 'Wompi está seleccionado, pero faltan credenciales, precios o una URL HTTPS válida.'
+            : 'Pagos deshabilitados de forma segura hasta completar la configuración de Wompi.',
     },
   ];
 

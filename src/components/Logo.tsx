@@ -1,11 +1,8 @@
 import { cn } from '@tl/ui';
 
 /**
- * Marca de TradingLab.
- *
- * Diseño original: un trazo ascendente escalonado que evoca progresión de
- * aprendizaje, no una vela de precios. Deliberadamente distinto de las marcas
- * de plataformas de trading existentes.
+ * Marca de TradingLab: una ventana limpia sobre el proceso de decisión.
+ * El trazo ascendente representa aprendizaje, no rentabilidad prometida.
  */
 export function Logo({
   size = 'md',
@@ -31,29 +28,25 @@ export function Logo({
         className="shrink-0"
       >
         <defs>
-          <linearGradient id="tl-logo-gradient" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="var(--color-blue)" />
-            <stop offset="55%" stopColor="var(--color-violet)" />
-            <stop offset="100%" stopColor="var(--color-positive)" />
+          <linearGradient id="tl-mark" x1="9" y1="55" x2="55" y2="8" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#0071E3" />
+            <stop offset="1" stopColor="#56B4FF" />
           </linearGradient>
         </defs>
-        <rect width="64" height="64" rx="16" fill="var(--color-elevated)" />
-        <rect x="0.5" y="0.5" width="63" height="63" rx="15.5" fill="none" stroke="var(--color-border-strong)" />
+        <rect width="64" height="64" rx="18" fill="url(#tl-mark)" />
+        <rect x="1" y="1" width="62" height="62" rx="17" fill="none" stroke="#FFFFFF4D" strokeWidth="2" />
         <path
-          d="M14 44 L24 34 L32 40 L50 20"
+          d="M15 42L27 31L36 37L49 20"
           fill="none"
-          stroke="url(#tl-logo-gradient)"
-          strokeWidth="4"
+          stroke="#FFFFFF"
+          strokeWidth="5.5"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
-        <circle cx="50" cy="20" r="4.5" fill="var(--color-positive)" />
-        <rect x="13" y="47" width="38" height="3" rx="1.5" fill="var(--color-border-strong)" />
+        <circle cx="49" cy="20" r="4.5" fill="#FFFFFF" />
       </svg>
       {withWordmark && (
-        <span className={cn('font-semibold tracking-[-0.02em]', text)}>
-          Trading<span className="text-[var(--color-muted)]">Lab</span>
-        </span>
+        <span className={cn('font-semibold tracking-[-0.045em]', text)}>TradingLab</span>
       )}
     </span>
   );

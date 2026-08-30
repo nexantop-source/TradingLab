@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000" role="img" aria-labelledby="title">
+  <title id="title">TradingLab 13A master symbol</title>
+  <path id="plane-upper" d="M180 390 C180 360 195 335 220 318 L548 100 C580 79 620 101 620 140 L620 300 C620 324 610 345 590 360 L500 405 L395 500 L240 615 C214 633 180 615 180 583 Z M500 405 L605 500 L617 491 L518 396 Z" fill="#071324"/>
+  <path id="plane-lower" d="M820 610 C820 640 805 665 780 682 L452 900 C420 921 380 899 380 860 L380 700 C380 676 390 655 410 640 L500 595 L605 500 L760 385 C786 367 820 385 820 417 Z M500 595 L395 500 L383 509 L482 604 Z" fill="#071324"/>
+</svg>

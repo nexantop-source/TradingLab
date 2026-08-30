@@ -137,7 +137,7 @@ export default async function ChallengesPage() {
         </ul>
       </section>
 
-      <AdSlot code="challenge-sponsor" page="challenges" />
+      <AdSlot code="challenge-sponsor" page="challenges" plan={auth.user.plan} />
 
       {/* Insignias */}
       <section>

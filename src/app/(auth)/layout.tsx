@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative min-h-dvh">
+    <div className="auth-shell relative min-h-dvh">
       <div aria-hidden="true" className="mesh-aurora absolute inset-0 -z-10 opacity-60" />
 
       <header className="px-5 py-6">

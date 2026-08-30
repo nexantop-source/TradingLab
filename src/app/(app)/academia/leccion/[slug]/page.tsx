@@ -113,6 +113,7 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
       chartData={chartData}
       previous={index > 0 ? siblings[index - 1] : null}
       next={index >= 0 && index < siblings.length - 1 ? siblings[index + 1] : null}
+      plan={auth.user.plan}
     />
   );
 }

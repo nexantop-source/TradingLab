@@ -16,8 +16,7 @@ const NAV = [
 ];
 
 /**
- * Cabecera pública flotante y translúcida.
- * Se compacta suavemente al desplazarse, sin saltos bruscos de altura.
+ * Cabecera pública de orientación: compacta, estable y centrada en tareas.
  */
 export function MarketingHeader({ authenticated = false }: { authenticated?: boolean }) {
   const [scrolled, setScrolled] = React.useState(false);
@@ -38,13 +37,13 @@ export function MarketingHeader({ authenticated = false }: { authenticated?: boo
   }, [open]);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-4 sm:pt-4">
+    <header className="fixed inset-x-0 top-0 z-50">
       <div
         className={cn(
-          'marketing-nav-shell mx-auto flex max-w-7xl items-center gap-4 rounded-full px-4 transition-all duration-300 ease-[var(--ease-out-soft)] sm:px-5',
+          'marketing-nav-shell mx-auto flex max-w-6xl items-center gap-4 px-5 transition-all duration-300 ease-[var(--ease-out-soft)] sm:px-8',
           scrolled
-            ? 'h-13 border border-[var(--color-border-strong)] bg-[color-mix(in_srgb,var(--color-surface)_86%,transparent)] shadow-[var(--shadow-soft)] backdrop-blur-xl'
-            : 'h-15 border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_48%,transparent)] backdrop-blur-md',
+            ? 'h-12 bg-[color-mix(in_srgb,var(--color-surface)_78%,transparent)] backdrop-blur-2xl'
+            : 'h-14 bg-[color-mix(in_srgb,var(--color-surface)_62%,transparent)] backdrop-blur-xl',
         )}
       >
         <Link href="/" className="shrink-0" aria-label="TradingLab, ir al inicio">
@@ -56,7 +55,7 @@ export function MarketingHeader({ authenticated = false }: { authenticated?: boo
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-full px-3 py-2 text-[12px] font-medium text-[var(--color-muted)] transition-colors hover:bg-[var(--color-overlay)] hover:text-[var(--color-text)]"
+              className="rounded-full px-3 py-2 text-[12px] font-medium text-[var(--color-text)] transition-opacity hover:opacity-55"
             >
               {item.label}
             </Link>
@@ -66,17 +65,17 @@ export function MarketingHeader({ authenticated = false }: { authenticated?: boo
         <div className="ml-auto flex items-center gap-2">
           {authenticated ? (
             <Link href="/panel">
-              <Button size="sm" className="rounded-full px-4">Ir a mi panel</Button>
+              <Button size="sm" className="rounded-[10px] px-4">Ir a mi panel</Button>
             </Link>
           ) : (
             <>
               <Link href="/entrar" className="hidden sm:block">
-                <Button variant="ghost" size="sm" className="rounded-full">
+                <Button variant="ghost" size="sm" className="rounded-[10px]">
                   Iniciar sesión
                 </Button>
               </Link>
               <Link href="/crear-cuenta">
-                <Button size="sm" className="rounded-full px-4">Crear DEMO</Button>
+                <Button size="sm" className="rounded-[10px] px-4">Crear cuenta DEMO</Button>
               </Link>
             </>
           )}
@@ -96,7 +95,7 @@ export function MarketingHeader({ authenticated = false }: { authenticated?: boo
       {open && (
         <div
           id="menu-movil"
-          className="animate-fade-up mx-auto mt-2 max-w-6xl rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-elevated)] p-3 shadow-[var(--shadow-lifted)] lg:hidden"
+          className="animate-fade-up mx-3 mt-2 rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_92%,transparent)] p-3 shadow-[var(--shadow-lifted)] backdrop-blur-2xl lg:hidden"
         >
           <nav aria-label="Navegación móvil" className="flex flex-col">
             {NAV.map((item) => (

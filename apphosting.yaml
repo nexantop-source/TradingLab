@@ -79,13 +79,30 @@ env:
 
   # ── Facturación y publicidad ───────────────────────────────────────────────
   - variable: BILLING_PROVIDER
-    value: mock
+    # Fail-closed: no activa planes hasta enlazar secretos Wompi y cambiarlo a wompi.
+    value: disabled
     availability:
       - RUNTIME
 
   - variable: ADS_PROVIDER
+    # Las campañas directas no facturan en producción hasta tener idempotencia
+    # persistente multi-instancia. El cliente conserva house ads de respaldo.
+    value: off
+    availability:
+      - RUNTIME
+
+  # Puerta cliente del proveedor. Google permanece desactivado hasta tener
+  # cuenta/dominio aprobados, CMP certificada, IDs reales y CSP con nonce.
+  - variable: NEXT_PUBLIC_ADS_PROVIDER
     value: internal
     availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_GOOGLE_ADS_ENABLED
+    value: "false"
+    availability:
+      - BUILD
       - RUNTIME
 
   - variable: EMAIL_PROVIDER

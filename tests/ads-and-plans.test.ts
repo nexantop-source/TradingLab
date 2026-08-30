@@ -234,7 +234,21 @@ describe('matriz de planes', () => {
     expect(premium.indicators.length).toBeGreaterThanOrEqual(standard.indicators.length);
     expect(standard.historyDays).toBeGreaterThan(free.historyDays);
     expect(premium.historyDays).toBeGreaterThan(standard.historyDays);
-    expect(premium.portfolios).toBeGreaterThan(standard.portfolios);
+    expect(premium.portfolios).toBeGreaterThanOrEqual(standard.portfolios);
+  });
+
+  it('no vende capacidades que todavía no existen de punta a punta', () => {
+    for (const id of PLANS) {
+      const features = PLAN_ENTITLEMENTS[id].features;
+      expect(features.backtesting).toBe('none');
+      expect(features.certificates).toBe('none');
+      expect(features.exportCsv).toBe(false);
+      expect(features.exportPdf).toBe(false);
+      expect(features.multiTimeframeAI).toBe(false);
+      expect(features.strategyComparison).toBe(false);
+      expect(features.privateTournaments).toBe(false);
+      expect(features.weeklyReports).toBe(false);
+    }
   });
 
   it('la comparación de planes es transitiva', () => {

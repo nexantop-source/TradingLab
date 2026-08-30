@@ -228,7 +228,8 @@ export function CoachView({
 
         {!multiTimeframe && kind === 'CHART_REVIEW' && (
           <p className="mt-3 text-[11px] leading-relaxed text-[var(--color-subtle)]">
-            El análisis multitemporal, que compara varias escalas a la vez, está incluido en el plan Premium.
+            Cada solicitud analiza una sola temporalidad. La comparación simultánea de varias escalas aún no está
+            disponible en ningún plan.
           </p>
         )}
       </Card>

@@ -1,0 +1,455 @@
+{
+  "brand": "TradingLab",
+  "officialSelection": "13A",
+  "generatedAt": "2026-08-30T04:47:47.167Z",
+  "source": "identidad visual/logo-master-13A-final-2026-08-29/manual-clean/tradinglab-symbol-master.svg",
+  "sourceSha256": "41dea71fcd588d3196d405c490b0ef8f44488a3e68ea2d45d75744fef43143b3",
+  "palette": {
+    "ink": "#071324",
+    "blue": "#185ADB",
+    "paper": "#F7F9FC",
+    "black": "#000000"
+  },
+  "input": {
+    "viewBox": [
+      0,
+      0,
+      1000,
+      1000
+    ],
+    "shapes": 2,
+    "paths": 2,
+    "estimatedAnchors": 26,
+    "curves": 8,
+    "embeddedImages": 0
+  },
+  "wordmark": {
+    "font": "Poppins SemiBold",
+    "source": "C:/Windows/Fonts/Poppins-SemiBold.ttf",
+    "glyphs": [
+      "T",
+      "r",
+      "a",
+      "d",
+      "i",
+      "n",
+      "g",
+      "L",
+      "a",
+      "b"
+    ],
+    "outlined": true,
+    "bounds": [
+      32,
+      -273,
+      5664,
+      784
+    ],
+    "advanceWidth": 5697
+  },
+  "exports": {
+    "transparentSymbolPngSizes": [
+      2048,
+      1024,
+      512,
+      256,
+      128,
+      64,
+      48,
+      32,
+      24,
+      16
+    ],
+    "avatarPngSizes": [
+      1024,
+      512,
+      256,
+      128,
+      64,
+      32
+    ],
+    "svgProductionValidation": [
+      {
+        "file": "tradinglab-symbol-master.svg",
+        "paths": 2,
+        "bytes": 916,
+        "hasText": false,
+        "hasImage": false
+      },
+      {
+        "file": "tradinglab-symbol-duotone.svg",
+        "paths": 2,
+        "bytes": 910,
+        "hasText": false,
+        "hasImage": false
+      },
+      {
+        "file": "tradinglab-symbol-black.svg",
+        "paths": 2,
+        "bytes": 908,
+        "hasText": false,
+        "hasImage": false
+      },
+      {
+        "file": "tradinglab-symbol-inverse.svg",
+        "paths": 2,
+        "bytes": 910,
+        "hasText": false,
+        "hasImage": false
+      },
+      {
+        "file": "tradinglab-lockup-horizontal.svg",
+        "paths": 3,
+        "bytes": 4192,
+        "hasText": false,
+        "hasImage": false
+      },
+      {
+        "file": "tradinglab-lockup-horizontal-inverse.svg",
+        "paths": 3,
+        "bytes": 4200,
+        "hasText": false,
+        "hasImage": false
+      },
+      {
+        "file": "tradinglab-lockup-stacked.svg",
+        "paths": 3,
+        "bytes": 4184,
+        "hasText": false,
+        "hasImage": false
+      },
+      {
+        "file": "tradinglab-lockup-stacked-inverse.svg",
+        "paths": 3,
+        "bytes": 4192,
+        "hasText": false,
+        "hasImage": false
+      },
+      {
+        "file": "tradinglab-avatar.svg",
+        "paths": 2,
+        "bytes": 952,
+        "hasText": false,
+        "hasImage": false
+      }
+    ],
+    "alphaSample": {
+      "file": "png/symbols/duotone/tradinglab-symbol-duotone-256.png",
+      "hasAlpha": true,
+      "alphaMin": 0,
+      "alphaMax": 255
+    }
+  },
+  "files": [
+    {
+      "file": "png/avatar/tradinglab-avatar-1024.png",
+      "bytes": 31189,
+      "sha256": "9ecba7b47af4dc8fd19098cbbb3fc4814f97e64491626c2c72e57f8fdcc09efb"
+    },
+    {
+      "file": "png/avatar/tradinglab-avatar-128.png",
+      "bytes": 3346,
+      "sha256": "ddde938ad83b9c4efbcb8989787a440a3e9de506bc73d728cab2131cc21b2773"
+    },
+    {
+      "file": "png/avatar/tradinglab-avatar-256.png",
+      "bytes": 6941,
+      "sha256": "e7f064d923461ff61819505bc3b25580d3d62b080ddbdf2a3269568aee3e39b4"
+    },
+    {
+      "file": "png/avatar/tradinglab-avatar-32.png",
+      "bytes": 855,
+      "sha256": "2c0c9eb2e8b4d96e9cbc8a2cd3f13c6398ecced93c6c68c1f613199f08de75c9"
+    },
+    {
+      "file": "png/avatar/tradinglab-avatar-512.png",
+      "bytes": 14528,
+      "sha256": "d51993aa956f062ee919a7116c64ae342cdedbcb64e58637eee6c0bf9bcf9e6d"
+    },
+    {
+      "file": "png/avatar/tradinglab-avatar-64.png",
+      "bytes": 1604,
+      "sha256": "7bc0a2f3c808c4db7d35acfdd63d7ec686dd4148df35dc7504e5d9406c0cedbc"
+    },
+    {
+      "file": "png/lockups/tradinglab-lockup-horizontal-1250.png",
+      "bytes": 23673,
+      "sha256": "3df959cc805c57a4f8b9c8f86174984b343a44e3f7e9938b358b56780150da45"
+    },
+    {
+      "file": "png/lockups/tradinglab-lockup-horizontal-2500.png",
+      "bytes": 49518,
+      "sha256": "f0e0af6f203c23725e6a335fdadd4cd8ce036ef4e5d26b1c577e3a88f02e629b"
+    },
+    {
+      "file": "png/lockups/tradinglab-lockup-horizontal-inverse-2500.png",
+      "bytes": 47585,
+      "sha256": "c672e7df5104f1d07f922ced78b5ebd6bcea8ab07a9b3876493f1bbb3f1970c9"
+    },
+    {
+      "file": "png/lockups/tradinglab-lockup-stacked-1200.png",
+      "bytes": 43022,
+      "sha256": "66cc849c036d85061dc59bc9c85d93f179a7af7e7901bd0639bcb95d76505782"
+    },
+    {
+      "file": "png/lockups/tradinglab-lockup-stacked-inverse-1200.png",
+      "bytes": 40970,
+      "sha256": "dfdac44b136f90de8732100018b2526cabd3bc505b0a75c846ce71eda3bc82f2"
+    },
+    {
+      "file": "png/symbols/black/tradinglab-symbol-black-1024.png",
+      "bytes": 19039,
+      "sha256": "a7b596f758fecdd6c844c412447c60e60a4c47ba4a4f93025cf89204828086a4"
+    },
+    {
+      "file": "png/symbols/black/tradinglab-symbol-black-128.png",
+      "bytes": 1616,
+      "sha256": "8deecf1f281b99d2047c1af46d129db87821b511e8aa7033c160289714bb241e"
+    },
+    {
+      "file": "png/symbols/black/tradinglab-symbol-black-16.png",
+      "bytes": 255,
+      "sha256": "b3cdf6582145c3db1a55de984934d27e483e8e50d9dab14c0e74708a5515f48c"
+    },
+    {
+      "file": "png/symbols/black/tradinglab-symbol-black-2048.png",
+      "bytes": 47108,
+      "sha256": "758612a31815086e754ab270a7e94d6831ecfe608ee42f9b3be51b1dbd66ae88"
+    },
+    {
+      "file": "png/symbols/black/tradinglab-symbol-black-24.png",
+      "bytes": 366,
+      "sha256": "d7cfb0d24ffae68737d5efb6e1ee8c16c6206b5464e0fa1fe5f1b0abb9892958"
+    },
+    {
+      "file": "png/symbols/black/tradinglab-symbol-black-256.png",
+      "bytes": 3335,
+      "sha256": "b1dbf36c55b6a05eaae9df260e79035af6a715b0587d38126dcb1aa7c32d33fa"
+    },
+    {
+      "file": "png/symbols/black/tradinglab-symbol-black-32.png",
+      "bytes": 446,
+      "sha256": "9e9757d06ae1126a67922063d0fb20a885032312fd3f7082f7bea460ac530199"
+    },
+    {
+      "file": "png/symbols/black/tradinglab-symbol-black-48.png",
+      "bytes": 628,
+      "sha256": "6284f6a8a058e54c850e48b70dd22b7c6ba62f712c98960293b668bcbeb2cb08"
+    },
+    {
+      "file": "png/symbols/black/tradinglab-symbol-black-512.png",
+      "bytes": 7716,
+      "sha256": "80fb927e07362ffa435acbfefc9591e0d65b7560de6014d1af54bcde735ec6be"
+    },
+    {
+      "file": "png/symbols/black/tradinglab-symbol-black-64.png",
+      "bytes": 848,
+      "sha256": "f62033db7f402648d29d5360b6c48858c6293cbd30a507f381e2f95b9070b29c"
+    },
+    {
+      "file": "png/symbols/duotone/tradinglab-symbol-duotone-1024.png",
+      "bytes": 27435,
+      "sha256": "e2fc421caa8d739796b47d9e47da2b02c894058789f2a105c40825cf590e74f8"
+    },
+    {
+      "file": "png/symbols/duotone/tradinglab-symbol-duotone-128.png",
+      "bytes": 2843,
+      "sha256": "27643836317bab94f8877ada460c0331a65fa05c8cb9b5c2540ad7da99e5d4e2"
+    },
+    {
+      "file": "png/symbols/duotone/tradinglab-symbol-duotone-16.png",
+      "bytes": 425,
+      "sha256": "82967f1f1e2b23814e5c2e5f31be9a975a53e81a280012f23917e30be37994a5"
+    },
+    {
+      "file": "png/symbols/duotone/tradinglab-symbol-duotone-2048.png",
+      "bytes": 63579,
+      "sha256": "4fe7d0ed6f852788ad0d917cc51c9acd9d80c1b8699ac5f99a806d69c3625af8"
+    },
+    {
+      "file": "png/symbols/duotone/tradinglab-symbol-duotone-24.png",
+      "bytes": 572,
+      "sha256": "3797778e3e5ab274da1f366e54b5e333892089c98687ee3b3fe9ceed74bb1662"
+    },
+    {
+      "file": "png/symbols/duotone/tradinglab-symbol-duotone-256.png",
+      "bytes": 5797,
+      "sha256": "9a9fe3400e86df003c129d564165ffee84ea6156c482a2ff14519994a37fc6c6"
+    },
+    {
+      "file": "png/symbols/duotone/tradinglab-symbol-duotone-32.png",
+      "bytes": 742,
+      "sha256": "9e1b06b8440045f982fa55fefef78ab065bc3f8fb87951204a108508ee848edd"
+    },
+    {
+      "file": "png/symbols/duotone/tradinglab-symbol-duotone-48.png",
+      "bytes": 1078,
+      "sha256": "0e4b82e9bc5a25efc8aed286c67e46d1670c226c1941c35da0f61867ef1caea3"
+    },
+    {
+      "file": "png/symbols/duotone/tradinglab-symbol-duotone-512.png",
+      "bytes": 12401,
+      "sha256": "310aa5bd7080ba20c8d6a254e93a1bd0096e96d3daa143e95ac1d3e26e28a470"
+    },
+    {
+      "file": "png/symbols/duotone/tradinglab-symbol-duotone-64.png",
+      "bytes": 1386,
+      "sha256": "b7896c091c3de64bc050ff21a515e26e17df0f91437c3298bdd98889b3c668c2"
+    },
+    {
+      "file": "png/symbols/inverse/tradinglab-symbol-inverse-1024.png",
+      "bytes": 25868,
+      "sha256": "f178e3158aa4fe9baa6aab43311b44bc6e0f52de4d9cc97a7e61895223b5ae5c"
+    },
+    {
+      "file": "png/symbols/inverse/tradinglab-symbol-inverse-128.png",
+      "bytes": 2610,
+      "sha256": "5d077e5c43cc1c913cb1ac22eb535fbf25fab0e77842fbf2c0bdbde55acf16ef"
+    },
+    {
+      "file": "png/symbols/inverse/tradinglab-symbol-inverse-16.png",
+      "bytes": 359,
+      "sha256": "1fdfef9a7ae8c2e481c339715dcbbe00baf9b7dad9f8366d8ffc5548dc826ca1"
+    },
+    {
+      "file": "png/symbols/inverse/tradinglab-symbol-inverse-2048.png",
+      "bytes": 60891,
+      "sha256": "f59ec73e6e2d2350063b295411c02f79f03e65721904853dde8a4f11de8ccbe5"
+    },
+    {
+      "file": "png/symbols/inverse/tradinglab-symbol-inverse-24.png",
+      "bytes": 511,
+      "sha256": "8b50076b1fca3e51e7228fd2c567d84c5b3e91118aeb02c003b5bf74094a0d41"
+    },
+    {
+      "file": "png/symbols/inverse/tradinglab-symbol-inverse-256.png",
+      "bytes": 5399,
+      "sha256": "638d1ea4971c949657fdca38db1584d035c9fd87d3a177598fc5ac6dd275299c"
+    },
+    {
+      "file": "png/symbols/inverse/tradinglab-symbol-inverse-32.png",
+      "bytes": 671,
+      "sha256": "62fa7788c0b6280672ffb90be79e1c492a7b272918308cf16833cd725ab9c707"
+    },
+    {
+      "file": "png/symbols/inverse/tradinglab-symbol-inverse-48.png",
+      "bytes": 968,
+      "sha256": "9ad2cc45ded8f576cf958d710baa27f23de75e583fceaeb0ec2cd85ad1ae1482"
+    },
+    {
+      "file": "png/symbols/inverse/tradinglab-symbol-inverse-512.png",
+      "bytes": 11609,
+      "sha256": "cb691d0f4c62c67371bce7c6cb13b68132d24cae4ab9943887f38939aeed01e8"
+    },
+    {
+      "file": "png/symbols/inverse/tradinglab-symbol-inverse-64.png",
+      "bytes": 1264,
+      "sha256": "2eeb15f68b852df2aa9b6f6f634d9dc6881f31582c13e109827e0d271a54d493"
+    },
+    {
+      "file": "png/symbols/master/tradinglab-symbol-master-1024.png",
+      "bytes": 26790,
+      "sha256": "ab78568463d15a4e600371187ff65b5103ae602e679592d39d64cd4f7d82bbd8"
+    },
+    {
+      "file": "png/symbols/master/tradinglab-symbol-master-128.png",
+      "bytes": 2763,
+      "sha256": "417d5f7219dc100fdb53462afd0f7be8cac853a9013f8d8b0851eb0cd43ae782"
+    },
+    {
+      "file": "png/symbols/master/tradinglab-symbol-master-16.png",
+      "bytes": 392,
+      "sha256": "db102b1d45d29115d7c0c2a84c7ec35a8de18014fe927a2408201dd705e5e820"
+    },
+    {
+      "file": "png/symbols/master/tradinglab-symbol-master-2048.png",
+      "bytes": 62277,
+      "sha256": "544e649213845a81ed140375b92f9c17bea470834402c7a250b5e2072f18e73c"
+    },
+    {
+      "file": "png/symbols/master/tradinglab-symbol-master-24.png",
+      "bytes": 544,
+      "sha256": "99a2dc4fb6434597df96db2d9788bdd249c158a4c77a4a633b8813ed4da3cf7c"
+    },
+    {
+      "file": "png/symbols/master/tradinglab-symbol-master-256.png",
+      "bytes": 5675,
+      "sha256": "e9fde2b22bf5de5df233d9888b4c03dcf19dd3ab61e04af322544bf52ffd3d89"
+    },
+    {
+      "file": "png/symbols/master/tradinglab-symbol-master-32.png",
+      "bytes": 709,
+      "sha256": "dc64560f140e9ade5d56124ad1e4c509adde90fda88edfd24517b525dfc4868a"
+    },
+    {
+      "file": "png/symbols/master/tradinglab-symbol-master-48.png",
+      "bytes": 1027,
+      "sha256": "69d406d6b14bd6b617c50642a3cb28175c9339f3ebcd886a0c12d68eef2c449e"
+    },
+    {
+      "file": "png/symbols/master/tradinglab-symbol-master-512.png",
+      "bytes": 12095,
+      "sha256": "315135ff9cd3a53b74d58584a7a59c7e2589a9ab803d6fd0ec6e7374ac9ccd54"
+    },
+    {
+      "file": "png/symbols/master/tradinglab-symbol-master-64.png",
+      "bytes": 1333,
+      "sha256": "9a25883abc2e80a7f53f2e7693b5bf7734a1d299c9cd66cec288fd9c6692392d"
+    },
+    {
+      "file": "qa/tradinglab-13A-qa.png",
+      "bytes": 206232,
+      "sha256": "402e4776ba5e632d8ca8ce59fe496cc68052a828b9a3683013ed68e950a487cf"
+    },
+    {
+      "file": "qa/tradinglab-13A-qa.svg",
+      "bytes": 19809,
+      "sha256": "09b7d3f87c7793d976b77d9bf4c925e0650f3685507ae9ca7360ca9ca7b4adc5"
+    },
+    {
+      "file": "svg/tradinglab-avatar.svg",
+      "bytes": 952,
+      "sha256": "2688443f734fa433531fc57e4dcb4b581cbe9a29faa2427fdd7c11934ea6d94a"
+    },
+    {
+      "file": "svg/tradinglab-lockup-horizontal-inverse.svg",
+      "bytes": 4200,
+      "sha256": "d147cd608ad724e61a5d1ff59d6a889bd913b395d649c01921ab5331bd5646e1"
+    },
+    {
+      "file": "svg/tradinglab-lockup-horizontal.svg",
+      "bytes": 4192,
+      "sha256": "24b99a1b3e6341299bf5ff2dc298d1cc1860b56edcf5e1bf3d48c64a3f4f7ff2"
+    },
+    {
+      "file": "svg/tradinglab-lockup-stacked-inverse.svg",
+      "bytes": 4192,
+      "sha256": "587fe5bb41878e945468f7b97a1d048e4e3140e0d25bbe7c957a7720e1a06644"
+    },
+    {
+      "file": "svg/tradinglab-lockup-stacked.svg",
+      "bytes": 4184,
+      "sha256": "d952c48dc632e40a56e06e631296e898f9eeb46603ea33e5338f8197d729afae"
+    },
+    {
+      "file": "svg/tradinglab-symbol-black.svg",
+      "bytes": 908,
+      "sha256": "f3b42b2390c31de42739db556cfedbaea43fd044fcd0295ee2253857cf43a25b"
+    },
+    {
+      "file": "svg/tradinglab-symbol-duotone.svg",
+      "bytes": 910,
+      "sha256": "18deced37b9bf3efa016e39fd486d99edc6ae3e093a3e19a0fab54ab7a427dd2"
+    },
+    {
+      "file": "svg/tradinglab-symbol-inverse.svg",
+      "bytes": 910,
+      "sha256": "edaad78a71fd3508c4c0da43e95578210ebafe0515a7eae02beb9a02e9e9263d"
+    },
+    {
+      "file": "svg/tradinglab-symbol-master.svg",
+      "bytes": 916,
+      "sha256": "c32ddc21c40e0a17fb35698402ff8bc442a4d6487afdc60114c4cb40442d765e"
+    }
+  ]
+}

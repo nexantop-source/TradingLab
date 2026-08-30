@@ -8,6 +8,7 @@ import { Badge, Button, Callout, Card, Progress, cn } from '@tl/ui';
 import { VirtualBalance } from '@tl/ui/compliance';
 import { ASSET_CLASSES, ASSET_CLASS_LABEL, type AssetClass } from '@tl/types';
 import { apiFetch, ApiRequestError } from '@/lib/client-api';
+import { checkoutPath, type CheckoutIntent } from '@/lib/checkout-intent';
 
 interface Question {
   id: string;
@@ -34,12 +35,14 @@ const STEPS: Step[] = ['bienvenida', 'intereses', 'objetivo', 'evaluacion', 'res
  */
 export function OnboardingFlow({
   userName,
+  checkoutIntent,
   questions,
   goals,
   availability,
   tracks,
 }: {
   userName: string;
+  checkoutIntent?: CheckoutIntent | null;
   questions: Question[];
   goals: Array<{ value: string; label: string }>;
   availability: Array<{ value: number; label: string }>;
@@ -356,23 +359,38 @@ export function OnboardingFlow({
               más útil cuando sabes qué estás mirando.
             </Callout>
 
+            {checkoutIntent && (
+              <Callout tone="success" className="mt-3" title="Tu plan está listo para revisar">
+                Tu cuenta DEMO ya funciona sin pagar. Si continúas, mostraremos el importe exacto de {checkoutIntent.plan === 'STANDARD' ? 'Standard' : 'Premium'} {checkoutIntent.interval === 'YEARLY' ? 'anual' : 'mensual'} en COP antes de abrir el checkout seguro de Wompi.
+              </Callout>
+            )}
+
             <div className="mt-6 flex flex-wrap gap-2">
-              <Link href={recommendedTrack ? `/academia/${recommendedTrack.slug}` : '/academia'} className="flex-1">
+              <Link
+                href={checkoutIntent ? checkoutPath(checkoutIntent) : recommendedTrack ? `/academia/${recommendedTrack.slug}` : '/academia'}
+                className="flex-1"
+              >
                 <Button fullWidth size="lg">
-                  Empezar mi ruta
+                  {checkoutIntent ? `Revisar ${checkoutIntent.plan === 'STANDARD' ? 'Standard' : 'Premium'} y pagar` : 'Empezar mi ruta'}
                   <ArrowRight className="size-4" aria-hidden="true" />
                 </Button>
               </Link>
-              <Button
-                variant="secondary"
-                size="lg"
-                onClick={() => {
-                  router.push('/panel');
-                  router.refresh();
-                }}
-              >
-                Ir al panel
-              </Button>
+              {checkoutIntent && recommendedTrack ? (
+                <Link href={`/academia/${recommendedTrack.slug}`}>
+                  <Button variant="secondary" size="lg">Empezar mi ruta gratis</Button>
+                </Link>
+              ) : (
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  onClick={() => {
+                    router.push('/panel');
+                    router.refresh();
+                  }}
+                >
+                  Ir al panel
+                </Button>
+              )}
             </div>
           </Card>
 
