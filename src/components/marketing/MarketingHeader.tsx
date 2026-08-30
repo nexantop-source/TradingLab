@@ -7,11 +7,8 @@ import { Logo } from '@/components/Logo';
 import { Button, cn } from '@tl/ui';
 
 const NAV = [
-  { href: '/#como-funciona', label: 'El ciclo' },
-  { href: '/#entrenador-ia', label: 'Entrenador IA' },
-  // La academia completa exige cuenta; la vista pública vive en /recursos.
-  { href: '/recursos', label: 'Academia' },
-  { href: '/mercados', label: 'Mercados' },
+  { href: '/#producto', label: 'Producto' },
+  { href: '/#metodo', label: 'Método' },
   { href: '/precios', label: 'Precios' },
 ];
 
@@ -75,7 +72,7 @@ export function MarketingHeader({ authenticated = false }: { authenticated?: boo
                 </Button>
               </Link>
               <Link href="/crear-cuenta">
-                <Button size="sm" className="rounded-[10px] px-4">Crear cuenta DEMO</Button>
+                <Button size="sm" className="rounded-[10px] px-4">Empezar gratis</Button>
               </Link>
             </>
           )}

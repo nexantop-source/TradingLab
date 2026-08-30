@@ -39,7 +39,7 @@ const mono = localFont({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'),
   title: {
-    default: 'TradingLab · Aprende a analizar los mercados sin arriesgar tu dinero',
+    default: 'TradingLab · Aprende a decidir antes de arriesgar',
     template: '%s · TradingLab',
   },
   description:
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'es_ES',
     siteName: 'TradingLab',
-    title: 'Aprende a analizar los mercados sin arriesgar tu dinero',
+    title: 'Aprende a decidir antes de arriesgar',
     description: `${LEGAL_ENTITY_DESCRIPTOR}. Simulación con dinero virtual, academia estructurada y análisis educativo con IA.`,
   },
   robots: { index: true, follow: true },
