@@ -5,12 +5,14 @@ import { ArrowRight, Check, Compass, Layers3, Sparkles, ShieldCheck, BookOpen, C
 import { PLAN_ENTITLEMENTS, yearlyDiscountPercent } from '@tl/types/plans';
 import { PLANS } from '@tl/types';
 import { FluidControl } from './FluidControl';
+import { PAYMENT_REGION_NOTICE } from '@/lib/payment-copy';
 
 export function PricingPlans({ heading = true }: { heading?: boolean }) {
   const [interval, setInterval] = useState<'MONTHLY' | 'YEARLY'>('MONTHLY');
   return <section className="invest-section invest-pricing visual-pricing" id="precios">
     {heading && <div className="invest-section-heading centered"><span className="invest-eyebrow">TU RITMO. TU PLAN.</span><h2>Un espacio para cada<br />forma de crecer.</h2><p>Empieza gratis. Amplía tus herramientas cuando las necesites.</p></div>}
     <div className="invest-billing"><FluidControl label="Frecuencia de facturación" value={interval} onChange={setInterval} options={[{ value: 'MONTHLY', label: 'Mensual' }, { value: 'YEARLY', label: 'Anual · ahorra hasta 17%' }]} /></div>
+    <p className="mb-8 mx-auto max-w-2xl text-center text-[13px] leading-relaxed text-[var(--color-muted)]">{PAYMENT_REGION_NOTICE}</p>
     <div className="invest-plan-grid">{PLANS.map(id => {
       const p = PLAN_ENTITLEMENTS[id];
       const yearly = interval === 'YEARLY';

@@ -26,6 +26,7 @@ import { Badge, Button, Card, cn } from '@tl/ui';
 import { ASSET_CLASS_LABEL, PLANS, type AssetClass } from '@tl/types';
 import { PLAN_ENTITLEMENTS, yearlyDiscountPercent } from '@tl/types/plans';
 import { Float, Lift, Reveal, Stagger } from '@/components/motion/Motion';
+import { PAYMENT_REGION_NOTICE, PAYMENT_REFERENCE_NOTICE } from '@/lib/payment-copy';
 
 export function SectionHeading({
   eyebrow,
@@ -530,7 +531,7 @@ export function PricingSection({
                         o USD {plan.priceYearlyUsd} al año <span className="text-[var(--color-positive)]">({discount}% de descuento)</span>
                       </p>
                       <p className="mt-2 text-[10px] leading-relaxed text-[var(--color-subtle)]">
-                        Precio publicado de referencia. Antes de pagar verás el importe fijo firmado en COP.
+                        {PAYMENT_REFERENCE_NOTICE}
                       </p>
                     </>
                   )}
@@ -603,6 +604,10 @@ export const FAQ_ITEMS = [
   {
     q: '¿Qué incluye cada plan?',
     a: 'Explore es gratuito e incluye USD 10.000 virtuales, academia básica, diario y 20 simulaciones al día. Plus amplía la práctica, el historial, los indicadores y las estadísticas, sin publicidad. Pro eleva el cupo del entrenador a 900 análisis mensuales y conserva diez años de historial. Teams se prepara mediante una propuesta para cada equipo.',
+  },
+  {
+    q: '¿En qué moneda se procesa mi pago?',
+    a: `${PAYMENT_REGION_NOTICE} ${PAYMENT_REFERENCE_NOTICE} El saldo DEMO de USD 10.000 es virtual y no es el importe de una compra.`,
   },
 ] as const;
 

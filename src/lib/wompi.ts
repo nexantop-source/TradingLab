@@ -304,7 +304,13 @@ export class WompiBillingProvider {
       );
     }
 
-    const config = readWompiConfig(process.env, { requireIntegrity: true });
+    // Do not issue a payable link if the server cannot validate its webhook.
+    const config = readWompiConfig(process.env, { requireIntegrity: true, requireEvents: true });
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
+    if (!appUrl) {
+      throw new WompiError('WOMPI_NOT_CONFIGURED', 'Falta configurar NEXT_PUBLIC_APP_URL para el retorno seguro de Wompi.', 503);
+    }
+    const origin = parseHttpsUrl(appUrl, 'NEXT_PUBLIC_APP_URL');
     const reference = wompiReference(params.userId, params.idempotencyKey, config.integritySecret);
     const idempotencyKey = wompiPaymentIdempotencyKey(reference);
     const description = wompiPaymentDescription(params.planId, params.interval);
@@ -422,6 +428,10 @@ export class WompiBillingProvider {
     if (payment.status === 'SUCCEEDED' && subscription?.externalId === payment.externalId) {
       return {
         status: 'ACTIVE' as const,
+        provider: 'wompi' as const,
+        paymentId: payment.id,
+        reference,
+        environment: config.environment,
         subscriptionId: subscription.id,
         currentPeriodEnd: subscription.currentPeriodEnd.toISOString(),
       };
@@ -456,15 +466,6 @@ export class WompiBillingProvider {
       );
     }
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
-    if (!appUrl) {
-      throw new WompiError(
-        'WOMPI_NOT_CONFIGURED',
-        'Falta configurar NEXT_PUBLIC_APP_URL para el retorno seguro de Wompi.',
-        503,
-      );
-    }
-    const origin = parseHttpsUrl(appUrl, 'NEXT_PUBLIC_APP_URL');
     const redirectUrl = new URL('/perfil?checkout=wompi', origin);
     const checkoutUrl = buildWompiCheckoutUrl({
       publicKey: config.publicKey,
@@ -477,6 +478,11 @@ export class WompiBillingProvider {
 
     return {
       status: 'REDIRECT' as const,
+      provider: 'wompi' as const,
+      paymentId: payment.id,
+      reference,
+      expiresAt: expirationTime,
+      environment: config.environment,
       redirectUrl: checkoutUrl,
       amountInCents,
       currency: 'COP' as const,

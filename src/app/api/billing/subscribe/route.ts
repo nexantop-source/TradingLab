@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     return ok({
       ...result,
       notice: DISCLAIMERS.billing,
-    });
+    }, { headers: { 'Cache-Control': 'private, no-store, max-age=0' } });
   } catch (error) {
     if (error instanceof WompiError) {
       return fail(error.code, error.message, error.status);

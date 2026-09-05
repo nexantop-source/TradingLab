@@ -99,7 +99,7 @@ el navegador. Referencias oficiales: [Checkout Web](https://docs.wompi.co/docs/c
 [eventos](https://docs.wompi.co/docs/colombia/eventos/) y
 [transacciones](https://docs.wompi.co/docs/colombia/transacciones/).
 
-1. En el Dashboard de comercios copia las cuatro credenciales del ambiente correspondiente. Los
+1. En el Dashboard de comercios configura las tres credenciales necesarias del ambiente correspondiente: llave pública, secreto de integridad y secreto de eventos. Los
    secretos de integridad y eventos son diferentes de las llaves pública y privada.
 2. Define `BILLING_PROVIDER=wompi`, `WOMPI_ENVIRONMENT` y los cuatro precios fijos. Un importe está
    expresado en centavos: COP 59.900 se configura como `5990000`.
@@ -114,6 +114,12 @@ el navegador. Referencias oficiales: [Checkout Web](https://docs.wompi.co/docs/c
 En Firebase App Hosting, mantén `BILLING_PROVIDER=disabled` hasta que existan los tres secretos
 usados por Checkout Web y eventos. `mock` está bloqueado por código cuando `NODE_ENV=production`:
 una configuración incompleta no puede regalar planes. Crea los secretos y concede acceso al backend:
+
+El checkout también exige el secreto de eventos y una URL de retorno HTTPS antes de escribir
+un intento de pago. Su respuesta autenticada y `private, no-store` incluye `paymentId`,
+`reference`, `expiresAt`, `environment` y el enlace firmado. La pantalla permite copiar ese
+enlace y muestra el ID; no se aplica un código manual a otra cuenta. El pago permanece unido
+al `userId` registrado por el servidor. Este flujo vende un periodo, sin débitos recurrentes.
 
 ```bash
 firebase apphosting:secrets:set WOMPI_PUBLIC_KEY --project nexant-87204

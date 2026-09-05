@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Logo } from '@/components/Logo';
 import { RiskWarning, ServiceNature, SimulationPill } from '@tl/ui/compliance';
 import { LEGAL_ENTITY_DESCRIPTOR } from '@tl/types/compliance';
+import { PAYMENT_REGION_NOTICE } from '@/lib/payment-copy';
 
 const COLUMNS = [
   {
@@ -99,6 +100,7 @@ export function MarketingFooter() {
         </div>
 
         <div className="mt-12 space-y-4 border-t border-[var(--color-border)] pt-8">
+          <p className="max-w-3xl text-[12px] leading-relaxed text-[var(--color-muted)]">{PAYMENT_REGION_NOTICE}</p>
           <RiskWarning />
           <p className="text-[11px] leading-relaxed text-[var(--color-subtle)]">
             Los precios que se muestran en la plataforma se utilizan exclusivamente con fines educativos. Los

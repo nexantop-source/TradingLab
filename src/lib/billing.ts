@@ -20,6 +20,11 @@ import { WompiBillingProvider, WompiError } from './wompi';
 
 export interface CheckoutResult {
   status: 'ACTIVE' | 'TRIALING' | 'REDIRECT';
+  provider?: 'wompi';
+  paymentId?: string;
+  reference?: string;
+  expiresAt?: string;
+  environment?: 'sandbox' | 'production';
   /** URL de la pasarela cuando el proveedor requiere redirección. */
   redirectUrl?: string;
   /** Importe exacto calculado por servidor y firmado para la pasarela. */

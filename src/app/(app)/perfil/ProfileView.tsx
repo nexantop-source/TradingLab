@@ -11,6 +11,7 @@ import { ASSET_CLASS_LABEL } from '@tl/types';
 import { apiFetch, ApiRequestError } from '@/lib/client-api';
 import { formatCurrency, formatDateTime, formatPaymentDescription } from '@/lib/format';
 import { AdPrivacyControl } from '@/components/ads/AdPrivacy';
+import { PAYMENT_REGION_NOTICE } from '@/lib/payment-copy';
 
 const PAYMENT_STATUS_META = {
   PENDING: { label: 'Pendiente', tone: 'blue' },
@@ -319,7 +320,7 @@ export function ProfileView({
                       ))}
                   </div>
                   <p className="mt-3 text-[11px] text-[var(--color-subtle)]">
-                    El importe final se muestra en COP antes de abrir el checkout de Wompi. Ningún retorno del
+                    {PAYMENT_REGION_NOTICE} Ningún retorno del
                     navegador activa el plan por sí solo.{' '}
                     <Link href="/precios" className="underline">
                       Ver comparación completa
