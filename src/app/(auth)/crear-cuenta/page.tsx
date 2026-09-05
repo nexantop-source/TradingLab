@@ -25,7 +25,8 @@ export default async function RegisterPage({
   }
 
   return (
-    <div className="rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-[var(--color-surface)] p-7 shadow-[var(--shadow-soft)]">
+    <div className="auth-form-card rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-[var(--color-surface)] p-7 shadow-[var(--shadow-soft)]">
+      <p className="auth-form-eyebrow">TU CRITERIO EMPIEZA AQUÍ</p>
       <h1 className="text-2xl font-semibold tracking-[-0.02em]">Crea tu cuenta DEMO</h1>
       <p className="mt-2 text-[13px] leading-relaxed text-[var(--color-muted)]">
         Sin tarjeta, sin depósitos y sin promesas de rentabilidad. Al terminar recibirás:

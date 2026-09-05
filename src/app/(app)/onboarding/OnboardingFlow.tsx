@@ -1,6 +1,10 @@
 'use client';
 
 import * as React from 'react';
+import { motion } from 'framer-motion';
+import { useMotionPreference } from '@/components/pwa/useMotionPreference';
+import { useTheme } from '@tl/ui/ThemeProvider';
+import { MarketArtwork } from '@/components/pwa/MarketArtwork';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Check, ArrowRight, ArrowLeft } from 'lucide-react';
@@ -49,6 +53,11 @@ export function OnboardingFlow({
   tracks: Array<{ slug: string; title: string; summary: string; lessons: number; minutes: number }>;
 }) {
   const router = useRouter();
+  const systemReduce = useMotionPreference();
+  const { reduceMotion } = useTheme();
+  const reduce = systemReduce || reduceMotion;
+  const stageRef = React.useRef<HTMLDivElement>(null);
+  const firstRender = React.useRef(true);
   const [step, setStep] = React.useState<Step>('bienvenida');
   const [interests, setInterests] = React.useState<AssetClass[]>([]);
   const [goal, setGoal] = React.useState(goals[0]?.value ?? '');
@@ -64,6 +73,11 @@ export function OnboardingFlow({
   } | null>(null);
 
   const stepIndex = STEPS.indexOf(step);
+  React.useEffect(() => {
+    if (firstRender.current) { firstRender.current = false; return; }
+    const heading = stageRef.current?.querySelector<HTMLElement>(step === 'evaluacion' ? 'legend' : 'h1');
+    if (heading) { heading.tabIndex = -1; heading.focus({ preventScroll: true }); }
+  }, [step, current]);
 
   async function submit() {
     setSubmitting(true);
@@ -97,12 +111,15 @@ export function OnboardingFlow({
     : null;
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
+    <div className="onboarding-app mx-auto px-4 py-8 sm:px-6">
       <div className="mb-8">
         <Progress value={stepIndex + 1} max={STEPS.length} label="Progreso de la configuración inicial" />
         <p className="num mt-2 text-[11px] text-[var(--color-subtle)]">
           Paso {stepIndex + 1} de {STEPS.length}
         </p>
+        <ol className="onboarding-steps" aria-label="Etapas de tu configuración">
+          {['Bienvenida', 'Intereses', 'Tu objetivo', 'Tu punto de partida', 'Tu ruta'].map((label, index) => <li key={label} aria-current={index === stepIndex ? 'step' : undefined}>{label}</li>)}
+        </ol>
       </div>
 
       {error && (
@@ -112,8 +129,10 @@ export function OnboardingFlow({
       )}
 
       {/* ── Bienvenida ─────────────────────────────────────────────────── */}
+      <motion.div ref={stageRef} key={step} className="onboarding-stage" initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 210, damping: 30 }}>
       {step === 'bienvenida' && (
         <Card className="p-7">
+          <div className="onboarding-intro-art"><MarketArtwork compact /></div>
           <h1 className="text-2xl font-semibold tracking-[-0.02em]">
             Bienvenido, {userName.split(' ')[0]}
           </h1>
@@ -160,7 +179,7 @@ export function OnboardingFlow({
           </p>
 
           <div className="mt-5 grid gap-2 sm:grid-cols-2">
-            {ASSET_CLASSES.filter((c) => c !== 'ETF').map((c) => {
+            {ASSET_CLASSES.map((c) => {
               const active = interests.includes(c);
               return (
                 <button
@@ -284,9 +303,7 @@ export function OnboardingFlow({
                       next[current] = i;
                       return next;
                     });
-                    if (current < questions.length - 1) {
-                      setTimeout(() => setCurrent((c) => c + 1), 180);
-                    }
+                    // Explicit continuation avoids skipping questions on rapid taps.
                   }}
                   className={cn(
                     'w-full rounded-[var(--radius-md)] border p-3.5 text-left text-[13px] leading-snug transition-colors',
@@ -411,6 +428,7 @@ export function OnboardingFlow({
           </Card>
         </div>
       )}
+      </motion.div>
     </div>
   );
 }
@@ -421,5 +439,5 @@ const MARKET_HINT: Record<string, string> = {
   STOCK: 'Acciones de empresas cotizadas.',
   INDEX: 'Cestas que resumen un mercado completo.',
   COMMODITY: 'Metales y energía, con lógica de oferta física.',
-  ETF: 'Fondos cotizados. Próximamente.',
+  ETF: 'Fondos cotizados que reúnen varios activos en un instrumento.',
 };

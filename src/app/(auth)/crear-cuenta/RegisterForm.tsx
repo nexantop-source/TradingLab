@@ -4,6 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button, Callout, Checkbox, Field, Input, Select } from '@tl/ui';
+import { PasswordInput } from '@/components/pwa/PasswordInput';
 import { apiFetch, ApiRequestError } from '@/lib/client-api';
 import { onboardingPath, type CheckoutIntent } from '@/lib/checkout-intent';
 
@@ -97,7 +98,7 @@ export function RegisterForm({ intent = null }: { intent?: CheckoutIntent | null
       </Field>
 
       <Field label="Correo electrónico" htmlFor="email" error={fieldErrors.email} required>
-        <Input id="email" name="email" type="email" autoComplete="email" required placeholder="tu@correo.com" />
+        <Input id="email" name="email" type="email" inputMode="email" autoCapitalize="none" spellCheck={false} autoComplete="email" required placeholder="tu@correo.com" />
       </Field>
 
       <Field
@@ -107,7 +108,7 @@ export function RegisterForm({ intent = null }: { intent?: CheckoutIntent | null
         error={fieldErrors.password}
         required
       >
-        <Input id="password" name="password" type="password" autoComplete="new-password" required minLength={10} />
+        <PasswordInput id="password" name="password" autoComplete="new-password" required minLength={10} />
       </Field>
 
       <Field

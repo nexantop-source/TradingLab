@@ -3,10 +3,12 @@ import localFont from 'next/font/local';
 import { THEME_INIT_SCRIPT } from '@tl/ui/ThemeProvider';
 import { LEGAL_ENTITY_DESCRIPTOR } from '@tl/types/compliance';
 import { AdPrivacyBanner } from '@/components/ads/AdPrivacy';
+import { PwaRuntime } from '@/components/pwa/PwaRuntime';
 import './globals.css';
 import './investment.css';
 import './instrument-icons.css';
 import './marketing-visuals.css';
+import './mobile-app.css';
 
 const sans = localFont({
   src: '../../identidad visual/fuentes/instrument-sans-latin.woff2',
@@ -66,6 +68,7 @@ export const metadata: Metadata = {
   },
   robots: { index: true, follow: true },
   manifest: '/manifest.webmanifest',
+  icons: { icon: '/app-icon/192', apple: '/app-icon/180' },
   appleWebApp: { capable: true, title: 'TradingLab', statusBarStyle: 'black-translucent' },
 };
 
@@ -91,6 +94,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Saltar al contenido principal
         </a>
         {children}
+        <PwaRuntime />
         <AdPrivacyBanner />
       </body>
     </html>

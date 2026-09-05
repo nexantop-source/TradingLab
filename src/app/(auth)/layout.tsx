@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Logo } from '@/components/Logo';
+import { MarketArtwork } from '@/components/pwa/MarketArtwork';
 import { ServiceNature, SimulationPill } from '@tl/ui/compliance';
 
 /**
@@ -19,13 +20,20 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </Link>
       </header>
 
-      <main id="contenido" className="flex items-start justify-center px-5 pb-20">
-        <div className="w-full max-w-md">
+      <main id="contenido" className="auth-app-layout">
+        <aside className="auth-art-panel">
+          <span className="ios-eyebrow">APRENDE PRIMERO. DECIDE MEJOR.</span>
+          <h2>Un espacio para<br />tu próximo paso.</h2>
+          <MarketArtwork compact />
+          <p>Mercados, lecciones y práctica.<br />Todo empieza con tu curiosidad.</p>
+          <Link href="/app" className="glass-link">Conoce la app →</Link>
+        </aside>
+        <section className="auth-form-panel" aria-label="Acceso a TradingLab">
           <div className="mb-6 flex justify-center">
             <SimulationPill />
           </div>
           {children}
-        </div>
+        </section>
       </main>
 
       <footer className="border-t border-[var(--color-border)] px-5 py-8">

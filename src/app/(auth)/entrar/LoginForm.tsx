@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Field, Input, Callout } from '@tl/ui';
+import { PasswordInput } from '@/components/pwa/PasswordInput';
 import { apiFetch, ApiRequestError } from '@/lib/client-api';
 import { checkoutPath, onboardingPath, type CheckoutIntent } from '@/lib/checkout-intent';
 
@@ -59,6 +60,9 @@ export function LoginForm({ intent = null }: { intent?: CheckoutIntent | null })
           id="email"
           name="email"
           type="email"
+          inputMode="email"
+          autoCapitalize="none"
+          spellCheck={false}
           autoComplete="email"
           required
           placeholder="tu@correo.com"
@@ -66,7 +70,7 @@ export function LoginForm({ intent = null }: { intent?: CheckoutIntent | null })
       </Field>
 
       <Field label="Contraseña" htmlFor="password" error={fieldErrors.password} required>
-        <Input id="password" name="password" type="password" autoComplete="current-password" required />
+        <PasswordInput id="password" name="password" autoComplete="current-password" required />
       </Field>
 
       <Button type="submit" fullWidth size="lg" loading={loading}>

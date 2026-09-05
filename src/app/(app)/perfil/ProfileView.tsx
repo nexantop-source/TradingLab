@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Badge, Button, Callout, Card, Checkbox, Field, Modal, Select, Tabs, cn } from '@tl/ui';
 import { VirtualBalance } from '@tl/ui/compliance';
 import { THEME_OPTIONS, useTheme } from '@tl/ui/ThemeProvider';
+import { InstallApp } from '@/components/pwa/InstallApp';
 import type { SessionUser, ThemeId } from '@tl/types';
 import { ASSET_CLASS_LABEL } from '@tl/types';
 import { apiFetch, ApiRequestError } from '@/lib/client-api';
@@ -154,6 +155,7 @@ export function ProfileView({
       )}
 
       {checkoutTransactionId && <PaymentReturnStatus transactionId={checkoutTransactionId} />}
+      <InstallApp />
 
       <Tabs
         ariaLabel="Secciones del perfil"

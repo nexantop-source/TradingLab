@@ -1,0 +1,134 @@
+/* Original TradingLab mobile language: optical depth, still artwork, tactile controls. */
+.ios-welcome { min-height: 100svh; background: #071324; color: #edf5f6; padding: max(20px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left)); color-scheme: dark; overflow: clip; }
+.ios-welcome-header { max-width: 1180px; margin: auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.glass-link { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; padding: 0 18px; border: 1px solid #ffffff26; border-radius: 24px; color: #e7eff3; background: #ffffff08; font-size: 13px; transition: background 160ms ease, transform 160ms ease; }
+.glass-link:active, .ios-primary-action:active { transform: scale(.97); }
+.glass-link:hover { background: #ffffff12; }
+.ios-welcome-layout { max-width: 1120px; min-height: min(740px, calc(100svh - 135px)); margin: auto; display: grid; grid-template-columns: 1.08fr 1fr; gap: 60px; align-items: center; }
+.ios-welcome-art { grid-column: 2; grid-row: 1; cursor: grab; }
+.ios-welcome-art:active { cursor: grabbing; }
+.ios-welcome-copy { grid-column: 1; grid-row: 1; padding: 56px 0; }
+.ios-eyebrow { display: block; font-size: 10px; font-weight: 600; line-height: 1.6; letter-spacing: .18em; color: #a4e3d5; }
+.ios-welcome-copy h1 { margin: 22px 0 20px; font-size: clamp(36px, 4.1vw, 58px); line-height: 1.04; font-weight: 550; letter-spacing: -.055em; white-space: pre-line; }
+.ios-welcome-description { min-height: 84px; max-width: 390px; font-size: 16px; line-height: 1.7; color: #aabaca; }
+.ios-scene-controls { display: flex; align-items: center; gap: 16px; margin: 20px 0 26px; }
+.ios-scene-controls > button { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid #ffffff20; border-radius: 50%; color: #d6e4eb; }
+.ios-scene-controls button:disabled { opacity: .3; cursor: default; }
+.ios-scene-controls button:active:not(:disabled) { background: #ffffff18; }
+.ios-scene-dots { display: flex; }
+.ios-scene-dots button { min-width: 44px; min-height: 44px; display: grid; place-items: center; }
+.ios-scene-dots span { width: 6px; height: 6px; border-radius: 8px; background: #607384; transition: width 200ms ease, background 200ms ease; }
+.ios-scene-dots [aria-current] span { width: 26px; background: #a4e3d5; }
+.ios-primary-action { width: 100%; max-width: 390px; min-height: 56px; display: flex; align-items: center; justify-content: center; gap: 16px; border-radius: 20px; background: #b2eedf; color: #092b2c; font-size: 15px; font-weight: 650; box-shadow: inset 0 1px 0 #ffffff99, 0 8px 32px #071d2255; transition: transform 160ms ease, background 160ms ease; }
+.ios-primary-action:hover { background: #c4f3e8; }
+.ios-welcome-fineprint { max-width: 390px; margin: 14px 0 20px; color: #8eabba; font-size: 11px; line-height: 1.65; text-align: center; }
+.ios-welcome-footer { max-width: 1180px; margin: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 20px; border-top: 1px solid #ffffff10; padding-top: 12px; font-size: 11px; color: #aabaca; }
+.ios-welcome-footer span { margin-right: auto; }
+.ios-welcome-footer a { display: inline-flex; align-items: center; min-height: 44px; }
+.market-art { position: relative; width: 100%; aspect-ratio: 1 / 1.12; isolation: isolate; pointer-events: none; }
+.market-art-halo { position: absolute; inset: 3% -15%; background: radial-gradient(ellipse at 50% 40%, #4a928043, #23396138 42%, transparent 69%); z-index: -1; }
+.market-art-orbit { position: absolute; border: 1px solid #abdacb20; border-radius: 50%; }
+.orbit-one { width: 89%; height: 72%; top: 10%; left: 5%; transform: rotate(-28deg); }
+.orbit-two { width: 66%; height: 96%; top: -2%; left: 16%; transform: rotate(31deg); border-color: #b6c8e013; }
+.market-art-core { position: absolute; width: 46%; aspect-ratio: 1; top: 17%; left: 28%; display: grid; place-items: center; border-radius: 33%; border: 1px solid #d4ffed45; color: #d5fff0; background: linear-gradient(135deg, #89d5bb40, #344b7940 55%, #111d38aa); box-shadow: inset 1px 1px 0 #ffffff40, inset -1px -1px 0 #ffffff10, 0 35px 60px #00000045; transform: rotate(-7deg); }
+.market-art-core svg { width: 51%; height: auto; }
+.market-art-core > span, .market-art-core > div { justify-content: center; width: 100%; }
+.market-art-chart { position: absolute; width: 79%; left: 9%; top: 51%; padding: 6%; border-radius: 24px; border: 1px solid #b9dddb3b; color: #c1d1dc; background: linear-gradient(125deg, #314450e8, #12233beb); box-shadow: inset 0 1px 0 #eaffff20, 0 24px 50px #00000035; backdrop-filter: blur(20px); }
+.art-card-heading, .art-card-caption { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: clamp(6px, 1vw, 9px); letter-spacing: .06em; }
+.art-card-heading span:last-child { border: 1px solid #9ce7d338; border-radius: 12px; padding: 4px 8px; color: #9ce7d3; }
+.market-art-chart svg { width: 100%; margin: 15px 0 8px; }
+.art-card-caption { letter-spacing: 0; opacity: .85; }
+.market-art-token { position: absolute; display: grid; place-items: center; border: 1px solid #ffffff2e; border-radius: 24px; box-shadow: inset 0 1px 0 #ffffff2b, 0 16px 30px #00000020; }
+.token-bitcoin { width: 18%; aspect-ratio: 1; left: 5%; top: 22%; transform: rotate(-15deg); background: linear-gradient(135deg, #745a3be8, #252b3e); }
+.token-bitcoin .instrument-icon { background: transparent; box-shadow: none; border: none; }
+.token-lesson { width: 19%; aspect-ratio: 1; right: 0; top: 40%; transform: rotate(12deg); background: linear-gradient(135deg, #9ebed3, #54748f); color: #102940; align-content: center; gap: 1px; }
+.token-lesson span { font-size: clamp(20px, 4vw, 40px); line-height: 1.1; letter-spacing: -.07em; font-weight: 550; }
+.token-lesson small { font-size: 7px; letter-spacing: .12em; }
+.market-art-note { position: absolute; left: 15%; right: 0; bottom: 2%; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 10px; letter-spacing: .02em; color: #92aabd; }
+.market-art-note i { width: 5px; height: 5px; background: #a4e3d5; border-radius: 50%; }
+.pwa-install { font-size: 12px; color: inherit; }
+.pwa-install summary, .pwa-install > button { min-height: 44px; display: flex; gap: 10px; align-items: center; cursor: pointer; color: inherit; line-height: 1.5; }
+.pwa-install summary svg { flex-shrink: 0; }
+.pwa-install summary { list-style: none; }
+.pwa-install summary::-webkit-details-marker { display: none; }
+.pwa-install-instructions { max-width: 390px; border: 1px solid #8998a833; border-radius: 16px; padding: 16px; line-height: 1.7; }
+.pwa-install-instructions p + p { margin-top: 10px; }
+.pwa-install-instructions svg { display: inline; vertical-align: middle; }
+.pwa-installed { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.pwa-status { position: fixed; z-index: 80; bottom: calc(100px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); display: flex; align-items: center; flex-wrap: wrap; gap: 12px; width: max-content; max-width: calc(100% - 32px); padding: 14px 20px; background: #112638; color: #e9f5f2; border: 1px solid #72958e; border-radius: 20px; box-shadow: 0 10px 30px #0003; font-size: 12px; }
+.pwa-status button { min-height: 44px; padding: 0 16px; border-radius: 14px; background: #b2eedf; color: #092b2c; font-weight: 600; }
+.auth-shell { background: #f2f4f4; }
+.auth-shell > header { max-width: 1220px; margin: auto; padding-top: max(24px, env(safe-area-inset-top)); }
+.auth-app-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; max-width: 1120px; margin: 8px auto 60px; padding: 0 24px; }
+.auth-art-panel { position: sticky; top: 24px; border-radius: 36px; padding: 40px 34px 30px; overflow: hidden; background: #071324; color: #ecf4f7; }
+.auth-art-panel h2 { font-size: clamp(30px, 3.2vw, 42px); line-height: 1.08; letter-spacing: -.045em; margin-top: 18px; font-weight: 500; }
+.auth-art-panel p { font-size: 13px; line-height: 1.7; color: #aabaca; }
+.auth-art-panel .glass-link { margin-top: 20px; }
+.auth-art-panel .market-art { margin: -10px auto 22px; max-width: 365px; }
+.auth-art-panel .market-art-note { display: none; }
+.auth-form-panel { min-width: 0; padding: 24px 0; }
+.auth-form-card { padding: 32px; border: 1px solid #172c3610; border-radius: 28px; box-shadow: 0 16px 55px #122a3407; }
+.auth-form-card h1 { font-size: 30px; font-weight: 550; letter-spacing: -.04em; }
+.auth-form-eyebrow { font-size: 9px; font-weight: 600; letter-spacing: .15em; color: #52746c; margin-bottom: 16px; }
+.auth-form-panel input:not([type=checkbox]), .auth-form-panel select { min-height: 50px; font-size: 16px; border-radius: 14px; }
+.password-field { position: relative; }
+.password-field input { padding-right: 52px; }
+.password-field button { position: absolute; right: 3px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; display: grid; place-items: center; border-radius: 12px; color: var(--color-muted); }
+.password-field button:hover { background: var(--color-overlay); }
+.onboarding-app { max-width: 760px; padding-top: 36px; padding-bottom: 44px; }
+.onboarding-steps { display: flex; gap: 8px; justify-content: space-between; margin-top: 16px; color: var(--color-muted); font-size: 11px; }
+.onboarding-steps [aria-current] { color: var(--color-text); font-weight: 650; }
+.onboarding-stage > section, .onboarding-stage > div { border-radius: 28px; }
+.onboarding-stage h1 { letter-spacing: -.04em; }
+.onboarding-intro-art { height: 195px; overflow: hidden; margin: -28px -28px 28px; background: #071324; border-radius: 28px 28px 0 0; }
+.onboarding-intro-art .market-art { width: 270px; margin: -73px auto 0; }
+.onboarding-intro-art .market-art-note { display: none; }
+.onboarding-stage button { min-height: 44px; }
+.onboarding-stage h1:focus { outline: none; }
+.ios-welcome :focus-visible, .auth-art-panel :focus-visible { outline: 3px solid #b2eedf; outline-offset: 4px; }
+@media (max-width: 1023px) {
+  .app-mobile-nav { inset-inline: max(12px, env(safe-area-inset-left)) max(12px, env(safe-area-inset-right)); bottom: max(8px, env(safe-area-inset-bottom)); border: 1px solid var(--color-border-strong); border-radius: 28px; padding: 6px; min-height: 68px; box-shadow: 0 8px 30px #00102018, inset 0 1px 0 #ffffff28; background: color-mix(in srgb, var(--color-surface) 88%, transparent); backdrop-filter: blur(24px) saturate(145%); }
+  .app-mobile-nav-item { position: relative; justify-content: center; min-width: 0; min-height: 54px; border-radius: 22px; isolation: isolate; }
+  .app-mobile-nav-selection { position: absolute; inset: 0; z-index: -1; background: var(--color-blue-soft); border-radius: inherit; }
+  .app-mobile-nav-item:active { transform: scale(.96); }
+  .app-workspace > main.pb-20 { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+  .app-mobile-header { height: calc(64px + env(safe-area-inset-top)); padding-top: env(safe-area-inset-top); }
+  .app-mobile-header button, .app-mobile-header > a { min-width: 44px; min-height: 44px; }
+  .app-mobile-drawer { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+}
+@media (max-width: 760px) {
+  .ios-welcome { padding-inline: 24px; }
+  .ios-welcome-header .glass-link { padding-inline: 12px; font-size: 11px; gap: 6px; }
+  .ios-welcome-layout { display: flex; flex-direction: column; gap: 0; min-height: auto; }
+  .ios-welcome-art { width: min(100%, 350px); margin: 4px auto -2px; }
+  .ios-welcome-art .market-art { aspect-ratio: 1 / .96; }
+  .ios-welcome-art .market-art-note { display: none; }
+  .ios-welcome-copy { width: 100%; max-width: 450px; padding: 28px 0 24px; }
+  .ios-welcome-copy h1 { font-size: clamp(32px, 8.9vw, 44px); margin: 14px 0; }
+  .ios-welcome-description { min-height: 72px; font-size: 14px; line-height: 1.65; }
+  .ios-eyebrow { font-size: 9px; }
+  .ios-scene-controls { margin: 10px 0 18px; justify-content: center; }
+  .ios-primary-action, .ios-welcome-fineprint { max-width: none; }
+  .ios-welcome-footer { gap: 16px; font-size: 10px; }
+  .ios-welcome-footer span { width: 100%; }
+  .ios-welcome-footer a { min-height: 32px; }
+  .auth-app-layout { display: block; padding: 0 16px; margin: 0 auto 36px; max-width: 540px; }
+  .auth-art-panel { display: none; }
+  .auth-form-panel { padding-top: 8px; }
+  .auth-form-card { padding: 28px 22px; border-radius: 28px; }
+  .auth-form-card h1 { font-size: 29px; }
+  .onboarding-app { padding-top: 24px; }
+  .onboarding-steps { font-size: 9px; gap: 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ios-welcome *, .auth-art-panel *, .app-mobile-nav * { transition: none !important; animation: none !important; }
+  .ios-welcome-art, .market-art-core, .market-art-chart { transform: none !important; }
+  .onboarding-stage, .ios-welcome-copy > div { transform: none !important; opacity: 1 !important; }
+}
+html[data-reduce-motion='true'] .onboarding-stage { transform: none !important; opacity: 1 !important; }
+html[data-reduce-motion='true'] .market-art-core, html[data-reduce-motion='true'] .market-art-chart { transform: none !important; }
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .market-art-chart { background: #182d42; backdrop-filter: none; }
+  .app-mobile-nav { background: var(--color-surface); backdrop-filter: none; border-color: var(--color-text); }
+  .glass-link { background: #182d42; border-color: #8baca9; }
+}

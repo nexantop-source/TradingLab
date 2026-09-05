@@ -1,6 +1,9 @@
 'use client';
 
 import * as React from 'react';
+import { motion } from 'framer-motion';
+import { useMotionPreference } from '@/components/pwa/useMotionPreference';
+import { useTheme } from '@tl/ui/ThemeProvider';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -80,6 +83,8 @@ export function AppShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const systemReducedMotion = useMotionPreference();
+  const { reduceMotion } = useTheme();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [notifOpen, setNotifOpen] = React.useState(false);
@@ -245,10 +250,11 @@ export function AppShell({
                   href={item.href}
                   aria-current={active ? 'page' : undefined}
                   className={cn(
-                    'flex flex-1 flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors',
+                    'app-mobile-nav-item flex flex-1 flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors',
                     active ? 'text-[var(--color-blue)]' : 'text-[var(--color-muted)]',
                   )}
                 >
+                  {active && <motion.span className="app-mobile-nav-selection" layoutId="mobile-active-tab" transition={systemReducedMotion || reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 380, damping: 34 }} aria-hidden="true" />}
                   <item.icon className="size-5" aria-hidden="true" />
                   {item.label}
                 </Link>
