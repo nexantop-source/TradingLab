@@ -79,8 +79,36 @@ env:
 
   # ── Facturación y publicidad ───────────────────────────────────────────────
   - variable: BILLING_PROVIDER
-    # Fail-closed: no activa planes hasta enlazar secretos Wompi y cambiarlo a wompi.
+    # Pendiente: rotar secretos expuestos y verificar webhook/pruebas de pago.
+    # Tener secretos disponibles NO autoriza habilitar cobros.
     value: disabled
+    availability:
+      - RUNTIME
+
+  - variable: WOMPI_ENVIRONMENT
+    value: production
+    availability:
+      - RUNTIME
+
+  - variable: WOMPI_PRICING_MODE
+    value: usd_trm
+    availability:
+      - RUNTIME
+
+  # Secretos exclusivos de TradingLab: no reutilizar nombres de otros backends.
+  # Nunca disponibles durante BUILD ni mediante variables NEXT_PUBLIC_*.
+  - variable: WOMPI_PUBLIC_KEY
+    secret: TRADINGLAB_WOMPI_PUBLIC_KEY
+    availability:
+      - RUNTIME
+
+  - variable: WOMPI_INTEGRITY_SECRET
+    secret: TRADINGLAB_WOMPI_INTEGRITY_SECRET
+    availability:
+      - RUNTIME
+
+  - variable: WOMPI_EVENTS_SECRET
+    secret: TRADINGLAB_WOMPI_EVENTS_SECRET
     availability:
       - RUNTIME
 

@@ -23,6 +23,7 @@ interface PreparedCheckout {
   currentPeriodEnd: string;
   amountInCents?: number;
   currency?: 'COP' | 'USD';
+  exchangeQuote?: import('@/lib/cop-exchange').CopExchangeQuote;
   notice?: string;
 }
 
@@ -188,10 +189,19 @@ export function CheckoutView({
                   <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-subtle)]">Importe firmado por el servidor</p>
                   <p className="num mt-2 text-2xl font-semibold">
                     {prepared.currency === 'COP' && prepared.amountInCents != null
-                      ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(prepared.amountInCents / 100)
+                      ? `COP ${new Intl.NumberFormat('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(prepared.amountInCents / 100)}`
                       : 'Importe disponible en Wompi'}
                   </p>
                   <p className="mt-1 text-[11px] text-[var(--color-muted)]">Verifica este mismo importe en la pantalla de Wompi antes de autorizar.</p>
+                  {prepared.exchangeQuote && (
+                    <div className="mt-4 border-t border-[var(--color-border)] pt-3 text-[11px] leading-relaxed text-[var(--color-muted)]">
+                      <p>Base del pago: USD {(prepared.exchangeQuote.usdAmountInCents / 100).toFixed(2)}.</p>
+                      <p>TRM aplicada: 1 USD = {new Intl.NumberFormat('es-CO', { minimumFractionDigits: 2 }).format(prepared.exchangeQuote.rateHundredths / 100)} COP.</p>
+                      <p>Vigente del {prepared.exchangeQuote.validFrom} al {prepared.exchangeQuote.validThrough} (hora Colombia).</p>
+                      <a className="underline underline-offset-2" href="https://www.datos.gov.co/Econom-a-y-Finanzas/Tasa-de-Cambio-Representativa-del-Mercado-TRM/32sa-8pi3" target="_blank" rel="noopener noreferrer">Fuente: Superintendencia Financiera · Datos Abiertos</a>
+                      <p className="mt-2">Sin recargo de conversión de TradingLab. Redondeado al centavo de COP. Este importe no cambia mientras el enlace sea válido. Tu banco podría aplicar cargos propios.</p>
+                    </div>
+                  )}
                 </div>
                 <Button size="lg" fullWidth onClick={openWompi}>
                   Abrir checkout seguro <ExternalLink className="size-4" aria-hidden="true" />

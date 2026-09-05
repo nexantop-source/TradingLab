@@ -12,5 +12,7 @@ describe('payment currency copy', () => {
     expect(PAYMENT_REFERENCE_NOTICE).toContain('USD son de referencia');
     expect(PAYMENT_REFERENCE_NOTICE).toContain('se presenta en COP');
     expect(PAYMENT_REFERENCE_NOTICE).toContain('no es un depósito para invertir');
+    expect(PAYMENT_REFERENCE_NOTICE).toContain('TRM oficial vigente');
+    expect(PAYMENT_REFERENCE_NOTICE).toContain('queda fijo durante la vigencia del enlace');
   });
 });

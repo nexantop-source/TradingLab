@@ -637,7 +637,7 @@ function PaymentReturnStatus({ transactionId }: { transactionId: string }) {
 
   const status = state.transactionStatus ?? 'PENDING';
   const amount = state.currency === 'COP' && state.amountInCents != null
-    ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(state.amountInCents / 100)
+    ? `COP ${new Intl.NumberFormat('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(state.amountInCents / 100)}`
     : null;
 
   if (state.membershipActive) {

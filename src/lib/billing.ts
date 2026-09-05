@@ -30,6 +30,7 @@ export interface CheckoutResult {
   /** Importe exacto calculado por servidor y firmado para la pasarela. */
   amountInCents?: number;
   currency?: 'COP' | 'USD';
+  exchangeQuote?: import('./cop-exchange').CopExchangeQuote;
   subscriptionId: string;
   currentPeriodEnd: string;
 }

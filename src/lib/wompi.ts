@@ -2,6 +2,8 @@ import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { z } from 'zod';
 import { db } from './db';
 import type { PlanId } from '@tl/types';
+import { PLAN_ENTITLEMENTS } from '@tl/types/plans';
+import { currentTrm, convertUsdToCopCents, exchangeQuoteTag, readExchangeQuote, rateCovers, type CopExchangeQuote } from './cop-exchange';
 
 export type WompiEnvironment = 'sandbox' | 'production';
 export type WompiInterval = 'MONTHLY' | 'YEARLY';
@@ -315,6 +317,25 @@ export class WompiBillingProvider {
     const idempotencyKey = wompiPaymentIdempotencyKey(reference);
     const description = wompiPaymentDescription(params.planId, params.interval);
     const now = new Date();
+    let newExchange: CopExchangeQuote | undefined;
+    // Resolve FX before opening a DB transaction. A retry always uses its persisted
+    // quote, even after midnight or during an outage of the public TRM service.
+    const pricingMode = process.env.WOMPI_PRICING_MODE ?? 'fixed_cop';
+    if (!['fixed_cop', 'usd_trm'].includes(pricingMode)) {
+      throw new WompiError('WOMPI_NOT_CONFIGURED', 'El modo de conversión no es válido.', 503);
+    }
+    if (pricingMode === 'usd_trm' && !await db.payment.findUnique({ where: { idempotencyKey }, select: { id: true } })) {
+      try {
+        const plan = PLAN_ENTITLEMENTS[params.planId];
+        newExchange = {
+          ...await currentTrm(),
+          usdAmountInCents: Math.round((params.interval === 'YEARLY' ? plan.priceYearlyUsd : plan.priceMonthlyUsd) * 100),
+        };
+        convertUsdToCopCents(newExchange.usdAmountInCents, newExchange.rateHundredths);
+      } catch {
+        throw new WompiError('EXCHANGE_RATE_UNAVAILABLE', 'No pudimos verificar la TRM vigente. No se generó ningún cobro; inténtalo de nuevo más tarde.', 503);
+      }
+    }
 
     // El update de User funciona como cerrojo por cuenta. Dos pestañas con
     // claves distintas no pueden superar a la vez la comprobación de PENDING.
@@ -336,7 +357,8 @@ export class WompiBillingProvider {
           if (
             existing.userId !== params.userId ||
             existing.currency !== 'COP' ||
-            existing.description !== description
+            parseWompiPaymentDescription(existing.description).planId !== params.planId ||
+            parseWompiPaymentDescription(existing.description).interval !== params.interval
           ) {
             throw new WompiError(
               'IDEMPOTENCY_CONFLICT',
@@ -407,14 +429,19 @@ export class WompiBillingProvider {
           }
         }
 
-        const amountInCents = wompiAmountInCents(params.planId, params.interval);
+        if (pricingMode === 'usd_trm' && (!newExchange || !rateCovers(newExchange, new Date()))) {
+          throw new WompiError('EXCHANGE_RATE_UNAVAILABLE', 'La TRM cambió de vigencia. Prepara el importe de nuevo.', 503);
+        }
+        const amountInCents = newExchange
+          ? convertUsdToCopCents(newExchange.usdAmountInCents, newExchange.rateHundredths)
+          : wompiAmountInCents(params.planId, params.interval);
         return tx.payment.create({
           data: {
             userId: params.userId,
             amountCents: amountInCents,
             currency: 'COP',
             status: 'PENDING',
-            description,
+            description: newExchange ? `${exchangeQuoteTag(newExchange)} ${description}` : description,
             idempotencyKey,
           },
         });
@@ -486,6 +513,7 @@ export class WompiBillingProvider {
       redirectUrl: checkoutUrl,
       amountInCents,
       currency: 'COP' as const,
+      exchangeQuote: readExchangeQuote(payment.description, amountInCents),
       // Se conserva el contrato histórico. Mientras el pago está pendiente,
       // este identificador correlaciona el intento; no representa acceso activo.
       subscriptionId: subscription?.id ?? payment.id,

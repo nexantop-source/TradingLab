@@ -70,6 +70,8 @@ WOMPI_PUBLIC_KEY=
 WOMPI_PRIVATE_KEY=               # solo para API/tokenización futura
 WOMPI_INTEGRITY_SECRET=
 WOMPI_EVENTS_SECRET=
+WOMPI_PRICING_MODE=usd_trm        # usd_trm | fixed_cop (compatibilidad/pruebas)
+# Los cuatro importes siguientes SOLO se usan con fixed_cop:
 WOMPI_STANDARD_MONTHLY_AMOUNT_IN_CENTS=
 WOMPI_STANDARD_YEARLY_AMOUNT_IN_CENTS=
 WOMPI_PREMIUM_MONTHLY_AMOUNT_IN_CENTS=
@@ -91,18 +93,22 @@ reflejarse en `MARKET_DATA_DELAY_SECONDS` para que la interfaz la declare con ho
 ## 4. Conectar Wompi
 
 La implementación usa el **Checkout Web oficial**. TradingLab genera en servidor una referencia
-opaca única, congela el importe de las variables `WOMPI_*_AMOUNT_IN_CENTS`, define una expiración
+opaca única, congela el importe de la cotización, define una expiración
 de 30 minutos, firma `<referencia><importe>COP<expiración><secreto-de-integridad>` y redirige a
 `https://checkout.wompi.co/p/`.
-Wompi solo admite COP en este flujo. No se convierte desde USD ni se acepta un importe enviado por
-el navegador. Referencias oficiales: [Checkout Web](https://docs.wompi.co/docs/colombia/widget-checkout-web/),
+Wompi solo admite COP en este flujo. Con `WOMPI_PRICING_MODE=usd_trm`, el servidor convierte
+el precio USD de `PLAN_ENTITLEMENTS` usando la TRM vigente publicada por la Superintendencia
+Financiera en [Datos Abiertos Colombia](https://www.datos.gov.co/Econom-a-y-Finanzas/Tasa-de-Cambio-Representativa-del-Mercado-TRM/32sa-8pi3).
+No se acepta un precio ni una tasa enviados por el navegador. Referencias oficiales: [Checkout Web](https://docs.wompi.co/docs/colombia/widget-checkout-web/),
 [eventos](https://docs.wompi.co/docs/colombia/eventos/) y
 [transacciones](https://docs.wompi.co/docs/colombia/transacciones/).
 
 1. En el Dashboard de comercios configura las tres credenciales necesarias del ambiente correspondiente: llave pública, secreto de integridad y secreto de eventos. Los
    secretos de integridad y eventos son diferentes de las llaves pública y privada.
-2. Define `BILLING_PROVIDER=wompi`, `WOMPI_ENVIRONMENT` y los cuatro precios fijos. Un importe está
-   expresado en centavos: COP 59.900 se configura como `5990000`.
+2. Prepara `WOMPI_ENVIRONMENT` y `WOMPI_PRICING_MODE=usd_trm`. El catálogo mantiene Plus
+   USD 14,99/mes o 149/año y Pro USD 29,99/mes o 299/año. Conserva `BILLING_PROVIDER=disabled`
+   hasta completar la configuración y las pruebas. El modo alternativo `fixed_cop` exige cuatro
+   importes fijos en centavos: COP 59.900 se configura como `5990000`.
 3. `NEXT_PUBLIC_APP_URL` debe ser el origen HTTPS público. Wompi vuelve a
    `/perfil?checkout=wompi&id=<ID>`. La UI puede consultar de forma autenticada y de solo lectura
    `/api/billing/status?id=<ID>`; esta consulta **nunca activa** una membresía.
@@ -122,16 +128,34 @@ enlace y muestra el ID; no se aplica un código manual a otra cuenta. El pago pe
 al `userId` registrado por el servidor. Este flujo vende un periodo, sin débitos recurrentes.
 
 ```bash
-firebase apphosting:secrets:set WOMPI_PUBLIC_KEY --project nexant-87204
-firebase apphosting:secrets:set WOMPI_INTEGRITY_SECRET --project nexant-87204
-firebase apphosting:secrets:set WOMPI_EVENTS_SECRET --project nexant-87204
-firebase apphosting:secrets:grantaccess WOMPI_PUBLIC_KEY,WOMPI_INTEGRITY_SECRET,WOMPI_EVENTS_SECRET \
+firebase apphosting:secrets:set TRADINGLAB_WOMPI_PUBLIC_KEY --project nexant-87204
+firebase apphosting:secrets:set TRADINGLAB_WOMPI_INTEGRITY_SECRET --project nexant-87204
+firebase apphosting:secrets:set TRADINGLAB_WOMPI_EVENTS_SECRET --project nexant-87204
+firebase apphosting:secrets:grantaccess TRADINGLAB_WOMPI_PUBLIC_KEY,TRADINGLAB_WOMPI_INTEGRITY_SECRET,TRADINGLAB_WOMPI_EVENTS_SECRET \
   --backend tradinglab --project nexant-87204
 ```
 
-Después referencia esos nombres como secretos `RUNTIME` en `apphosting.yaml`, configura allí
-`WOMPI_ENVIRONMENT` y los cuatro importes COP, cambia `BILLING_PROVIDER` a `wompi` y despliega
-primero en Sandbox. `WOMPI_PRIVATE_KEY` no se necesita para Checkout Web ni para consultar una
+Para cargar los valores desde `.env.wompi.local` (ignorado por Git), sin incluirlos en
+argumentos de terminal ni imprimirlos, usa Node 24 y la sesión Firebase de
+`nexantop@gmail.com`:
+
+```bash
+node scripts/upload-wompi-secrets.mjs          # solo valida el archivo local
+node scripts/upload-wompi-secrets.mjs --apply  # carga nuevas versiones y concede acceso
+```
+
+El script exige producción con `BILLING_PROVIDER=disabled`, no guarda la llave privada
+y no cambia el webhook ni activa pagos. Cada ejecución con `--apply` crea nuevas
+versiones: no lo ejecutes para consultar el estado. Los nombres `TRADINGLAB_*` evitan
+modificar secretos de Nexant u otros backends. Esto no sustituye la regeneración de
+secretos en Wompi: si se compartieron en un chat o comentario, deben rotarse allí,
+coordinar otras aplicaciones afectadas, actualizar el archivo local, subir las nuevas
+versiones y desplegar de nuevo antes de habilitar cobros.
+
+`apphosting.yaml` referencia esos nombres como secretos `RUNTIME`, con ambiente de producción
+y `usd_trm`, pero mantiene facturación desactivada. Antes de cambiar `BILLING_PROVIDER` a `wompi`,
+prueba la integración en un entorno Sandbox separado con sus propias credenciales y webhook.
+`WOMPI_PRIVATE_KEY` no se necesita para Checkout Web ni para consultar una
 transacción y no debe añadirse hasta implementar tokenización/cargos API con un alcance aprobado.
 
 El webhook limita el tamaño, exige JSON, valida el ambiente y calcula SHA-256 usando la lista
@@ -152,6 +176,23 @@ reportara una aprobación tardía o coexistiera otro periodo activo, el pago pas
 `REVIEW_REQUIRED`, genera una alerta de soporte y **no** reemplaza ni extiende la membresía. El
 importe se valida contra el snapshot inmutable guardado en `Payment`, por lo que cambiar precios no
 invalida compras ya abiertas.
+
+### Conversión USD a COP
+
+La TRM es una tasa oficial diaria, no una cotización de mercado minuto a minuto. Se consulta
+`GET https://www.datos.gov.co/resource/32sa-8pi3.json` filtrando la fecha actual en Colombia
+(UTC−5) dentro del intervalo inclusivo `vigenciadesde`–`vigenciahasta`. La vigencia puede abarcar
+fines de semana y festivos. Una tasa futura, vencida, ambigua o inválida bloquea un nuevo intento;
+no se utiliza una tasa inventada ni la última conocida fuera de vigencia. La caché en memoria dura
+como máximo una hora y nunca ignora la fecha de vigencia; la consulta tiene timeout y límite de tamaño.
+
+Se calcula `round(centavos_USD × TRM_en_centésimas / 100)` en centavos COP, sin recargo de
+conversión. El checkout muestra USD base, COP final con dos decimales, TRM, fuente y fechas antes
+de abrir Wompi. Los bancos pueden aplicar cargos propios. La cotización queda persistida en un
+tag versionado `[tl:fx:v1:…]` en `Payment.description`, junto a los metadatos existentes de plan;
+no contiene información personal. Así no se requiere una migración destructiva ni se pierde la
+auditoría. Los reintentos reutilizan importe, tasa y expiración originales sin consultar de nuevo
+la TRM. El webhook sigue comparando el importe COP persistido, nunca la tasa del día del evento.
 
 Wompi puede generar un segundo ID de transacción con la **misma referencia** cuando el pagador usa
 su reintento oficial tras un rechazo. La reconciliación admite que ese segundo ID aprobado sustituya

@@ -4,11 +4,17 @@ import { safeWompiCheckoutUrl } from '../src/lib/checkout-url';
 const mocks = vi.hoisted(() => ({
   transaction: vi.fn(), userUpdate: vi.fn(), paymentFind: vi.fn(),
   pendingFind: vi.fn(), paymentCreate: vi.fn(), subscriptionFind: vi.fn(),
+  currentTrm: vi.fn(),
 }));
 vi.mock('../src/lib/db', () => ({ db: {
   $transaction: mocks.transaction,
   subscription: { findUnique: mocks.subscriptionFind },
+  payment: { findUnique: mocks.paymentFind },
 } }));
+vi.mock('../src/lib/cop-exchange', async importOriginal => ({
+  ...await importOriginal<typeof import('../src/lib/cop-exchange')>(), currentTrm: mocks.currentTrm,
+}));
+import { colombiaDay, readExchangeQuote } from '../src/lib/cop-exchange';
 import { WompiBillingProvider, wompiReference } from '../src/lib/wompi';
 
 const params = { userId: 'account-one', email: 'test@example.com', planId: 'STANDARD' as const, interval: 'MONTHLY' as const, idempotencyKey: 'intent-one-12345678' };
@@ -23,6 +29,7 @@ describe('Wompi checkout identity contract', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.stubEnv('WOMPI_ENVIRONMENT', 'sandbox');
+    vi.stubEnv('WOMPI_PRICING_MODE', 'fixed_cop');
     vi.stubEnv('WOMPI_PUBLIC_KEY', 'pub_test_contract-fixture');
     vi.stubEnv('WOMPI_INTEGRITY_SECRET', secret);
     vi.stubEnv('WOMPI_PRIVATE_KEY', '');
@@ -75,6 +82,39 @@ describe('Wompi checkout identity contract', () => {
     vi.stubEnv(key, '');
     await expect(new WompiBillingProvider().createCheckout(params)).rejects.toMatchObject({ code: 'WOMPI_NOT_CONFIGURED' });
     expect(mocks.transaction).not.toHaveBeenCalled();
+  });
+  it('converts server catalog USD and persists the exact rate with the payment', async () => {
+    vi.stubEnv('WOMPI_PRICING_MODE', 'usd_trm');
+    const day = colombiaDay(new Date());
+    mocks.currentTrm.mockResolvedValue({ source: 'SFC_TRM', rateHundredths: 312608, validFrom: day, validThrough: day });
+    const result = await new WompiBillingProvider().createCheckout(params);
+    if (result.status !== 'REDIRECT') throw new Error('Expected redirect');
+    expect(result.amountInCents).toBe(4685994);
+    expect(result.exchangeQuote?.usdAmountInCents).toBe(1499);
+    const persisted = await mocks.paymentCreate.mock.results[0].value;
+    expect(readExchangeQuote(persisted.description, persisted.amountCents)).toEqual(result.exchangeQuote);
+    expect(new URL(result.redirectUrl).searchParams.get('amount-in-cents')).toBe('4685994');
+    // Later retry works without asking for a new rate, even during an outage.
+    mocks.paymentFind.mockResolvedValue(persisted);
+    mocks.currentTrm.mockRejectedValue(new Error('TRM offline'));
+    const retry = await new WompiBillingProvider().createCheckout(params);
+    expect(retry).toMatchObject({ paymentId: result.paymentId, reference: result.reference,
+      redirectUrl: result.redirectUrl, expiresAt: result.expiresAt,
+      amountInCents: result.amountInCents, exchangeQuote: result.exchangeQuote });
+    expect(mocks.currentTrm).toHaveBeenCalledTimes(1);
+    expect(mocks.paymentCreate).toHaveBeenCalledTimes(1);
+  });
+  it('does not start a database transaction without a verified exchange rate', async () => {
+    vi.stubEnv('WOMPI_PRICING_MODE', 'usd_trm');
+    mocks.currentTrm.mockRejectedValue(new Error('TRM offline'));
+    await expect(new WompiBillingProvider().createCheckout(params)).rejects.toMatchObject({ code: 'EXCHANGE_RATE_UNAVAILABLE' });
+    expect(mocks.transaction).not.toHaveBeenCalled();
+  });
+  it('does not reuse a persisted quote for a different plan', async () => {
+    const first = await new WompiBillingProvider().createCheckout(params);
+    expect(first.status).toBe('REDIRECT');
+    mocks.paymentFind.mockResolvedValue(await mocks.paymentCreate.mock.results[0].value);
+    await expect(new WompiBillingProvider().createCheckout({ ...params, planId: 'PREMIUM' })).rejects.toMatchObject({ code: 'IDEMPOTENCY_CONFLICT' });
   });
 });
 
