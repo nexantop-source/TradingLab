@@ -1,4 +1,5 @@
 'use client';
+import { AssetIcon } from '@/components/investment/AssetIcon';
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
@@ -217,6 +218,7 @@ export function JournalView({
                   <Card className="flex flex-wrap items-center gap-3 p-4">
                     <span className="min-w-0 flex-1">
                       <span className="num flex items-center gap-2 text-[13px] font-medium">
+                        <AssetIcon symbol={s.symbol} size="sm" />
                         {s.symbol}
                         <Badge tone={s.direction === 'BEARISH' ? 'negative' : 'positive'}>
                           {s.direction === 'BEARISH' ? 'Bajista' : 'Alcista'}

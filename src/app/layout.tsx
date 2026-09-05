@@ -5,6 +5,7 @@ import { LEGAL_ENTITY_DESCRIPTOR } from '@tl/types/compliance';
 import { AdPrivacyBanner } from '@/components/ads/AdPrivacy';
 import './globals.css';
 import './investment.css';
+import './instrument-icons.css';
 
 const sans = localFont({
   src: '../../identidad visual/fuentes/instrument-sans-latin.woff2',

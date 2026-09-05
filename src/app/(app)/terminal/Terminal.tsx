@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { AssetIcon } from '@/components/investment/AssetIcon';
 import { Search, Star, X, Maximize2, ChevronUp } from 'lucide-react';
 import type { Candle, DataProvenance, IndicatorId, SessionUser, Timeframe } from '@tl/types';
 import { TIMEFRAMES } from '@tl/types';
@@ -214,7 +215,7 @@ export function Terminal(props: TerminalProps) {
       {/* ── Barra superior ───────────────────────────────────────────────── */}
       <header className="app-terminal-header flex shrink-0 flex-wrap items-center gap-3 border-b border-[var(--color-border)] px-4 py-2.5">
         <div className="flex items-center gap-2">
-          <span className="num text-sm font-semibold">{props.symbol.symbol}</span>
+          <AssetIcon symbol={props.symbol.symbol} /><span className="num text-sm font-semibold">{props.symbol.symbol}</span>
           <span className="hidden text-[11px] text-[var(--color-muted)] sm:inline">{props.symbol.name}</span>
         </div>
 
@@ -273,7 +274,7 @@ export function Terminal(props: TerminalProps) {
                     onClick={() => selectSymbol(c.symbol)}
                     className="flex w-full items-center justify-between gap-2 rounded-[var(--radius-xs)] px-2 py-1.5 text-left hover:bg-[var(--color-overlay)]"
                   >
-                    <span className="num text-[11px]">{c.symbol}</span>
+                    <span className="inline-flex items-center gap-2"><AssetIcon symbol={c.symbol} size="sm" /><span className="num text-[11px]">{c.symbol}</span></span>
                     {c.minPlan !== 'FREE' && <Badge tone="gold">{c.minPlan}</Badge>}
                   </button>
                 ))}
@@ -294,6 +295,7 @@ export function Terminal(props: TerminalProps) {
                         : 'hover:bg-[var(--color-overlay)]',
                     )}
                   >
+                    <AssetIcon symbol={w.symbol} size="sm" />
                     {w.favorite && (
                       <Star className="size-3 shrink-0 fill-[var(--color-gold)] text-[var(--color-gold)]" aria-label="Favorito" />
                     )}
@@ -600,7 +602,7 @@ function OpenPositionsTable({
             onMouseLeave={() => onHover(null)}
             className="border-b border-[var(--color-border)] last:border-0 hover:bg-[var(--color-overlay)]"
           >
-            <td className="num px-3 py-2 font-medium">{p.symbol}</td>
+            <td className="num px-3 py-2 font-medium"><span className="inline-flex items-center gap-2"><AssetIcon symbol={p.symbol} size="sm" />{p.symbol}</span></td>
             <td className="px-3 py-2">
               <Badge tone={p.direction === 'BEARISH' ? 'negative' : 'positive'}>
                 {p.direction === 'BEARISH' ? 'Bajista' : 'Alcista'}
@@ -651,7 +653,7 @@ function HistoryTable({ items }: { items: ClosedItem[] }) {
             aria-expanded={expanded === s.id}
             className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-[var(--color-overlay)]"
           >
-            <span className="num text-[11px] font-medium">{s.symbol}</span>
+            <span className="inline-flex items-center gap-2 num text-[11px] font-medium"><AssetIcon symbol={s.symbol} size="sm" />{s.symbol}</span>
             <Badge tone={s.direction === 'BEARISH' ? 'negative' : 'positive'}>
               {s.direction === 'BEARISH' ? 'Bajista' : 'Alcista'}
             </Badge>

@@ -1,20 +1,19 @@
 'use client';
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowDownUp, ArrowUpRight, Search, Star, Layers3, Globe2, Bitcoin, ChevronRight } from 'lucide-react';
+import { ArrowDownUp, ArrowUpRight, Search, Star, ChevronRight } from 'lucide-react';
 import { ASSET_CLASS_LABEL, type AssetClass, type PlanId } from '@tl/types';
 import { PLAN_ENTITLEMENTS, planAtLeast } from '@tl/types/plans';
 import { Modal } from '@tl/ui';
 import { apiFetch } from '@/lib/client-api';
 import { FluidControl } from './FluidControl';
+import { AssetIcon } from './AssetIcon';
+export { AssetIcon } from './AssetIcon';
 
 export interface ExplorerAsset {
   symbol: string; name: string; assetClass: AssetClass; precision: number; currency: string;
   description: string; risk: number; minPlan: PlanId; session: string; price: number | null;
   change: number | null; synthetic: boolean; source: string; timestamp: number;
-}
-export function AssetIcon({ symbol, assetClass }: { symbol: string; assetClass: AssetClass }) {
-  return <span className={`invest-asset-icon ${assetClass.toLowerCase()}`} aria-hidden="true">{assetClass === 'ETF' ? <Layers3 size={19} /> : assetClass === 'FOREX' ? <Globe2 size={19} /> : assetClass === 'CRYPTO' ? symbol === 'BTCUSD' ? <Bitcoin size={22} /> : symbol.slice(0, 1) : symbol.slice(0, 1)}</span>;
 }
 export function MarketExplorer({ assets, authenticated = false, initialWatchlist = [], plan = 'FREE' }: {
   assets: ExplorerAsset[]; authenticated?: boolean; initialWatchlist?: string[]; plan?: PlanId;

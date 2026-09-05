@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { AssetIcon } from '@/components/investment/AssetIcon';
 import { MarketOverview } from '@/components/investment/MarketOverview';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -239,6 +240,7 @@ export default async function DashboardPage() {
                   <li key={p.id} className="flex flex-wrap items-center gap-3 px-5 py-3">
                     <span className="min-w-0 flex-1">
                       <span className="num flex items-center gap-2 text-[13px] font-medium">
+                        <AssetIcon symbol={p.symbol} size="sm" />
                         {p.symbol}
                         <Badge tone={p.direction === 'BEARISH' ? 'negative' : 'positive'}>
                           {p.direction === 'BEARISH' ? 'Bajista' : 'Alcista'}
@@ -281,7 +283,7 @@ export default async function DashboardPage() {
                   return (
                     <li key={s.id} className="flex items-center gap-3 px-5 py-3">
                       <span className="min-w-0 flex-1">
-                        <span className="num text-[13px] font-medium">{s.symbol}</span>
+                        <span className="inline-flex items-center gap-2 num text-[13px] font-medium"><AssetIcon symbol={s.symbol} size="sm" />{s.symbol}</span>
                         <span className="mt-0.5 block truncate text-[11px] text-[var(--color-subtle)]">
                           {s.rationale.slice(0, 70)}…
                         </span>
@@ -401,7 +403,8 @@ export default async function DashboardPage() {
                       href={`/terminal?symbol=${q.symbol}`}
                       className="flex items-center justify-between gap-2 px-4 py-2.5 hover:bg-[var(--color-overlay)]"
                     >
-                      <span className="min-w-0">
+                      <AssetIcon symbol={q.symbol} size="sm" />
+                      <span className="min-w-0 flex-1">
                         <span className="num block text-[12px] font-medium">{q.symbol}</span>
                         <span className="block truncate text-[10px] text-[var(--color-subtle)]">
                           {meta?.name}

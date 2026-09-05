@@ -1,0 +1,74 @@
+/* Identity artwork is kept intact on a neutral backing in both themes. */
+.instrument-icon {
+  --instrument-size: 40px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--instrument-size);
+  height: var(--instrument-size);
+  flex: 0 0 var(--instrument-size);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 1px #8b98ad26;
+  vertical-align: middle;
+  isolation: isolate;
+}
+.instrument-icon--sm { --instrument-size: 28px; }
+.instrument-icon--lg { --instrument-size: 54px; }
+.instrument-icon > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: inherit;
+}
+.instrument-icon--pair { background: transparent; box-shadow: none; }
+.instrument-icon--pair > img:first-child {
+  width: 76%;
+  height: 76%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px #8b98ad26;
+}
+.instrument-icon > .instrument-icon-counter {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 61%;
+  height: 61%;
+  object-fit: cover;
+  border: 2px solid var(--color-surface, #fff);
+  box-sizing: border-box;
+  background: #fff;
+}
+.instrument-icon--fallback { background: var(--color-overlay); }
+.instrument-icon-fallback {
+  font: 600 8px/1 system-ui, sans-serif;
+  letter-spacing: 0;
+  color: var(--color-text);
+  max-width: 100%;
+  overflow: hidden;
+}
+.invest-brand-stack {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 0 20px;
+}
+.invest-brand-stack > .instrument-icon {
+  margin-inline-start: -7px;
+  border: 3px solid #fff;
+  box-shadow: 0 3px 10px #172e5914;
+}
+.invest-brand-stack > .instrument-icon:first-child { margin-inline-start: 0; }
+.invest-preview-tabs .instrument-icon--sm { --instrument-size: 24px; }
+.app-terminal-watchlist { width: 244px; }
+@media (max-width: 760px) {
+  .instrument-icon { --instrument-size: 34px; }
+  .instrument-icon--sm { --instrument-size: 26px; }
+  .instrument-icon--lg { --instrument-size: 48px; }
+  .invest-preview-tabs button { gap: 6px; }
+}

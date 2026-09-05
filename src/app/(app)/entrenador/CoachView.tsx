@@ -1,4 +1,5 @@
 'use client';
+import { AssetIcon } from '@/components/investment/AssetIcon';
 
 import * as React from 'react';
 import Link from 'next/link';
@@ -254,7 +255,7 @@ export function CoachView({
                 <details className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)]">
                   <summary className="flex cursor-pointer flex-wrap items-center gap-2 px-4 py-3 text-[13px]">
                     <Badge tone="violet">{KIND_LABEL[h.kind as Kind] ?? h.kind}</Badge>
-                    {h.symbol && <span className="num font-medium">{h.symbol}</span>}
+                    {h.symbol && <span className="num inline-flex items-center gap-2 font-medium"><AssetIcon symbol={h.symbol} size="sm" />{h.symbol}</span>}
                     <span className="ml-auto text-[11px] text-[var(--color-subtle)]">
                       {formatRelative(h.createdAt)}
                     </span>

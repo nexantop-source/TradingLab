@@ -1,0 +1,116 @@
+{
+  "apple.svg": {
+    "url": "https://s3-symbol-logo.tradingview.com/apple.svg"
+  },
+  "microsoft.svg": {
+    "url": "https://s3-symbol-logo.tradingview.com/microsoft.svg"
+  },
+  "nvidia.svg": {
+    "url": "https://s3-symbol-logo.tradingview.com/nvidia.svg"
+  },
+  "tesla.svg": {
+    "url": "https://s3-symbol-logo.tradingview.com/tesla.svg"
+  },
+  "amazon.svg": {
+    "url": "https://s3-symbol-logo.tradingview.com/amazon.svg"
+  },
+  "btc.svg": {
+    "url": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/svg/color/btc.svg"
+  },
+  "eth.svg": {
+    "url": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/svg/color/eth.svg"
+  },
+  "sol.svg": {
+    "url": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/svg/color/sol.svg"
+  },
+  "xrp.svg": {
+    "url": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/svg/color/xrp.svg"
+  },
+  "ada.svg": {
+    "url": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/svg/color/ada.svg"
+  },
+  "doge.svg": {
+    "url": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/svg/color/doge.svg"
+  },
+  "avax.svg": {
+    "url": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/svg/color/avax.svg"
+  },
+  "link.svg": {
+    "url": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/svg/color/link.svg"
+  },
+  "dot.svg": {
+    "url": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/svg/color/dot.svg"
+  },
+  "ltc.svg": {
+    "url": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/svg/color/ltc.svg"
+  },
+  "bnb.svg": {
+    "url": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/svg/color/bnb.svg"
+  },
+  "uni.svg": {
+    "url": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/svg/color/uni.svg"
+  },
+  "flag-us.svg": {
+    "url": "https://raw.githubusercontent.com/lipis/flag-icons/main/flags/1x1/us.svg"
+  },
+  "flag-eu.svg": {
+    "url": "https://raw.githubusercontent.com/lipis/flag-icons/main/flags/1x1/eu.svg"
+  },
+  "flag-gb.svg": {
+    "url": "https://raw.githubusercontent.com/lipis/flag-icons/main/flags/1x1/gb.svg"
+  },
+  "flag-jp.svg": {
+    "url": "https://raw.githubusercontent.com/lipis/flag-icons/main/flags/1x1/jp.svg"
+  },
+  "flag-mx.svg": {
+    "url": "https://raw.githubusercontent.com/lipis/flag-icons/main/flags/1x1/mx.svg"
+  },
+  "flag-au.svg": {
+    "url": "https://raw.githubusercontent.com/lipis/flag-icons/main/flags/1x1/au.svg"
+  },
+  "flag-ch.svg": {
+    "url": "https://raw.githubusercontent.com/lipis/flag-icons/main/flags/1x1/ch.svg"
+  },
+  "flag-ca.svg": {
+    "url": "https://raw.githubusercontent.com/lipis/flag-icons/main/flags/1x1/ca.svg"
+  },
+  "flag-nz.svg": {
+    "url": "https://raw.githubusercontent.com/lipis/flag-icons/main/flags/1x1/nz.svg"
+  },
+  "flag-co.svg": {
+    "url": "https://raw.githubusercontent.com/lipis/flag-icons/main/flags/1x1/co.svg"
+  },
+  "vanguard.svg": {
+    "url": "https://s3-symbol-logo.tradingview.com/vanguard.svg"
+  },
+  "spdr-sandp500-etf-tr.svg": {
+    "url": "https://s3-symbol-logo.tradingview.com/spdr-sandp500-etf-tr.svg"
+  },
+  "invesco.svg": {
+    "url": "https://s3-symbol-logo.tradingview.com/invesco.svg"
+  },
+  "ishares.svg": {
+    "url": "https://s3-symbol-logo.tradingview.com/ishares.svg"
+  },
+  "schwab.svg": {
+    "url": "https://s3-symbol-logo.tradingview.com/schwab.svg"
+  },
+  "indices-s-and-p-500.svg": {
+    "url": "https://s3-symbol-logo.tradingview.com/indices/s-and-p-500.svg"
+  },
+  "indices-nasdaq-100.svg": {
+    "url": "https://s3-symbol-logo.tradingview.com/indices/nasdaq-100.svg"
+  },
+  "indices-dax.svg": {
+    "url": "https://s3-symbol-logo.tradingview.com/indices/dax.svg"
+  },
+  "metal-gold.svg": {
+    "url": "https://s3-symbol-logo.tradingview.com/metal/gold.svg"
+  },
+  "metal-silver.svg": {
+    "url": "https://s3-symbol-logo.tradingview.com/metal/silver.svg"
+  },
+  "crude-oil.svg": {
+    "url": "https://s3-symbol-logo.tradingview.com/crude-oil.svg"
+  }
+}

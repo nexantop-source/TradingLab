@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ArrowUpRight, Compass, LayoutDashboard, Layers3, GraduationCap, WalletCards, Search } from 'lucide-react';
 import { Logo } from '@/components/Logo';
 import { FluidControl } from './FluidControl';
+import { AssetIcon } from './AssetIcon';
 
 export interface PreviewSample { symbol: string; name: string; price: number; change: number; values: number[]; synthetic: boolean; source: string; precision: number }
 export function PlatformPreview({ samples }: { samples: PreviewSample[] }) {
@@ -17,7 +18,7 @@ export function PlatformPreview({ samples }: { samples: PreviewSample[] }) {
   return <div className="invest-preview" aria-label="Vista interactiva de la plataforma">
     <aside className="invest-preview-sidebar"><Logo size="sm" /><div>{[[LayoutDashboard, 'Resumen', '/panel'], [Compass, 'Explorar', '/mercados'], [Layers3, 'Trading', '/terminal'], [WalletCards, 'Portafolio', '/portafolio'], [GraduationCap, 'Academia', '/academia']].map(([Icon, label, href]) => { const I = Icon as typeof Compass; return <Link className={label === 'Trading' ? 'active' : ''} href={String(href)} key={String(label)}><I size={17} />{String(label)}</Link>; })}</div><span className="invest-preview-account"><span>Tu espacio para practicar</span><b>Cuenta DEMO</b></span></aside>
     <div className="invest-preview-main"><div className="invest-preview-top"><span>Tu espacio de trading</span><Link href="/mercados" aria-label="Buscar mercados"><Search size={16} /></Link><span className="invest-demo-chip">DEMO</span></div>
-      <div className="invest-preview-tabs">{samples.map(s => <button key={s.symbol} aria-pressed={active === s.symbol} onClick={() => setActive(s.symbol)}><span>{s.symbol === 'BTCUSD' ? '₿' : s.symbol === 'EURUSD' ? '€' : 'S'}</span><strong>{s.symbol}</strong><small className={s.change < 0 ? 'down' : ''}>{s.change >= 0 ? '+' : ''}{s.change.toFixed(2)}%</small></button>)}</div>
+      <div className="invest-preview-tabs">{samples.map(s => <button key={s.symbol} aria-pressed={active === s.symbol} onClick={() => setActive(s.symbol)}><AssetIcon symbol={s.symbol} size="sm" /><strong>{s.symbol}</strong><small className={s.change < 0 ? 'down' : ''}>{s.change >= 0 ? '+' : ''}{s.change.toFixed(2)}%</small></button>)}</div>
       <div className="invest-preview-body"><div className="invest-preview-chart"><div className="invest-preview-asset"><div><span>{selected.name}</span><h2>{selected.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: selected.precision })}<small> USD</small></h2><span className="invest-preview-source">{selected.synthetic ? 'Precio simulado · DEMO' : selected.source}</span></div><Link href={`/terminal?symbol=${active}`} aria-label={`Abrir ${active} en la terminal`}><ArrowUpRight size={21} /></Link></div>
         <svg viewBox="0 0 720 240" className="invest-line-chart" role="img" aria-label={`Serie ${selected.synthetic ? 'simulada' : selected.source} de ${selected.symbol}, últimas ${range} velas de una hora`}>
           <defs><linearGradient id={id} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#3478f6" stopOpacity=".2" /><stop offset="100%" stopColor="#3478f6" stopOpacity="0" /></linearGradient></defs>
