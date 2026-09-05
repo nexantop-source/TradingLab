@@ -6,6 +6,7 @@ import { AdPrivacyBanner } from '@/components/ads/AdPrivacy';
 import './globals.css';
 import './investment.css';
 import './instrument-icons.css';
+import './marketing-visuals.css';
 
 const sans = localFont({
   src: '../../identidad visual/fuentes/instrument-sans-latin.woff2',

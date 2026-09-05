@@ -1,0 +1,222 @@
+/* Editorial imagery adds atmosphere; live data, copy and controls stay in HTML. */
+.investment-artwork { object-fit: cover; pointer-events: none; }
+.invest-hero { position: relative; isolation: isolate; background: #fafbfd; padding-top: 142px; }
+.invest-hero-art { position: absolute; z-index: -1; inset: 0 0 auto; height: 850px; overflow: hidden; }
+.invest-hero-art::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, #fafbfd15 45%, #fafbfd 100%); }
+.invest-hero-art .investment-artwork { object-position: center top; }
+.invest-hero h1 > span { color: #466c9c; }
+.invest-hero-copy > p { color: #455970; }
+.invest-hero-note { color: #50657b; }
+.invest-hero-copy { position: relative; }
+.invest-hero .invest-preview { margin-top: 64px; box-shadow: 0 2px 8px #0b24450d, 0 30px 75px -20px #163c6b30; }
+.investment-landing .invest-feature { padding: 34px; }
+.investment-landing .feature-universe { background: linear-gradient(145deg, #fff 40%, #eaf2ff); }
+.investment-landing .feature-coach { background: linear-gradient(145deg, #fff 20%, #f1ecfb); }
+.investment-landing .feature-coach .invest-coach-example { background: #ffffffb3; }
+.investment-landing .invest-feature > p { color: #55667d; }
+.investment-landing .feature-terminal > p { color: #b2c1d6; }
+
+/* Learning becomes an editorial chapter, not another text-only feature list. */
+.visual-home-learning { background: #eef3ef; }
+.home-learning-intro { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+.home-learning-intro > div > p { color: #53665e; font-size: 15px; line-height: 1.8; max-width: 440px; }
+.home-learning-intro .invest-button { margin-top: 27px; background: #fff; }
+.home-learning-art { position: relative; aspect-ratio: 4 / 3; border-radius: 28px; overflow: hidden; }
+.home-learning-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; margin-top: 54px; }
+.home-learning-steps > div { border-top: 1px solid #cddbd3; padding-top: 23px; }
+.home-step-top { display: flex; justify-content: space-between; align-items: center; color: #477668; }
+.home-step-top small { font-size: 11px; letter-spacing: .1em; }
+.home-learning-steps h3 { margin-top: 20px; font-size: 19px; font-weight: 600; letter-spacing: -.035em; }
+.home-learning-steps p { margin-top: 9px; color: #53665e; font-size: 12px; line-height: 1.8; }
+
+/* Shared plans: aligned reading rhythm and all commercial data left untouched. */
+.visual-pricing { padding-block: 100px; }
+.visual-pricing .invest-billing { margin: 34px 0 44px; }
+.visual-pricing .invest-plan-grid { gap: 24px; align-items: stretch; }
+.visual-pricing .invest-plan { position: relative; padding: 30px 32px 36px; border-radius: 26px; background: linear-gradient(160deg, #f0f6f4, #fff 45%); border-color: #dbe5df; }
+.visual-pricing .plan-standard { background: linear-gradient(155deg, #eaf2ff, #fff 48%); }
+.visual-pricing .plan-premium { background: linear-gradient(155deg, #eeebf9, #fff 48%); border-color: #e1dced; }
+.visual-pricing .invest-plan.featured { border: 1px solid #5285df; box-shadow: 0 12px 40px -18px #205dba40; }
+.visual-pricing .invest-plan-label { font-size: 9px; min-height: 27px; flex-wrap: wrap; color: #526579; }
+.visual-pricing .invest-plan-label b { font-size: 9px; padding: 6px 10px; }
+.invest-plan-emblem { width: 58px; height: 58px; border-radius: 18px; display: grid; place-items: center; margin-top: 26px; background: #dfeee7; color: #246650; box-shadow: inset 0 1px 0 #ffffffa0; }
+.plan-standard .invest-plan-emblem { background: #dae8ff; color: #185adb; }
+.plan-premium .invest-plan-emblem { background: #e5def8; color: #6b46a4; }
+.visual-pricing .invest-plan h3 { font-size: 30px; margin-top: 20px; }
+.visual-pricing .invest-plan-tagline { min-height: 40px; font-size: 13px; }
+.visual-pricing .invest-plan-price { margin-top: 22px; gap: 10px; }
+.visual-pricing .invest-plan-price strong { font-size: clamp(38px, 4vw, 52px); }
+.visual-pricing .invest-billing-note { min-height: 38px; font-size: 11px; margin-top: 6px; }
+.visual-pricing .invest-plan .invest-button { margin-top: 23px; min-height: 48px; }
+.visual-pricing .invest-plan ul { padding-top: 28px; margin-top: 30px; gap: 17px; }
+.visual-pricing .invest-plan li { font-size: 12px; align-items: flex-start; line-height: 1.6; }
+.visual-pricing .invest-plan li svg { margin-top: 2px; }
+.invest-plan-included { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px 38px; margin: 30px 0; color: #526579; font-size: 12px; }
+.invest-plan-included span { display: flex; gap: 10px; align-items: center; }
+.invest-plan-included svg { color: #537a6c; flex-shrink: 0; }
+.invest-plan-comparison { border: 1px solid #dfe5ee; border-radius: 18px; background: #fff; overflow: hidden; margin: 30px 0; }
+.invest-plan-comparison summary { padding: 24px 28px; display: flex; justify-content: space-between; gap: 16px; align-items: center; cursor: pointer; font-size: 14px; font-weight: 600; list-style: none; }
+.invest-plan-comparison summary::-webkit-details-marker { display: none; }
+.invest-plan-comparison[open] summary svg { transform: rotate(180deg); }
+.invest-comparison-scroll { overflow-x: auto; }
+.invest-plan-comparison table { width: 100%; min-width: 570px; border-collapse: collapse; font-size: 12px; text-align: left; }
+.invest-plan-comparison caption { text-align: left; padding: 0 28px 18px; font-size: 11px; color: #526579; }
+.invest-plan-comparison th, .invest-plan-comparison td { padding: 16px 28px; border-top: 1px solid #e9edf3; }
+.invest-plan-comparison thead { background: #f4f7fb; }
+.invest-plan-comparison tbody th { font-weight: 500; }
+.invest-plan-comparison td { color: #526579; }
+.visual-pricing .invest-team { margin-top: 32px; padding: 38px 40px; gap: 40px; background: #f0f3f9; border-color: #e1e7ef; border-radius: 24px; }
+.visual-pricing .invest-team h3 { max-width: 520px; font-size: 25px; line-height: 1.2; margin-top: 12px; }
+.visual-pricing .invest-team p { font-size: 12px; line-height: 1.8; max-width: 540px; margin-top: 12px; }
+.visual-pricing .invest-team .invest-button { background: white; }
+.visual-pricing .invest-pricing-footnote { margin-top: 30px; font-size: 11px; }
+.visual-pricing-page { overflow: hidden; }
+.visual-pricing-header { position: relative; isolation: isolate; margin-bottom: 0; padding-top: 70px; padding-bottom: 20px !important; }
+.visual-pricing-header h1 { font-size: clamp(44px, 5.2vw, 66px); }
+.visual-pricing-header h1 span { color: #53739a; }
+.visual-pricing-art { position: absolute; inset: -96px -160px -110px; z-index: -1; opacity: .54; mask-image: linear-gradient(#000 45%, transparent 100%); }
+.visual-pricing-page .visual-pricing { padding-top: 12px; }
+
+/* Closing: the full image remains visible to the right, white copy on a dark scrim. */
+.invest-closing-visual { position: relative; isolation: isolate; width: min(1200px, calc(100% - 64px)); margin: 0 auto 88px; min-height: 520px; border-radius: 30px; overflow: hidden; text-align: left; padding: 76px 64px; background: #07101d; color: white; }
+.invest-closing-visual > .investment-artwork { z-index: -2; object-position: 65% center; }
+.invest-closing-visual::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, #060d1ae8 0%, #060d1ac9 34%, #060d1a12 67%); }
+.invest-closing-copy { max-width: 510px; }
+.invest-closing-visual .invest-eyebrow { color: #aecaf3; }
+.invest-closing-visual h2 { font-size: clamp(46px, 5.6vw, 70px); line-height: 1.02; margin: 20px 0; }
+.invest-closing-visual p { color: #c1cddd; line-height: 1.8; }
+.invest-closing-visual .invest-button { background: #fff; color: #13223a; margin-top: 28px; }
+.invest-closing-visual .invest-button:hover { background: #dfebff; }
+.invest-closing-visual small { display: block; margin-top: 16px; color: #abbcd1; font-size: 11px; }
+
+/* Public learning: spacious editorial layout with authentic curriculum metadata. */
+.learn-page { background: #fafbfd; }
+.learn-hero { display: grid; grid-template-columns: 1fr 1fr; gap: 54px; padding-block: 58px 72px; align-items: center; }
+.learn-hero h1 { font-size: clamp(40px, 4.8vw, 65px); line-height: 1.04; letter-spacing: -.06em; font-weight: 600; margin: 20px 0 23px; }
+.learn-hero h1 span { color: #4e7b6c; }
+.learn-hero-copy > p { font-size: 16px; color: #566879; line-height: 1.8; max-width: 455px; }
+.learn-hero .invest-button { margin-top: 28px; }
+.learn-hero-stats { display: flex; gap: 30px; margin-top: 36px; font-size: 11px; color: #566879; }
+.learn-hero-stats span + span { border-left: 1px solid #dbe3e0; padding-left: 30px; }
+.learn-hero-stats strong { display: block; font-size: 25px; font-weight: 600; color: #263f35; margin-bottom: 4px; }
+.learn-hero-art { position: relative; aspect-ratio: 1 / 1; overflow: hidden; border-radius: 30px; background: #e8ede6; }
+.learn-hero-art .investment-artwork { object-position: 50% center; }
+.learn-art-caption { position: absolute; bottom: 22px; left: 22px; right: 22px; display: flex; gap: 10px; align-items: center; justify-content: center; padding: 15px 12px; border: 1px solid #ffffffb0; border-radius: 12px; color: #284439; background: #fffffff0; font-size: 11px; font-weight: 500; }
+.learn-art-caption svg { flex-shrink: 0; }
+.learn-shortcuts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; padding-block: 0 72px; }
+.learn-shortcuts a { display: flex; flex-direction: column; border-top: 1px solid #d8e3df; padding-top: 26px; }
+.learn-shortcuts a > svg { color: #4d796c; }
+.learn-shortcuts h2 { margin-top: 22px; font-size: 17px; line-height: 1.3; letter-spacing: -.025em; font-weight: 600; }
+.learn-shortcuts p { color: #586b7c; font-size: 12px; line-height: 1.8; margin-top: 10px; margin-bottom: 20px; }
+.learn-shortcuts a > span { display: flex; gap: 8px; align-items: center; margin-top: auto; color: #185adb; font-size: 12px; font-weight: 500; min-height: 24px; }
+.learn-curriculum { border-top: 1px solid #e4e9ed; padding-block: 75px 90px; scroll-margin-top: 90px; }
+.learn-section-heading { display: flex; justify-content: space-between; gap: 45px; align-items: end; margin-bottom: 40px; }
+.learn-section-heading h2, .learn-next h2 { font-size: clamp(30px, 3.5vw, 44px); line-height: 1.1; letter-spacing: -.045em; font-weight: 600; margin-top: 15px; }
+.learn-section-heading h2 span { color: #6d7d90; }
+.learn-section-heading > p { max-width: 310px; font-size: 13px; color: #566879; line-height: 1.8; }
+.learn-featured-track { display: grid; grid-template-columns: 150px 1fr auto; align-items: center; gap: 35px; padding: 35px; border: 1px solid #cddfd6; background: linear-gradient(120deg, #e3eee7, #f1f6ed); border-radius: 24px; }
+.learn-featured-number { color: #659281; font-size: 80px; font-weight: 500; line-height: 1; letter-spacing: -.07em; }
+.learn-featured-number span { display: block; font-size: 8px; letter-spacing: .16em; margin-top: 18px; }
+.learn-featured-track .invest-eyebrow { color: #426959; font-size: 9px; }
+.learn-featured-track h3 { font-size: 25px; line-height: 1.2; font-weight: 600; letter-spacing: -.035em; margin-top: 12px; }
+.learn-featured-track p { color: #496358; font-size: 13px; line-height: 1.75; margin-top: 10px; max-width: 610px; }
+.learn-featured-arrow { display: grid; justify-items: end; gap: 14px; color: #385f4e; font-size: 11px; }
+.learn-track-grid, .learn-article-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 24px; }
+.learn-track { display: flex; flex-direction: column; padding: 28px; border: 1px solid #e1e7ed; background: #fff; border-radius: 20px; }
+.learn-track-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.learn-level { background: #edf4ef; color: #3e6c56; border-radius: 6px; padding: 6px 9px; font-size: 10px; font-weight: 500; }
+.level-intermedio .learn-level { background: #eaf1fc; color: #315f9f; }
+.level-avanzado .learn-level { background: #f0eaf9; color: #6b4994; }
+.learn-track-number { color: #7e8d9c; font-size: 12px; }
+.learn-track h3 { font-size: 19px; line-height: 1.25; letter-spacing: -.025em; font-weight: 600; margin-top: 24px; }
+.learn-track > p { margin-top: 12px; margin-bottom: 24px; font-size: 12px; line-height: 1.8; color: #566879; flex: 1; }
+.learn-track-meta { display: flex; align-items: center; gap: 10px; font-size: 11px; color: #566879; margin-top: 20px; }
+.learn-track .learn-track-meta { border-top: 1px solid #e9edf1; padding-top: 18px; margin-top: auto; justify-content: space-between; }
+.learn-track > small { color: #53657b; font-size: 10px; margin-top: 10px; }
+.learn-reading { background: #f0f3f8; }
+.learn-article { border: 1px solid #e0e6ee; background: #fff; border-radius: 22px; overflow: hidden; display: flex; flex-direction: column; }
+.learn-article-cover { height: 144px; padding: 23px; display: flex; justify-content: space-between; align-items: center; color: #325879; background: linear-gradient(130deg, #dce9f3, #edf4fa); }
+.learn-article-cover span { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
+.learn-article-cover span:first-child { max-width: 110px; }
+.cover-1 { color: #446b5b; background: linear-gradient(130deg, #dae8df, #edf3ee); }
+.cover-2 { color: #6b548c; background: linear-gradient(130deg, #e4def0, #f3eff8); }
+.learn-article-copy { padding: 27px; display: flex; flex-direction: column; flex: 1; }
+.learn-article-copy > small { display: flex; align-items: center; gap: 6px; color: #5a6b7e; font-size: 10px; }
+.learn-article h3 { margin-top: 15px; font-size: 20px; line-height: 1.3; letter-spacing: -.025em; font-weight: 600; }
+.learn-article p { font-size: 12px; color: #566879; line-height: 1.8; margin-top: 12px; margin-bottom: 20px; flex: 1; }
+.learn-article .invest-text-link { font-size: 12px; }
+.learn-next { text-align: center; }
+.learn-next > svg { margin-inline: auto; color: #4e7b6c; }
+.learn-next h2 { margin-top: 25px; }
+.learn-next p { margin-top: 20px; color: #566879; font-size: 14px; }
+.learn-next .invest-button { margin-top: 28px; }
+.learn-page a:focus-visible, .invest-plan-comparison summary:focus-visible, .invest-comparison-scroll:focus-visible { outline: 3px solid #185adb; outline-offset: 5px; }
+@media (hover: hover) {
+  .learn-track:hover, .learn-article:hover { border-color: #88a9b8; box-shadow: 0 8px 24px -12px #29495b24; }
+  .learn-featured-track:hover { border-color: #6d9b88; }
+  .learn-shortcuts a:hover h2 { color: #185adb; }
+}
+@media (max-width: 1050px) {
+  .visual-pricing .invest-plan { padding: 26px 23px 30px; }
+  .visual-pricing .invest-plan-label { min-height: 48px; align-content: start; }
+  .visual-pricing .invest-team { padding: 30px; }
+  .home-learning-intro, .learn-hero { gap: 34px; }
+  .learn-track-grid, .learn-article-grid { grid-template-columns: repeat(2, 1fr); }
+  .learn-shortcuts { grid-template-columns: repeat(2, 1fr); gap: 30px; }
+  .learn-featured-track { grid-template-columns: 100px 1fr; gap: 24px; }
+  .learn-featured-arrow { display: none; }
+}
+@media (max-width: 760px) {
+  .invest-hero { padding-top: 118px; }
+  .invest-hero-art { height: 650px; }
+  .invest-hero-art .investment-artwork { object-fit: cover; object-position: 60% top; opacity: .55; }
+  .invest-hero-art::after { background: linear-gradient(180deg, #fafbfd33, #fafbfd22 65%, #fafbfd); }
+  .invest-hero .invest-preview { margin-top: 42px; }
+  .investment-landing .invest-feature { padding: 28px; }
+  .home-learning-intro, .learn-hero { grid-template-columns: 1fr; gap: 34px; }
+  .home-learning-art { border-radius: 22px; }
+  .home-learning-steps { grid-template-columns: repeat(2, 1fr); gap: 26px; margin-top: 35px; }
+  .visual-pricing { padding-block: 65px; }
+  .visual-pricing .invest-plan-grid { gap: 22px; }
+  .visual-pricing .invest-plan { padding: 30px; }
+  .visual-pricing .invest-plan-label { min-height: 27px; align-items: center; }
+  .visual-pricing .invest-plan-tagline, .visual-pricing .invest-billing-note { min-height: 0; }
+  .visual-pricing .invest-plan-price strong { font-size: 50px; }
+  .visual-pricing .invest-plan-included { flex-direction: column; padding: 0 12px; font-size: 11px; }
+  .visual-pricing .invest-team { padding: 28px; gap: 24px; }
+  .invest-plan-comparison summary { padding: 23px; font-size: 13px; }
+  .invest-plan-comparison summary svg { flex-shrink: 0; }
+  .visual-pricing-header { padding-top: 35px; }
+  .visual-pricing-header h1 { font-size: 46px; }
+  .visual-pricing-header > p { font-size: 14px; }
+  .visual-pricing .invest-billing { margin-block: 24px 30px; }
+  .visual-pricing .invest-billing .invest-segment button { font-size: 11px; padding-inline: 11px; }
+  .invest-closing-visual { width: calc(100% - 36px); margin-bottom: 55px; min-height: 640px; padding: 40px 28px; border-radius: 24px; }
+  .invest-closing-visual > .investment-artwork { object-position: 76% bottom; }
+  .invest-closing-visual::before { background: linear-gradient(180deg, #060d1af5 0%, #060d1aea 36%, #060d1a30 74%); }
+  .invest-closing-visual h2 { font-size: 52px; }
+  .invest-closing-visual p { font-size: 14px; }
+  .learn-hero { padding-block: 34px 46px; }
+  .learn-hero h1 { font-size: 49px; }
+  .learn-hero-copy > p { font-size: 15px; }
+  .learn-hero-art { aspect-ratio: 4 / 3; border-radius: 22px; }
+  .learn-art-caption { inset: auto 15px 15px; padding: 12px; font-size: 9px; }
+  .learn-shortcuts { padding-block: 0 45px; gap: 26px 20px; }
+  .learn-shortcuts h2 { font-size: 16px; }
+  .learn-shortcuts a > span { font-size: 11px; }
+  .learn-section-heading { flex-direction: column; align-items: start; gap: 20px; margin-bottom: 30px; }
+  .learn-section-heading > p { max-width: 100%; }
+  .learn-curriculum { padding-block: 48px; }
+  .learn-featured-track { grid-template-columns: 1fr; padding: 26px; gap: 20px; }
+  .learn-featured-number { font-size: 50px; }
+  .learn-featured-number span { display: inline; margin-left: 15px; vertical-align: middle; }
+  .learn-featured-track h3 { font-size: 25px; }
+  .learn-track-grid, .learn-article-grid { grid-template-columns: 1fr; gap: 18px; }
+  .learn-track { padding: 26px; }
+  .learn-next p { line-height: 1.8; }
+}
+@media (prefers-contrast: more) {
+  .invest-hero-art, .visual-pricing-art { display: none; }
+  .invest-closing-visual::before { background: #060d1ae8; }
+  .learn-track, .learn-article, .learn-featured-track, .visual-pricing .invest-plan { border: 2px solid #24445b; }
+}
