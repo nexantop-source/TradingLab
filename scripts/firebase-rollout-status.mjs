@@ -19,13 +19,24 @@ async function get(path) {
   }
   return response.json();
 }
+async function latestRollouts() {
+  const items = [];
+  let token;
+  do {
+    const page = await get(`${backend}/rollouts?pageSize=100${token ? `&pageToken=${encodeURIComponent(token)}` : ''}`);
+    items.push(...(page.rollouts ?? []));
+    token = page.nextPageToken;
+  } while (token);
+  return items.sort((a, b) => (b.createTime ?? '').localeCompare(a.createTime ?? '')).slice(0, 3);
+}
 const [rollouts, traffic] = await Promise.all([
-  get(`${backend}/rollouts?pageSize=5`),
+  latestRollouts(),
   get(`${backend}/traffic`),
 ]);
-const builds = await Promise.all((traffic.current?.splits ?? []).map(item => get(item.build)));
+const buildNames = new Set([rollouts[0]?.build, ...(traffic.current?.splits ?? []).map(item => item.build)].filter(Boolean));
+const builds = await Promise.all([...buildNames].map(name => get(name)));
 console.log(JSON.stringify({
-  rollouts: (rollouts.rollouts ?? []).map(item => ({ name: item.name, state: item.state, build: item.build, createTime: item.createTime, errorCode: item.error?.code })),
+  rollouts: rollouts.map(item => ({ name: item.name, state: item.state, build: item.build, createTime: item.createTime, errorCode: item.error?.code })),
   builds: builds.map(item => ({ name: item.name, state: item.state, createTime: item.createTime, source: item.source?.codebase?.hash, errorCode: item.error?.code, buildLogsUri: item.buildLogsUri })),
   traffic: { current: traffic.current, reconciling: traffic.reconciling },
 }, null, 2));

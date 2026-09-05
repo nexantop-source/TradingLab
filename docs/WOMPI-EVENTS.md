@@ -27,3 +27,12 @@ Si falla un destino, reparar su configuración/despliegue sin desactivar recepci
 Precio de TradingLab mostrado USD; importe COP calculado con TRM SFC vigente y congelado por intento. Un pago compra un periodo: NO existen mandatos ni débitos recurrentes automáticos en esta entrega. La llave privada no se necesita para Checkout Web y no se incorpora al cliente.
 
 Fuente: https://docs.wompi.co/docs/colombia/eventos/
+
+## Evidencia de entrega — 5 de septiembre de 2026
+
+- Nexant `e1d6829`: build `build-2026-09-05-005` READY, rollout SUCCEEDED y tráfico 100 %.
+- Hub TradingLab `ba7ecc8`: build `build-2026-09-05-008` READY, rollout SUCCEEDED y tráfico 100 % antes de habilitar checkout.
+- Ambos receptores públicos: firma inválida HTTP 401; firma válida de evento no transaccional HTTP 200 / ignored. No se creó transacción Wompi.
+- 234 pruebas unitarias/de contrato aprobadas. `npm run test:wompi:integration` usa una SQLite temporal real y respuestas de Wompi simuladas: checkout idempotente, acceso pendiente bloqueado, activación única, no duplicación del periodo, Nexant fallido persistido y reintento recuperado.
+- TRM oficial consultada correctamente: vigencia 2026-09-05 a 2026-09-08. Cada compra consulta su propia vigencia, sin hardcodear esta tasa.
+- No se realizó pago con dinero real. El ensayo completo en Wompi con un medio de pago real sigue pendiente del titular.

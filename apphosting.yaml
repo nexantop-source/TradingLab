@@ -79,8 +79,8 @@ env:
 
   # ── Facturación y publicidad ───────────────────────────────────────────────
   - variable: BILLING_PROVIDER
-    # Recepción de eventos primero; checkout se habilita tras verificar despliegue.
-    value: disabled
+    # Receptores verificados; nuevas compras por periodo, sin débito recurrente.
+    value: wompi
     availability:
       - RUNTIME
 
