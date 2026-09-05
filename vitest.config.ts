@@ -24,7 +24,7 @@ export default defineConfig({
       { find: '@tl/ai/', replacement: resolve(__dirname, 'src/packages/ai/') },
       { find: '@tl/ads', replacement: resolve(__dirname, 'src/packages/ads/index.ts') },
       { find: '@tl/analytics', replacement: resolve(__dirname, 'src/packages/analytics/index.ts') },
-      { find: '@/', replacement: resolve(__dirname, 'src/') },
+      { find: /^@\//, replacement: `${resolve(__dirname, 'src')}/` },
     ],
   },
 });

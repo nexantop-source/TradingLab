@@ -79,14 +79,18 @@ env:
 
   # ── Facturación y publicidad ───────────────────────────────────────────────
   - variable: BILLING_PROVIDER
-    # Pendiente: rotar secretos expuestos y verificar webhook/pruebas de pago.
-    # Tener secretos disponibles NO autoriza habilitar cobros.
+    # Recepción de eventos primero; checkout se habilita tras verificar despliegue.
     value: disabled
     availability:
       - RUNTIME
 
   - variable: WOMPI_ENVIRONMENT
     value: production
+    availability:
+      - RUNTIME
+
+  - variable: WOMPI_EVENT_HUB_ENABLED
+    value: "true"
     availability:
       - RUNTIME
 

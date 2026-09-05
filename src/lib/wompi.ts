@@ -736,6 +736,7 @@ export async function fetchWompiTransaction(
   try {
     response = await fetch(`${config.apiBaseUrl}/transactions/${encodeURIComponent(transactionId)}`, {
       method: 'GET',
+      redirect: 'error',
       headers: { Authorization: `Bearer ${config.publicKey}`, Accept: 'application/json' },
       cache: 'no-store',
       signal: AbortSignal.timeout(8_000),
