@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
 
     // También se revalida el plan al registrar: una sesión Premium no produce
     // telemetría ni gasto, aunque conserve un recibo antiguo en otra pestaña.
-    if (auth?.user.plan === 'PREMIUM') return ok({ recorded: false, reason: 'PLAN_PREMIUM_NO_ADS' });
+    if (auth && auth.user.plan !== 'FREE') return ok({ recorded: false, reason: 'PLAN_NO_ADS' });
 
     await enforce(`adevent:${auth?.user.id ?? clientIp(req) ?? 'anon'}`, RATE_LIMITS.adEvent);
 

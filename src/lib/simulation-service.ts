@@ -529,11 +529,11 @@ export interface OpenPositionDto {
   marketStatus: string;
 }
 
-export async function listOpenPositions(userId: string): Promise<OpenPositionDto[]> {
+export async function listOpenPositions(userId: string, options: { all?: boolean } = {}): Promise<OpenPositionDto[]> {
   const rows = await db.simulation.findMany({
     where: { userId, status: 'OPEN' },
     orderBy: { openedAt: 'desc' },
-    take: 50,
+    take: options.all ? undefined : 50,
   });
   if (rows.length === 0) return [];
 

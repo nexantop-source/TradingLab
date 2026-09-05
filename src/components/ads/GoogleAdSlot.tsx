@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import type { PlanId } from '@tl/types';
+import { entitlements } from '@tl/types/plans';
 import { cn } from '@tl/ui';
 import { AD_CONSENT_EVENT, readAdConsent, type AdConsentPreference } from './AdPrivacy';
 import { HouseAd } from './HouseAd';
@@ -89,7 +90,7 @@ export function GoogleAdSlot({
   const configurationEligible =
     enabled &&
     Boolean(plan) &&
-    plan !== 'PREMIUM' &&
+    Boolean(plan && entitlements(plan).adDensity !== 'none') &&
     Boolean(sizeDescriptor) &&
     validGooglePublisherId(publisherId) &&
     validGoogleSlotId(slotId);

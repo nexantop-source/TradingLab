@@ -4,6 +4,7 @@ import { THEME_INIT_SCRIPT } from '@tl/ui/ThemeProvider';
 import { LEGAL_ENTITY_DESCRIPTOR } from '@tl/types/compliance';
 import { AdPrivacyBanner } from '@/components/ads/AdPrivacy';
 import './globals.css';
+import './investment.css';
 
 const sans = localFont({
   src: '../../identidad visual/fuentes/instrument-sans-latin.woff2',
@@ -39,7 +40,7 @@ const mono = localFont({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'),
   title: {
-    default: 'TradingLab · Aprende a decidir antes de arriesgar',
+    default: 'TradingLab · Tu próximo paso empieza con criterio',
     template: '%s · TradingLab',
   },
   description:

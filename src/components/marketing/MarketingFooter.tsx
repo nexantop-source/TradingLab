@@ -7,11 +7,11 @@ const COLUMNS = [
   {
     title: 'Producto',
     links: [
-      { href: '/#simulador', label: 'Terminal de simulación' },
+      { href: '/terminal', label: 'Trading DEMO' },
       { href: '/recursos', label: 'Academia' },
       { href: '/mercados', label: 'Mercados disponibles' },
       { href: '/precios', label: 'Planes y precios' },
-      { href: '/#entrenador-ia', label: 'Entrenador con IA' },
+      { href: '/entrenador', label: 'Entrenador con IA' },
     ],
   },
   {

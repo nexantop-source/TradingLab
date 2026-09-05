@@ -23,7 +23,10 @@ import {
   Search,
   Command,
   ArrowUpRight,
+  Compass,
+  WalletCards,
 } from 'lucide-react';
+import { PLAN_ENTITLEMENTS } from '@tl/types/plans';
 import { Logo } from '@/components/Logo';
 import { Badge, Button, cn } from '@tl/ui';
 import { DemoBadge } from '@tl/ui/compliance';
@@ -41,14 +44,16 @@ interface NotificationItem {
 }
 
 const NAV_PRIMARY = [
-  { href: '/panel', label: 'Hoy', icon: LayoutDashboard },
-  { href: '/terminal', label: 'Practicar', icon: CandlestickChart },
-  { href: '/academia', label: 'Aprender', icon: GraduationCap },
-  { href: '/diario', label: 'Diario', icon: NotebookPen },
-  { href: '/estadisticas', label: 'Disciplina', icon: BarChart3 },
+  { href: '/panel', label: 'Resumen', icon: LayoutDashboard },
+  { href: '/explorar', label: 'Explorar', icon: Compass },
+  { href: '/terminal', label: 'Trading', icon: CandlestickChart },
+  { href: '/portafolio', label: 'Portafolio', icon: WalletCards },
+  { href: '/academia', label: 'Academia', icon: GraduationCap },
 ];
 
 const NAV_SECONDARY = [
+  { href: '/diario', label: 'Diario', icon: NotebookPen },
+  { href: '/estadisticas', label: 'Estadísticas', icon: BarChart3 },
   { href: '/entrenador', label: 'Entrenador IA', icon: Sparkles },
   { href: '/retos', label: 'Retos', icon: Trophy },
   { href: '/calendario', label: 'Calendario', icon: CalendarDays },
@@ -139,7 +144,7 @@ export function AppShell({
             </span>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-[13px] font-medium">{user.name}</span>
-              <span className="block text-[10px] text-[var(--color-subtle)]">Plan {user.plan}</span>
+              <Link href="/precios" className="block text-[11px] text-[var(--color-blue)]">TradingLab {PLAN_ENTITLEMENTS[user.plan].name} ↗</Link>
             </span>
           </div>
           <button

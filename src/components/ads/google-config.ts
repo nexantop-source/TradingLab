@@ -1,4 +1,5 @@
 import type { PlanId } from '@tl/types';
+import { entitlements } from '@tl/types/plans';
 import { AD_SLOT_BY_CODE, isForbiddenSurface } from '@tl/ads';
 
 export interface GoogleAdBreakpointSize {
@@ -103,7 +104,7 @@ export interface GoogleAdEligibilityInput {
 /** Política pura y fail-closed, compartida por la UI y las pruebas. */
 export function canLoadGoogleAd(input: GoogleAdEligibilityInput): boolean {
   if (!input.enabled || input.consent !== 'granted') return false;
-  if (!input.plan || input.plan === 'PREMIUM') return false;
+  if (!input.plan || entitlements(input.plan).adDensity === 'none') return false;
   const descriptor = AD_SLOT_BY_CODE.get(input.code);
   if (!descriptor || !GOOGLE_AD_SIZES[input.code]) return false;
   if (isForbiddenSurface(descriptor.surface) || isForbiddenSurface(input.page)) return false;

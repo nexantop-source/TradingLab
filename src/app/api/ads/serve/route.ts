@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { clientIp, detectDevice, handleError, ok } from '@/lib/api';
 import { getAuth } from '@/lib/auth';
+import { entitlements } from '@tl/types/plans';
 import { db } from '@/lib/db';
 import { fromJson } from '@/lib/json';
 import {
@@ -48,7 +49,7 @@ export async function GET(req: NextRequest) {
 
     // Atajo: los usuarios Premium no generan ni siquiera una consulta al
     // inventario. Criterio de aceptación #12.
-    if (plan === 'PREMIUM') {
+    if (entitlements(plan).adDensity === 'none') {
       return ok({ ad: null, reason: 'PLAN_PREMIUM_NO_ADS' });
     }
 

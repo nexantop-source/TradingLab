@@ -72,7 +72,7 @@ export function SimulationPanel({
   onCreated: (result: { balanceCents: number }) => void;
   onError: (message: string) => void;
 }) {
-  const [mode, setMode] = React.useState<Mode>(entitlements.modes[0] ?? 'HYPOTHESIS');
+  const [mode, setMode] = React.useState<Mode>(entitlements.modes.includes('POSITION') ? 'POSITION' : entitlements.modes[0] ?? 'HYPOTHESIS');
   const [direction, setDirection] = React.useState<Direction>('BULLISH');
   const [amountUsd, setAmountUsd] = React.useState(50);
   const [durationMinutes, setDurationMinutes] = React.useState<number>(60);

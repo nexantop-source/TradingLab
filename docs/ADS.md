@@ -12,11 +12,24 @@ publicitario. Para este producto web el proveedor programático correcto es
 
 ## Estado verificado de la cuenta
 
-El 29 de agosto de 2026 se comprobó una cuenta AdSense existente, pero Google
-la reportó desactivada por inactividad. No se copiaron credenciales ni se activó
-el proveedor. Antes de monetizar hay que reactivar la cuenta, completar las
-verificaciones que solicite Google y enviar el dominio a revisión. Hasta
-entonces los flags de Google deben permanecer en `false`/`off`.
+El 5 de septiembre de 2026 se creó la cuenta con **nexantop@gmail.com**, país de
+pagos **Colombia**, después de recibir autorización expresa para aceptar los
+términos y enviar el registro. Publisher: **pub-5136116898669374**; client ID:
+**ca-pub-5136116898669374**. Son identificadores públicos, no credenciales.
+
+Google rechazó el subdominio Firebase `tradinglab--nexant-87204.us-east4.hosted.app`
+como dominio restringido. Se completó el alta con «Aún no tengo un sitio web».
+La cuenta está creada, **no aprobada para monetizar**. Quedan pendientes el
+perfil del beneficiario de pagos y conectar un dominio aceptado para revisión.
+No se compró un dominio, no se añadieron datos bancarios ni se activaron anuncios.
+El estado mostrado en administración es este registro manual, no una consulta
+en tiempo real a Google. Hasta completar las puertas siguientes, los flags de
+Google deben permanecer en `false`/`off`.
+
+[Continuar configuración en AdSense](https://adsense.google.com/adsense/u/8/pub-5136116898669374/onboarding)
+
+La nueva política comercial permite publicidad en **Explore (FREE)** y la bloquea
+en **Plus (STANDARD)** y **Pro (PREMIUM)**, tanto en componentes como en APIs.
 
 ## Decisión de proveedor
 
@@ -74,7 +87,7 @@ repositorio.
    `NEXT_PUBLIC_GOOGLE_ADS_ENABLED=true`, compila y despliega primero a staging.
 6. Pasa siempre `plan={auth.user.plan}` desde el Server Component a cada
    `AdSlot`. En modo Google el componente falla cerrado si no recibe el plan;
-   esto evita una petición externa y un hueco para Premium.
+   esto evita una petición externa y un hueco para Plus y Pro.
 7. Verifica en staging consentimiento aceptado/rechazado, planes Free/Standard/
    Premium, móvil/escritorio y todas las superficies prohibidas.
 8. Copia **exactamente** la línea que entrega AdSense a `public/ads.txt`. El

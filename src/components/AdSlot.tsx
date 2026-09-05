@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import type { PlanId, ServedAd } from '@tl/types';
+import { entitlements } from '@tl/types/plans';
 import { AD_SLOT_BY_CODE, isForbiddenSurface } from '@tl/ads';
 import { cn } from '@tl/ui';
 import { GoogleAdSlot } from '@/components/ads/GoogleAdSlot';
@@ -26,6 +27,7 @@ export interface AdSlotProps {
  */
 export function AdSlot(props: AdSlotProps) {
   const provider = (process.env.NEXT_PUBLIC_ADS_PROVIDER ?? 'internal').trim().toLowerCase();
+  if (props.plan && entitlements(props.plan).adDensity === 'none') return null;
   if (provider === 'off') return null;
   if (provider === 'google') {
     return <GoogleAdSlot code={props.code} page={props.page} plan={props.plan} className={props.className} />;
@@ -43,7 +45,7 @@ function InternalAdSlot({ code, page, topic, className, plan }: AdSlotProps) {
   const viewableReported = React.useRef(false);
 
   const forbidden =
-    plan === 'PREMIUM' || !descriptor || isForbiddenSurface(descriptor.surface) || isForbiddenSurface(page);
+    Boolean(plan && entitlements(plan).adDensity === 'none') || !descriptor || isForbiddenSurface(descriptor.surface) || isForbiddenSurface(page);
 
   // Pide inventario solo cuando el espacio está a 700 px del viewport.
   React.useEffect(() => {

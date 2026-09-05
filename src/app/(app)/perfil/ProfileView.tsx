@@ -298,7 +298,7 @@ export function ProfileView({
                       .filter((p) => p !== user.plan)
                       .map((p) => (
                         <div key={p} className="rounded-[var(--radius-md)] border border-[var(--color-border)] p-4">
-                          <p className="text-[14px] font-semibold">{p === 'STANDARD' ? 'Standard' : 'Premium'}</p>
+                          <p className="text-[14px] font-semibold">{p === 'STANDARD' ? 'Plus' : 'Pro'}</p>
                           <p className="num mt-1 text-[13px] text-[var(--color-muted)]">
                             USD {p === 'STANDARD' ? '14,99' : '29,99'} al mes
                           </p>

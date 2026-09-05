@@ -33,7 +33,7 @@ export default async function RegisterPage({
 
       {intent && (
         <p className="mt-4 rounded-[var(--radius-sm)] border border-[var(--color-blue)] bg-[var(--color-blue-soft)] px-3.5 py-3 text-[12px] leading-relaxed text-[var(--color-muted)]">
-          Seleccionaste <strong className="text-[var(--color-text)]">{intent.plan === 'STANDARD' ? 'Standard' : 'Premium'} {intent.interval === 'YEARLY' ? 'anual' : 'mensual'}</strong>. Crear la cuenta es gratis; verás el importe exacto en COP antes de abrir Wompi.
+          Seleccionaste <strong className="text-[var(--color-text)]">{intent.plan === 'STANDARD' ? 'Plus' : 'Pro'} {intent.interval === 'YEARLY' ? 'anual' : 'mensual'}</strong>. Crear la cuenta es gratis; verás el importe exacto en COP antes de abrir Wompi.
         </p>
       )}
 

@@ -1,4 +1,5 @@
 import type { AdSlotDescriptor, PlanId, ServedAd } from '@tl/types';
+import { entitlements } from '@tl/types/plans';
 import { DISCLAIMERS } from '@tl/types/compliance';
 
 /**
@@ -135,6 +136,7 @@ export interface SelectionResult {
   reason:
     | 'SERVED'
     | 'PLAN_PREMIUM_NO_ADS'
+    | 'PLAN_NO_ADS'
     | 'FORBIDDEN_SURFACE'
     | 'UNKNOWN_SLOT'
     | 'NO_CANDIDATES'
@@ -147,6 +149,7 @@ export function selectAd(input: SelectionInput): SelectionResult {
   if (input.targeting.plan === 'PREMIUM') {
     return { ad: null, reason: 'PLAN_PREMIUM_NO_ADS' };
   }
+  if (entitlements(input.targeting.plan).adDensity === 'none') return { ad: null, reason: 'PLAN_NO_ADS' };
 
   const slot = AD_SLOT_BY_CODE.get(input.slotCode);
   if (!slot) return { ad: null, reason: 'UNKNOWN_SLOT' };

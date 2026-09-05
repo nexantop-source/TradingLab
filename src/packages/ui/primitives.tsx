@@ -554,7 +554,8 @@ export function Modal({
           sizes[size],
         )}
       >
-        <div className="border-b border-[var(--color-border)] px-6 py-5">
+        <div className="border-b border-[var(--color-border)] px-6 py-5 pr-16">
+          <button type="button" onClick={onClose} aria-label="Cerrar diálogo" className="absolute right-3 top-3 flex size-11 items-center justify-center rounded-full text-xl text-[var(--color-muted)] hover:bg-[var(--color-overlay)]">×</button>
           <h2 className="text-base font-semibold tracking-tight">{title}</h2>
           {description && (
             <p className="mt-1 text-[13px] leading-relaxed text-[var(--color-muted)]">{description}</p>

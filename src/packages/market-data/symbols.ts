@@ -385,6 +385,57 @@ export const SYMBOLS: SymbolSeed[] = [
   },
 ];
 
+// Expanded demo universe. These are simulation parameters, never live quotes.
+const ETF_SEEDS: Array<[string, string, number, string]> = [
+  ['SPY', 'SPDR S&P 500 ETF Trust', 560, 'Grandes empresas de Estados Unidos.'],
+  ['VOO', 'Vanguard S&P 500 ETF', 515, 'Exposición amplia al S&P 500.'],
+  ['QQQ', 'Invesco QQQ Trust', 475, 'Las principales compañías no financieras del Nasdaq.'],
+  ['VTI', 'Vanguard Total Stock Market ETF', 275, 'Renta variable estadounidense de distintos tamaños.'],
+  ['VT', 'Vanguard Total World Stock ETF', 115, 'Renta variable de mercados desarrollados y emergentes.'],
+  ['VXUS', 'Vanguard Total International Stock ETF', 62, 'Acciones internacionales fuera de Estados Unidos.'],
+  ['IWM', 'iShares Russell 2000 ETF', 215, 'Pequeñas empresas estadounidenses.'],
+  ['SCHD', 'Schwab US Dividend Equity ETF', 28, 'Empresas estadounidenses seleccionadas por dividendos.'],
+  ['BND', 'Vanguard Total Bond Market ETF', 73, 'Bonos estadounidenses con grado de inversión.'],
+  ['TLT', 'iShares 20+ Year Treasury Bond ETF', 95, 'Bonos del Tesoro estadounidense a largo plazo.'],
+  ['GLD', 'SPDR Gold Shares', 230, 'Exposición al precio del oro mediante un fondo.'],
+  ['EEM', 'iShares MSCI Emerging Markets ETF', 43, 'Renta variable de mercados emergentes.'],
+  ['XLK', 'Technology Select Sector SPDR Fund', 220, 'Sector tecnológico del S&P 500.'],
+  ['XLE', 'Energy Select Sector SPDR Fund', 90, 'Sector energético del S&P 500.'],
+  ['VNQ', 'Vanguard Real Estate ETF', 92, 'Sector inmobiliario mediante valores cotizados.'],
+];
+SYMBOLS.push(...ETF_SEEDS.map(([symbol, name, basePrice, description]): SymbolSeed => ({
+  symbol, name, basePrice, description, assetClass: 'ETF', quoteCurrency: 'USD',
+  precision: 2, tickSize: 0.01, spreadBps: 2, session: SESSIONS.US_EQUITY,
+  educationalRisk: 3, minPlan: 'FREE', annualVolatility: 0.2, annualDrift: 0,
+})));
+const EXTRA_CRYPTO: Array<[string, string, number]> = [
+  ['ADAUSD', 'Cardano / Dólar estadounidense', 0.35], ['DOGEUSD', 'Dogecoin / Dólar estadounidense', 0.12],
+  ['AVAXUSD', 'Avalanche / Dólar estadounidense', 25], ['LINKUSD', 'Chainlink / Dólar estadounidense', 12],
+  ['DOTUSD', 'Polkadot / Dólar estadounidense', 4.5], ['LTCUSD', 'Litecoin / Dólar estadounidense', 65],
+  ['BNBUSD', 'BNB / Dólar estadounidense', 550], ['UNIUSD', 'Uniswap / Dólar estadounidense', 6.5],
+];
+SYMBOLS.push(...EXTRA_CRYPTO.map(([symbol, name, basePrice]): SymbolSeed => ({
+  symbol, name, basePrice, assetClass: 'CRYPTO', quoteCurrency: 'USD', precision: 4,
+  tickSize: 0.0001, spreadBps: 10, session: SESSIONS.CRYPTO, educationalRisk: 5,
+  description: 'Criptoactivo de alta volatilidad. Serie sintética para practicar gestión del riesgo.',
+  minPlan: 'FREE', annualVolatility: 0.7, annualDrift: 0,
+})));
+const EXTRA_FOREX: Array<[string, string, string, number]> = [
+  ['USDCHF', 'Dólar estadounidense / Franco suizo', 'CHF', 0.86],
+  ['USDCAD', 'Dólar estadounidense / Dólar canadiense', 'CAD', 1.36],
+  ['NZDUSD', 'Dólar neozelandés / Dólar estadounidense', 'USD', 0.61],
+  ['EURGBP', 'Euro / Libra esterlina', 'GBP', 0.85],
+  ['EURJPY', 'Euro / Yen japonés', 'JPY', 162],
+  ['GBPJPY', 'Libra esterlina / Yen japonés', 'JPY', 190],
+  ['USDCOP', 'Dólar estadounidense / Peso colombiano', 'COP', 4100],
+];
+SYMBOLS.push(...EXTRA_FOREX.map(([symbol, name, quoteCurrency, basePrice]): SymbolSeed => ({
+  symbol, name, quoteCurrency, basePrice, assetClass: 'FOREX', precision: 4, tickSize: 0.0001,
+  spreadBps: 4, session: SESSIONS.FOREX, educationalRisk: 4, minPlan: 'FREE',
+  description: 'Par de divisas. Estudia el tipo de cambio y su sensibilidad al contexto económico.',
+  annualVolatility: 0.12, annualDrift: 0,
+})));
+
 const BY_SYMBOL = new Map(SYMBOLS.map((s) => [s.symbol, s]));
 
 export function getSymbol(symbol: string): SymbolSeed | undefined {

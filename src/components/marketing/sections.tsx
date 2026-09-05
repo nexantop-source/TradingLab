@@ -602,7 +602,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: '¿Qué incluye cada plan?',
-    a: 'Free incluye USD 10.000 virtuales, academia básica, diario y simulaciones limitadas. Standard amplía la práctica, el historial, los indicadores y las estadísticas. Premium eleva el cupo del entrenador, conserva diez años de historial y elimina toda la publicidad.',
+    a: 'Explore es gratuito e incluye USD 10.000 virtuales, academia básica, diario y 20 simulaciones al día. Plus amplía la práctica, el historial, los indicadores y las estadísticas, sin publicidad. Pro eleva el cupo del entrenador a 900 análisis mensuales y conserva diez años de historial. Teams se prepara mediante una propuesta para cada equipo.',
   },
 ] as const;
 

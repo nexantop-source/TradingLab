@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { MarketOverview } from '@/components/investment/MarketOverview';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import {
@@ -72,7 +73,7 @@ export default async function DashboardPage() {
   ]);
 
   const [quotes, allSims, totalLessons] = await Promise.all([
-    provider.getQuotes(watchlist.map((w) => w.symbol)),
+    provider.getQuotes([...new Set(['SPY', 'BTCUSD', 'EURUSD', 'QQQ', ...watchlist.map((w) => w.symbol)])]),
     db.simulation.findMany({
       where: { userId: user.id },
       orderBy: { openedAt: 'desc' },
@@ -122,8 +123,8 @@ export default async function DashboardPage() {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="app-page-kicker">Hola, {user.name.split(' ')[0]}</p>
-          <h1 className="mt-1 text-3xl font-semibold tracking-[-0.045em] sm:text-4xl">Tu laboratorio de hoy</h1>
-          <p className="mt-2 max-w-xl text-[13px] leading-relaxed text-[var(--color-muted)]">Una sesión pequeña, bien documentada, vale más que una pantalla llena de señales.</p>
+          <h1 className="mt-1 text-3xl font-semibold tracking-[-0.045em] sm:text-4xl">Todo tu espacio, de un vistazo.</h1>
+          <p className="mt-2 max-w-xl text-[13px] leading-relaxed text-[var(--color-muted)]">Tu saldo demo, tus mercados y tu progreso. Elige dónde quieres poner el foco hoy.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Link href="/terminal">
@@ -140,28 +141,7 @@ export default async function DashboardPage() {
         </div>
       </header>
 
-      <section className="app-focus-card">
-        <div className="relative z-10 max-w-xl">
-          <p className="app-page-kicker text-[var(--color-blue)]">Ritual de hoy · 01</p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-[-0.045em] sm:text-3xl">Antes de buscar una entrada, define qué quieres aprender.</h2>
-          <p className="mt-3 max-w-lg text-[13px] leading-[1.7] text-[var(--color-muted)]">
-            Continúa tu ruta educativa o abre la terminal para formular una hipótesis con contexto, riesgo y una condición de invalidación.
-          </p>
-          <Link
-            href={nextLesson ? `/academia/leccion/${nextLesson.slug}` : '/terminal'}
-            className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--color-blue)] px-4 py-2.5 text-[12px] font-semibold text-white shadow-[var(--shadow-glow-blue)]"
-          >
-            {nextLesson ? 'Continuar mi ruta' : 'Abrir la terminal'}
-            <ArrowRight className="size-3.5" aria-hidden="true" />
-          </Link>
-        </div>
-        <div className="app-focus-orbit" aria-hidden="true">
-          <div className="app-focus-orbit-ring app-focus-orbit-ring-a" />
-          <div className="app-focus-orbit-ring app-focus-orbit-ring-b" />
-          <span className="app-focus-orbit-core"><Target className="size-5" /></span>
-          <span className="app-focus-orbit-label">Proceso primero</span>
-        </div>
-      </section>
+      <MarketOverview lessonHref={nextLesson ? `/academia/leccion/${nextLesson.slug}` : '/academia'} markets={quotes.slice(0, 4).map(q => ({ symbol: q.symbol, name: getSymbol(q.symbol)?.name ?? q.symbol, assetClass: getSymbol(q.symbol)?.assetClass ?? 'STOCK', precision: getSymbol(q.symbol)?.precision ?? 2, price: q.price, change: q.changePercent }))} />
 
       {/* ── Fila superior ────────────────────────────────────────────────── */}
       <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr_1fr]">

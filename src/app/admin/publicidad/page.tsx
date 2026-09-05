@@ -7,6 +7,7 @@ import { fromJson } from '@/lib/json';
 import { AD_SLOTS, SPONSOR_PACKAGES, PRICING_MODEL_LABEL, FORBIDDEN_SURFACES } from '@tl/ads';
 import { Badge, Card, Callout, Progress } from '@tl/ui';
 import { formatUsd } from '@/lib/format';
+import { PublisherSetup } from '@/components/ads/PublisherSetup';
 
 export const metadata: Metadata = { title: 'Publicidad' };
 export const dynamic = 'force-dynamic';
@@ -51,6 +52,8 @@ export default async function AdminAdsPage() {
           y en el componente de renderizado: no dependen de la configuración de cada campaña.
         </p>
       </header>
+
+      <PublisherSetup />
 
       {pendingCreatives.length > 0 && (
         <Callout tone="warning" title={`${pendingCreatives.length} creatividad(es) pendientes de revisión`}>

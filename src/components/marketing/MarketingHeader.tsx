@@ -7,9 +7,10 @@ import { Logo } from '@/components/Logo';
 import { Button, cn } from '@tl/ui';
 
 const NAV = [
-  { href: '/#producto', label: 'Producto' },
-  { href: '/#metodo', label: 'Método' },
-  { href: '/precios', label: 'Precios' },
+  { href: '/mercados', label: 'Mercados' },
+  { href: '/#producto', label: 'Plataforma' },
+  { href: '/recursos', label: 'Aprender' },
+  { href: '/precios', label: 'Planes' },
 ];
 
 /**

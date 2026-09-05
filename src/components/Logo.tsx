@@ -21,29 +21,14 @@ export function Logo({
       <svg
         width={dims}
         height={dims}
-        viewBox="0 0 64 64"
+        viewBox="100 70 800 860"
         fill="none"
         role="img"
         aria-label="TradingLab"
         className="shrink-0"
       >
-        <defs>
-          <linearGradient id="tl-mark" x1="9" y1="55" x2="55" y2="8" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#0071E3" />
-            <stop offset="1" stopColor="#56B4FF" />
-          </linearGradient>
-        </defs>
-        <rect width="64" height="64" rx="18" fill="url(#tl-mark)" />
-        <rect x="1" y="1" width="62" height="62" rx="17" fill="none" stroke="#FFFFFF4D" strokeWidth="2" />
-        <path
-          d="M15 42L27 31L36 37L49 20"
-          fill="none"
-          stroke="#FFFFFF"
-          strokeWidth="5.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <circle cx="49" cy="20" r="4.5" fill="#FFFFFF" />
+        <path fill="currentColor" d="M180 390 C180 360 195 335 220 318 L548 100 C580 79 620 101 620 140 L620 300 C620 324 610 345 590 360 L500 405 L395 500 L240 615 C214 633 180 615 180 583 Z M500 405 L605 500 L617 491 L518 396 Z" />
+        <path fill="currentColor" d="M820 610 C820 640 805 665 780 682 L452 900 C420 921 380 899 380 860 L380 700 C380 676 390 655 410 640 L500 595 L605 500 L760 385 C786 367 820 385 820 417 Z M500 595 L395 500 L383 509 L482 604 Z" />
       </svg>
       {withWordmark && (
         <span className={cn('font-semibold tracking-[-0.045em]', text)}>TradingLab</span>
