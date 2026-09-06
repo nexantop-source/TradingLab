@@ -143,3 +143,23 @@ export const strategySchema = z.object({
     .max(12)
     .default([]),
 });
+
+/**
+ * Concesión de una suscripción de cortesía desde el panel administrativo.
+ * El motivo es obligatorio: una cortesía sin razón declarada no es auditable.
+ */
+export const subscriptionGrantSchema = z
+  .object({
+    email: emailSchema,
+    plan: z.enum(['STANDARD', 'PREMIUM']),
+    days: z.number().int().min(1).max(1095),
+    reason: z.string().trim().min(4, 'Explica el motivo de la cortesía.').max(300),
+  })
+  .strict();
+
+export const subscriptionRevokeSchema = z
+  .object({
+    userId: z.string().trim().min(1).max(60),
+    reason: z.string().trim().min(4, 'Explica el motivo de la retirada.').max(300),
+  })
+  .strict();

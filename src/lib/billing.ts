@@ -316,7 +316,7 @@ export async function subscriptionMetrics() {
       status: { in: ['ACTIVE', 'TRIALING'] },
       currentPeriodEnd: { gt: new Date() },
     },
-    select: { planId: true, interval: true, status: true },
+    select: { planId: true, interval: true, status: true, source: true },
   });
 
   let mrrCents = 0;
@@ -324,6 +324,9 @@ export async function subscriptionMetrics() {
 
   for (const s of subs) {
     if (s.status === 'TRIALING') continue;
+    // Una cortesía concede acceso pero no ingresa dinero: contarla en el valor
+    // mensualizado inventaría ingresos inexistentes. Se cuenta aparte.
+    if (s.source === 'GRANT') continue;
     const plan = PLAN_ENTITLEMENTS[s.planId as PlanId];
     if (!plan) continue;
     const monthly =
@@ -332,6 +335,8 @@ export async function subscriptionMetrics() {
     byPlan[s.planId] = (byPlan[s.planId] ?? 0) + 1;
   }
 
+  const granted = subs.filter((s) => s.source === 'GRANT' && s.status === 'ACTIVE').length;
+
   const [totalUsers, canceledLast30] = await Promise.all([
     db.user.count({ where: { status: 'ACTIVE' } }),
     db.subscription.count({
@@ -339,12 +344,13 @@ export async function subscriptionMetrics() {
     }),
   ]);
 
-  const activePaying = subs.filter((s) => s.status === 'ACTIVE').length;
+  const activePaying = subs.filter((s) => s.status === 'ACTIVE' && s.source !== 'GRANT').length;
 
   return {
     mrrUsd: Number((mrrCents / 100).toFixed(2)),
     arrUsd: Number(((mrrCents * 12) / 100).toFixed(2)),
     activePaying,
+    granted,
     trialing: subs.filter((s) => s.status === 'TRIALING').length,
     byPlan,
     totalUsers,

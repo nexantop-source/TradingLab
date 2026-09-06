@@ -77,6 +77,7 @@ model User {
   notifications  Notification[]
   tickets        SupportTicket[]
   auditLogs      AuditLog[]      @relation("AuditActor")
+  grantedSubs    Subscription[]  @relation("SubscriptionGrantor")
   badges         UserBadge[]
   challenges     ChallengeEntry[]
   portfolios     Portfolio[]
@@ -155,10 +156,21 @@ model Subscription {
   couponCode         String?
   /// Identificador en la pasarela de pagos.
   externalId         String?
+  /// Origen de la suscripción: CHECKOUT (pagada) o GRANT (cortesía otorgada
+  /// desde el panel administrativo). Una cortesía nunca genera un `Payment`,
+  /// no computa en el valor mensualizado y no se renueva sola al vencer.
+  source             String    @default("CHECKOUT")
+  /// Quién concedió la cortesía. Se conserva aunque la cuenta se elimine.
+  grantedById        String?
+  grantedBy          User?     @relation("SubscriptionGrantor", fields: [grantedById], references: [id], onDelete: SetNull)
+  grantedAt          DateTime?
+  /// Motivo declarado por quien la concede. Obligatorio en el panel.
+  grantedReason      String?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
   @@index([status])
+  @@index([source])
 }
 
 model Payment {

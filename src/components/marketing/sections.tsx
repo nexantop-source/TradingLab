@@ -280,7 +280,7 @@ export function AICoachSection() {
                     El precio mantiene una estructura de corto plazo compatible con dos escenarios. La evidencia no es suficiente para convertirla en una certeza.
                   </p>
                 </div>
-                <div className="ml-auto max-w-[74%] rounded-2xl rounded-tr-md bg-[var(--color-blue)] p-4 text-white shadow-[var(--shadow-glow-blue)]">
+                <div className="ml-auto max-w-[74%] rounded-2xl rounded-tr-md bg-[var(--color-blue)] p-4 text-white shadow-[var(--shadow-focus)]">
                   <p className="text-[12px] leading-relaxed">¿Qué tendría que ocurrir para que mi hipótesis dejara de ser válida?</p>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">

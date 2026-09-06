@@ -8,6 +8,9 @@ import { PLAN_ENTITLEMENTS } from '@tl/types/plans';
 import { PLANS } from '@tl/types';
 import { Badge, Card } from '@tl/ui';
 import { formatCurrency, formatDateTime, formatUsd } from '@/lib/format';
+import { listActiveGrants } from '@/lib/subscription-grants';
+import { GrantSubscription } from './GrantSubscription';
+import { ActiveGrants } from './ActiveGrants';
 
 export const metadata: Metadata = { title: 'Suscripciones' };
 export const dynamic = 'force-dynamic';
@@ -16,7 +19,9 @@ export default async function AdminSubscriptionsPage() {
   const auth = await getAuth();
   if (!auth || !can(auth.user.role, 'subscriptions:read')) redirect('/panel');
 
-  const [metrics, subscriptions, payments, coupons, webhookErrors] = await Promise.all([
+  const canWrite = can(auth.user.role, 'subscriptions:write');
+
+  const [metrics, subscriptions, payments, coupons, webhookErrors, grants] = await Promise.all([
     subscriptionMetrics(),
     db.subscription.findMany({
       orderBy: { createdAt: 'desc' },
@@ -26,6 +31,7 @@ export default async function AdminSubscriptionsPage() {
     db.payment.findMany({ orderBy: { createdAt: 'desc' }, take: 25, include: { user: { select: { email: true } } } }),
     db.coupon.findMany({ orderBy: { createdAt: 'desc' } }),
     db.webhookEvent.findMany({ where: { error: { not: null } }, orderBy: { createdAt: 'desc' }, take: 10 }),
+    listActiveGrants(),
   ]);
 
   return (
@@ -41,8 +47,29 @@ export default async function AdminSubscriptionsPage() {
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Valor mensualizado" value={formatUsd(metrics.mrrUsd)} />
         <Stat label="Valor anualizado" value={formatUsd(metrics.arrUsd)} />
-        <Stat label="Suscriptores" value={String(metrics.activePaying)} hint={`${metrics.trialing} en prueba`} />
+        <Stat
+          label="Suscriptores"
+          value={String(metrics.activePaying)}
+          hint={`${metrics.trialing} en prueba · ${metrics.granted} de cortesía`}
+        />
         <Stat label="Churn 30 d" value={`${metrics.churnPercent} %`} hint={`ARPU ${formatUsd(metrics.arpuUsd)}`} />
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+        <GrantSubscription canWrite={canWrite} />
+        <ActiveGrants
+          canWrite={canWrite}
+          grants={grants.map((g) => ({
+            userId: g.user.id,
+            email: g.user.email,
+            name: g.user.name,
+            planId: g.planId,
+            currentPeriodEnd: g.currentPeriodEnd.toISOString(),
+            grantedAt: g.grantedAt?.toISOString() ?? null,
+            grantedReason: g.grantedReason,
+            grantedByName: g.grantedBy?.name ?? null,
+          }))}
+        />
       </div>
 
       <Card className="p-5">
@@ -129,6 +156,9 @@ export default async function AdminSubscriptionsPage() {
                 </td>
                 <td className="px-4 py-2.5 text-[11px] text-[var(--color-muted)]">
                   {formatDateTime(s.currentPeriodEnd, auth.user.timezone)}
+                </td>
+                <td className="px-4 py-2.5">
+                  {s.source === 'GRANT' ? <Badge tone="blue">cortesía</Badge> : <span className="text-[var(--color-muted)]">pago</span>}
                 </td>
                 <td className="num px-4 py-2.5 text-[var(--color-muted)]">{s.couponCode ?? '—'}</td>
               </tr>
