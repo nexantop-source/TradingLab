@@ -65,6 +65,8 @@ export const preferencesSchema = z.object({
   locale: z.enum(LOCALES).optional(),
   timezone: z.string().min(1).max(60).optional(),
   emailOptIn: z.boolean().optional(),
+  studyReminderOptIn: z.boolean().optional(),
+  studyReminderHour: z.number().int().min(0).max(23).optional(),
 });
 
 export const journalEntrySchema = z.object({

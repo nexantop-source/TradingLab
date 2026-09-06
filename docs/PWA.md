@@ -96,3 +96,74 @@ Desktop Chromium emulation is not evidence of a physical iPhone test. Before rel
 This work does not enable Wompi, add recurring charges, or replace simulated market data with an exchange-licensed live feed. Those are separate backend integrations.
 
 Reference: [Next.js PWA guide](https://nextjs.org/docs/app/guides/progressive-web-apps).
+
+## Notificaciones push (septiembre 2026)
+
+Sirven a una sola cosa: sostener el hábito de estudio. **No** hay alertas de
+precio ni avisos que inviten a operar por impulso; en una plataforma educativa,
+una notificación que empuje a «no perderse un movimiento» trabajaría contra su
+propósito.
+
+### Puesta en marcha
+
+1. Genera el par de claves: `npx web-push generate-vapid-keys`.
+2. Define `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` y `VAPID_SUBJECT`. Sin las dos
+   primeras la función queda apagada: la interfaz lo indica y no se registra
+   ningún dispositivo. La clave privada nunca llega al navegador.
+3. Define `PUSH_DISPATCH_SECRET` con al menos 32 caracteres aleatorios.
+4. Programa `POST /api/push/dispatch` **cada hora** con la cabecera
+   `Authorization: Bearer $PUSH_DISPATCH_SECRET`. En Firebase App Hosting se
+   hace con Cloud Scheduler:
+
+   ```
+   gcloud scheduler jobs create http tradinglab-study-reminders \
+     --schedule="0 * * * *" \
+     --uri="https://<tu-dominio>/api/push/dispatch" \
+     --http-method=POST \
+     --headers="Authorization=Bearer <PUSH_DISPATCH_SECRET>" \
+     --location=<region>
+   ```
+
+Cada ejecución avisa solo a quien tiene esa hora como preferida **en su zona
+horaria**, así que las 24 ejecuciones diarias cubren el mundo sin despertar a
+nadie de madrugada. Sin el secreto definido la ruta responde 503 y no envía
+nada, en lugar de quedar abierta.
+
+### Reglas de envío
+
+- Se avisa a quien lo pidió explícitamente, tiene al menos un dispositivo
+  registrado y **no ha estudiado hoy**. Recordar a quien ya hizo su lección es
+  ruido, y el ruido es lo que hace que la gente desactive las notificaciones.
+- El permiso del navegador se pide solo tras un gesto explícito y después de
+  explicar para qué sirve. Una denegación es casi irreversible.
+- Registrar el dispositivo no activa el recordatorio: son dos decisiones
+  separadas, igual que el consentimiento de correo.
+- Una suscripción que el servicio rechaza con 404 o 410 se borra en lugar de
+  reintentarse: ese navegador ya no existe.
+- El worker siempre muestra una notificación visible. Un `push` silencioso hace
+  que el navegador retire el permiso.
+- Al tocar la notificación solo se abren rutas propias, y se reutiliza la
+  ventana ya abierta en lugar de acumular pestañas.
+
+En iPhone las notificaciones requieren que TradingLab esté añadida a la pantalla
+de inicio; en Safari sin instalar, la interfaz lo indica en lugar de ofrecer un
+control que no funcionaría.
+
+## Academia sin conexión (septiembre 2026)
+
+El contenido descargado vive en IndexedDB y **lo escribe la página**, nunca el
+service worker: el worker mantiene intacta su política de no interceptar
+navegación autenticada, `/api/` ni RSC, y sigue guardando un único documento.
+
+- `GET /api/academy/offline` entrega solo las lecciones publicadas que el plan
+  vigente permite leer. El filtro es el mismo `minPlan` que protege la ruta de
+  lectura, así que descargar no puede saltarse el muro de pago.
+- No se descarga progreso, cuestionarios ni identificadores de la cuenta. Los
+  bloques de gráfico se cuentan pero no se sirven: sin conexión no hay precio
+  que dibujar.
+- La descarga se marca con un ámbito derivado de la cuenta y su plan. Si entra
+  otra persona en el mismo dispositivo no coincide y se borra antes de escribir;
+  al cerrar sesión se borra siempre.
+- `offline.html` es el lector: índice por ruta formativa y lectura completa.
+  Es autocontenido a propósito, sin una sola hoja de estilo, fuente o script
+  externos, porque es lo único disponible justo cuando no hay red.

@@ -78,6 +78,7 @@ model User {
   tickets        SupportTicket[]
   auditLogs      AuditLog[]      @relation("AuditActor")
   grantedSubs    Subscription[]  @relation("SubscriptionGrantor")
+  pushSubscriptions PushSubscription[]
   badges         UserBadge[]
   challenges     ChallengeEntry[]
   portfolios     Portfolio[]
@@ -105,8 +106,34 @@ model Profile {
   reduceMotion       Boolean  @default(false)
   highContrast       Boolean  @default(false)
   emailOptIn         Boolean  @default(false)
+  /// Recordatorio diario de estudio por notificación push. Independiente del
+  /// consentimiento de correo: aceptar uno nunca implica el otro.
+  studyReminderOptIn Boolean  @default(false)
+  /// Hora local preferida del recordatorio, 0-23.
+  studyReminderHour  Int      @default(20)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
+}
+
+/// Suscripción del navegador al servicio de notificaciones push.
+///
+/// `endpoint` identifica al dispositivo y es único: reinstalar la app genera
+/// otro. Las claves son las del propio navegador para cifrar el mensaje; no
+/// son credenciales de la cuenta y no dan acceso a nada. Una suscripción que
+/// el servicio rechaza de forma definitiva se borra en lugar de reintentarse.
+model PushSubscription {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint      String    @unique
+  p256dh        String
+  auth          String
+  userAgent     String?
+  createdAt     DateTime  @default(now())
+  lastSuccessAt DateTime?
+  failureCount  Int       @default(0)
+
+  @@index([userId])
 }
 
 model Session {

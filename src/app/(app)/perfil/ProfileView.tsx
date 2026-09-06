@@ -13,6 +13,7 @@ import { ASSET_CLASS_LABEL } from '@tl/types';
 import { apiFetch, ApiRequestError } from '@/lib/client-api';
 import { formatCurrency, formatDateTime, formatPaymentDescription } from '@/lib/format';
 import { AdPrivacyControl } from '@/components/ads/AdPrivacy';
+import { StudyReminders } from '@/components/pwa/StudyReminders';
 import { PAYMENT_REGION_NOTICE } from '@/lib/payment-copy';
 import { ChevronLeft, ChevronRight, CreditCard, Palette, ShieldCheck } from 'lucide-react';
 
@@ -54,6 +55,8 @@ export function ProfileView({
     reduceMotion: boolean;
     highContrast: boolean;
     emailOptIn: boolean;
+    studyReminderOptIn: boolean;
+    studyReminderHour: number;
     experienceLevel: string;
     marketInterests: string[];
     educationalGoal: string | null;
@@ -487,6 +490,13 @@ export function ProfileView({
                 }}
                 label="Recibir contenido educativo por correo"
                 description="Puedes cambiar esta preferencia en cualquier momento. No compartimos tu correo con anunciantes."
+              />
+            </div>
+            <div className="mt-5 border-t border-[var(--color-border)] pt-5">
+              <StudyReminders
+                initialOptIn={profile.studyReminderOptIn}
+                initialHour={profile.studyReminderHour}
+                timezone={user.timezone}
               />
             </div>
           </Card>

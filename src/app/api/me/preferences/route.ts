@@ -24,6 +24,8 @@ export async function PATCH(req: NextRequest) {
       ...(input.reduceMotion != null ? { reduceMotion: input.reduceMotion } : {}),
       ...(input.highContrast != null ? { highContrast: input.highContrast } : {}),
       ...(input.emailOptIn != null ? { emailOptIn: input.emailOptIn } : {}),
+      ...(input.studyReminderOptIn != null ? { studyReminderOptIn: input.studyReminderOptIn } : {}),
+      ...(input.studyReminderHour != null ? { studyReminderHour: input.studyReminderHour } : {}),
     };
 
     if (Object.keys(profileData).length > 0) {

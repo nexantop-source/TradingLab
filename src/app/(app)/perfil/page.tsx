@@ -55,6 +55,8 @@ export default async function ProfilePage({
         reduceMotion: profile?.reduceMotion ?? false,
         highContrast: profile?.highContrast ?? false,
         emailOptIn: profile?.emailOptIn ?? false,
+        studyReminderOptIn: profile?.studyReminderOptIn ?? false,
+        studyReminderHour: profile?.studyReminderHour ?? 20,
         experienceLevel: profile?.experienceLevel ?? 'PRINCIPIANTE',
         marketInterests: fromJson<string[]>(profile?.marketInterests ?? '[]', []),
         educationalGoal: profile?.educationalGoal ?? null,
