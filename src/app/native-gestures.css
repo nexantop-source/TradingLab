@@ -9,31 +9,31 @@
 }
 .native-gesture-drawer[open] { display: block; }
 .native-gesture-drawer::backdrop { background: transparent; }
-.native-drawer-scrim { position: absolute; inset: 0; background: #020a13a8; backdrop-filter: blur(4px); }
+.native-drawer-scrim { position: absolute; inset: 0; background: var(--color-elevated); backdrop-filter: blur(4px); }
 .native-drawer-panel {
   position: relative; height: 100%; box-sizing: border-box;
-  padding-top: max(8px, env(safe-area-inset-top));
-  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  padding-top: max(var(--space-2), env(safe-area-inset-top));
+  padding-bottom: max(var(--space-3), env(safe-area-inset-bottom));
   overflow-y: auto; overscroll-behavior-y: contain;
   color: var(--color-text); background: color-mix(in srgb, var(--color-surface) 96%, transparent);
   border-right: 1px solid var(--color-border-strong);
-  border-radius: 0 26px 26px 0;
-  box-shadow: 16px 0 64px #020a1340, inset -1px 0 0 #ffffff0a;
+  border-radius: 0 var(--radius-xl) var(--radius-xl) 0;
+  box-shadow: 16px 0 64px var(--color-border-strong), inset -1px 0 0 var(--color-overlay);
   backdrop-filter: blur(30px) saturate(135%);
   will-change: transform;
 }
 .native-drawer-panel a, .native-drawer-panel button { min-height: 48px; }
-.native-drawer-panel .app-nav-link { gap: 14px; font-size: 14px; border-radius: 14px; }
+.native-drawer-panel .app-nav-link { gap: var(--space-3); font-size: var(--text-sm); border-radius: var(--radius-sm); }
 .native-drawer-panel .app-nav-link svg { width: 19px; height: 19px; }
 .native-drawer-panel button:active, .native-drawer-panel a:active { opacity: .72; }
 .native-drawer-panel [data-drawer-close] { width: 44px; height: 44px; border-radius: 50%; background: var(--color-overlay); }
-.native-drawer-panel .app-balance-card { padding: 19px; border-radius: 21px; }
-.native-drawer-hint { display: flex; align-items: center; justify-content: center; gap: 7px; margin: 8px 16px 0; font-size: 11px; color: var(--color-muted); }
-.native-drawer-hint span { font-size: 18px; }
+.native-drawer-panel .app-balance-card { padding: var(--space-5); border-radius: var(--radius-lg); }
+.native-drawer-hint { display: flex; align-items: center; justify-content: center; gap: var(--space-2); margin: var(--space-2) var(--space-4) 0; font-size: var(--text-2xs); color: var(--color-muted); }
+.native-drawer-hint span { font-size: var(--text-md); }
 .native-gesture-drawer[data-dragging] { user-select: none; -webkit-user-select: none; }
 @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
   .native-drawer-panel { background: var(--color-surface); backdrop-filter: none; }
-  .native-drawer-scrim { backdrop-filter: none; background: #020a13cc; }
+  .native-drawer-scrim { backdrop-filter: none; background: var(--color-elevated); }
 }
 html[data-high-contrast='true'] .native-drawer-panel { background: var(--color-surface); backdrop-filter: none; border-right: 2px solid currentColor; }
 @media (prefers-reduced-motion: reduce) { .native-drawer-panel { will-change: auto; } }

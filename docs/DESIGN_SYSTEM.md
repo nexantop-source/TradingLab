@@ -17,40 +17,84 @@ literales: siempre `var(--color-*)`.
 
 ### Color
 
+Rampa **acromática**. En un producto financiero los únicos colores saturados de la pantalla deben
+ser el dato (P&L) y la acción primaria; un fondo con tinte azul compite con ambos. Verificado por
+`tests/design-tokens.test.ts`, que falla si `--color-bg` deja de ser neutro.
+
 | Token | Oscuro | Claro | Uso |
 |---|---|---|---|
-| `--color-bg` | `#000000` | `#F5F5F7` | Fondo de la aplicación |
-| `--color-surface` | `#1C1C1E` | `#FFFFFF` | Tarjetas y paneles |
-| `--color-elevated` | `#242426` | `#FFFFFF` | Modales, menús, elementos flotantes |
-| `--color-border` | blanco 8 % | tinta 8 % | Separadores |
+| `--color-bg` | `#09090B` | `#F5F5F7` | Fondo de la aplicación |
+| `--color-surface` | `#111113` | `#FFFFFF` | Tarjetas y paneles |
+| `--color-elevated` | `#1A1A1D` | `#FFFFFF` | Modales, menús, elementos flotantes |
+| `--color-overlay` | blanco 4 % | tinta 4 % | Velos y estados hover |
+| `--color-border` | blanco 7 % | tinta 8 % | Separadores |
 | `--color-border-strong` | blanco 12 % | tinta 14 % | Bordes de control |
-| `--color-text` | `#F5F5F7` | `#1D1D1F` | Texto principal |
+| `--color-text` | `#FAFAFA` | `#1D1D1F` | Texto principal |
 | `--color-muted` | `#A1A1A6` | `#6E6E73` | Texto secundario |
-| `--color-subtle` | `#86868B` | `#86868B` | Texto terciario y metadatos |
-| `--color-blue` | `#0A84FF` | `#0071E3` | Decisión y acción primaria |
+| `--color-subtle` | `#71717A` | `#86868B` | Texto terciario y metadatos |
+| `--color-blue` | `#0A84FF` | `#0071E3` | **Único** color de acción |
 | `--color-violet` | `#7D7AFF` | `#5856D6` | Contexto y entrenador |
-| `--color-positive` | `#30D158` | `#16834B` | Estado correcto |
-| `--color-negative` | `#FF453A` | `#D70015` | Riesgo/error, siempre con texto o icono |
+| `--color-positive` | `#30D158` | `#16834B` | Dato al alza. Nunca una superficie |
+| `--color-negative` | `#FF453A` | `#D70015` | Dato a la baja o error, siempre con texto o icono |
 | `--color-gold` | `#FFD60A` | `#9A6700` | DEMO y advertencias |
 | `--color-lime` | `#B7F34A` | `#547B00` | Acento educativo puntual |
 
-Cada color tiene su variante `-soft` para fondos, generada con opacidad. El modo de alto contraste
-sustituye todos los valores por una paleta de contraste reforzado sobre negro puro.
+Cada color tiene su variante `-soft` para fondos. El modo de alto contraste sustituye todos los
+valores por una paleta reforzada sobre negro puro.
+
+En las superficies de la app instalada **no se admite ningún color literal**: el test los rechaza.
+La única excepción es `#ffffff` sobre el azul de acción, donde el fondo no cambia con el tema.
 
 ### Tipografía
 
+Escala de nueve pasos. La zona densa (11–17 px) sostiene tablas, etiquetas y datos; a partir de
+21 px la razón es ~1,26. **11 px es el suelo absoluto** y solo se usa con `letter-spacing` positivo.
+
+| Token | px | Uso |
+|---|---|---|
+| `--text-2xs` | 11 | Micro-etiquetas, cabeceras de tabla, eyebrows |
+| `--text-xs` | 13 | Texto secundario, tablas densas |
+| `--text-sm` | 15 | Cuerpo |
+| `--text-md` | 17 | Cuerpo enfatizado, títulos de lista |
+| `--text-lg` | 21 | Títulos de tarjeta y sección |
+| `--text-xl` | 26 | Títulos de página |
+| `--text-2xl` | 33 | Titular corto |
+| `--text-3xl` | 42 | Titular |
+| `--text-4xl` | 54 | Display |
+
+Interlineado por función: `--leading-tight` 1,15 · `snug` 1,35 · `normal` 1,55 · `relaxed` 1,7.
+Tracking: `--tracking-display` −0,03em · `tight` −0,015em · `label` 0,08em · `eyebrow` 0,14em.
+
+Ningún `font-size` se escribe en px. Se admite `clamp()` para tipografía fluida de titulares.
+
 - **Tipografía de sistema** — `-apple-system`, `BlinkMacSystemFont`, SF Pro si está disponible e Instrument Sans como respaldo.
-- **Display sans** — la misma familia con mayor peso y tracking negativo; sin cursiva decorativa.
 - **JetBrains Mono** — precios, porcentajes, indicadores, identificadores y cualquier dato
   financiero. Se aplica con la utilidad `.num`, que además activa `tabular-nums` para que las
   columnas de cifras no bailen.
 
-### Radios, sombras y curvas
+### Espacio
 
-`--radius-xs` 10 px · `sm` 13 px · `md` 17 px · `lg` 22 px · `xl` 30 px.
+Escala de base 4: `--space-px` 2 · `1` 4 · `2` 8 · `3` 12 · `4` 16 · `5` 20 · `6` 24 · `8` 32 ·
+`10` 40 · `12` 48 · `16` 64 · `20` 80. Cubre `gap`, `padding` y `margin`. Los valores negativos son
+correcciones ópticas deliberadas y quedan fuera de la escala.
 
-Tres sombras: `soft` (tarjetas), `lifted` (elementos flotantes), `glow-blue` (acción primaria). En
-alto contraste se sustituyen por bordes sólidos.
+Las alturas mínimas de objetivo táctil (44 px, 48 px) **no** son espacio: son accesibilidad y se
+escriben en px a propósito.
+
+### Radios, sombras y materiales
+
+`--radius-2xs` 4 px · `xs` 8 · `sm` 12 · `md` 16 · `lg` 20 · `xl` 28 · `full` 999. Ningún
+`border-radius` se escribe en px.
+
+Dos sombras: `--shadow-soft` (tarjetas) y `--shadow-lifted` (elementos flotantes), más
+`--shadow-focus` para el anillo de foco. En oscuro son mínimas a propósito: sobre un fondo casi
+negro la elevación se lee por superficie y borde, no por sombra. En alto contraste se sustituyen
+por bordes sólidos.
+
+**Cristal esmerilado (`backdrop-filter`)**: se reserva al cromo que flota sobre contenido que se
+desplaza — cabecera, navegación, drawers, scrims, `::backdrop` y paleta de comandos. Sobre una
+tarjeta estática no comunica capa y es el rasgo más reconocible de una interfaz generada; el test
+lo rechaza. Siempre con respaldo bajo `prefers-reduced-transparency`.
 
 Curvas: `--ease-out-soft` para entradas, `--ease-in-out-soft` para transiciones. Duraciones entre
 200 y 500 ms. Nada rebota, nada gira.

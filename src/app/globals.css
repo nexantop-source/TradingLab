@@ -13,42 +13,96 @@
   --font-serif: var(--font-instrument-serif), ui-serif, Georgia, serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, 'SF Mono', monospace;
 
-  /* ── Paleta base ────────────────────────────────────────────────────────── */
-  --color-bg: #071324;
-  --color-surface: #0d1b2f;
-  --color-elevated: #13243b;
-  --color-overlay: #ffffff0d;
+  /* ── Paleta base · oscuro neutro ────────────────────────────────────────── */
+  /* Rampa acromática. El fondo no tiene tinte: en un producto financiero los
+     únicos colores saturados de la pantalla deben ser el dato (P&L) y la
+     acción primaria. Un fondo azulado compite con ambos y abarata la lectura. */
+  --color-bg: #09090b;
+  --color-surface: #111113;
+  --color-elevated: #1a1a1d;
+  --color-overlay: #ffffff0a;
 
-  --color-border: #ffffff14;
+  --color-border: #ffffff12;
   --color-border-strong: #ffffff1f;
 
-  --color-text: #f7f9fc;
-  --color-muted: #a8b7ca;
-  --color-subtle: #74869f;
+  --color-text: #fafafa;
+  --color-muted: #a1a1a6;
+  --color-subtle: #71717a;
 
-  --color-blue: #5b8dff;
-  --color-blue-soft: #185adb26;
-  --color-violet: #32c5ff;
-  --color-violet-soft: #32c5ff1f;
-  --color-positive: #45d7aa;
-  --color-positive-soft: #087a5b2b;
-  --color-negative: #ff7188;
-  --color-negative-soft: #c332502b;
-  --color-gold: #f3c86a;
-  --color-gold-soft: #8a5a002b;
-  --color-lime: #c4f04d;
-  --color-lime-soft: #c4f04d1f;
+  /* Único color de acción. */
+  --color-blue: #0a84ff;
+  --color-blue-soft: #0a84ff1f;
+  /* Contexto y entrenador. Nunca decorativo. */
+  --color-violet: #7d7aff;
+  --color-violet-soft: #7d7aff1c;
+  /* Dato: sube y baja. Reservados para cifras, nunca para superficies. */
+  --color-positive: #30d158;
+  --color-positive-soft: #30d15821;
+  --color-negative: #ff453a;
+  --color-negative-soft: #ff453a21;
+  /* DEMO y advertencias. */
+  --color-gold: #ffd60a;
+  --color-gold-soft: #ffd60a1c;
+  --color-lime: #b7f34a;
+  --color-lime-soft: #b7f34a1c;
+
+  /* ── Escala tipográfica ─────────────────────────────────────────────────── */
+  /* Nueve pasos. La zona densa (11–17) sostiene tablas, etiquetas y datos; a
+     partir de 21 la razón es ~1,26. Ningún componente escribe px directos:
+     un tamaño que no esté aquí es un tamaño que no existe en el producto.
+     11 px es el suelo absoluto y solo se usa con `letter-spacing` positivo. */
+  --text-2xs: 11px;
+  --text-xs: 13px;
+  --text-sm: 15px;
+  --text-md: 17px;
+  --text-lg: 21px;
+  --text-xl: 26px;
+  --text-2xl: 33px;
+  --text-3xl: 42px;
+  --text-4xl: 54px;
+
+  /* Interlineado por función, no por tamaño. */
+  --leading-tight: 1.15;
+  --leading-snug: 1.35;
+  --leading-normal: 1.55;
+  --leading-relaxed: 1.7;
+
+  /* Tracking: negativo en titulares, positivo solo en micro-etiquetas. */
+  --tracking-display: -0.03em;
+  --tracking-tight: -0.015em;
+  --tracking-normal: 0em;
+  --tracking-label: 0.08em;
+  --tracking-eyebrow: 0.14em;
+
+  /* ── Escala de espacio (base 4) ─────────────────────────────────────────── */
+  --space-0: 0px;
+  --space-px: 2px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
 
   /* ── Radios y sombras ───────────────────────────────────────────────────── */
+  --radius-2xs: 4px;
   --radius-xs: 8px;
   --radius-sm: 12px;
   --radius-md: 16px;
   --radius-lg: 20px;
   --radius-xl: 28px;
+  --radius-full: 999px;
 
-  --shadow-soft: 0 1px 2px #00000030, 0 18px 44px -28px #000000bd;
-  --shadow-lifted: 0 2px 6px #0000003d, 0 34px 78px -30px #000000d1;
-  --shadow-glow-blue: 0 0 0 1px #32c5ff38, 0 18px 54px -22px #185adb99;
+  /* En oscuro la elevación se lee por borde y superficie, no por sombra: una
+     sombra negra sobre fondo negro no existe. Se mantienen mínimas. */
+  --shadow-soft: 0 1px 2px #00000059;
+  --shadow-lifted: 0 2px 4px #00000070, 0 16px 40px -24px #000000;
+  --shadow-focus: 0 0 0 1px var(--color-blue);
 
   /* ── Animación ──────────────────────────────────────────────────────────── */
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
@@ -57,34 +111,36 @@
 
 /* ── Tema claro ───────────────────────────────────────────────────────────── */
 :root[data-theme='light'] {
-  --color-bg: #f7f9fc;
+  /* Espejo acromático del oscuro. Mismo criterio: el gris no tiene tinte. */
+  --color-bg: #f5f5f7;
   --color-surface: #ffffff;
   --color-elevated: #ffffff;
-  --color-overlay: #07132408;
+  --color-overlay: #0000000a;
 
-  --color-border: #0f172a14;
-  --color-border-strong: #0f172a24;
+  --color-border: #00000014;
+  --color-border-strong: #00000024;
 
-  --color-text: #071324;
-  --color-muted: #5a6a80;
-  --color-subtle: #7b8ba1;
+  --color-text: #1d1d1f;
+  --color-muted: #6e6e73;
+  --color-subtle: #86868b;
 
-  --color-blue: #185adb;
-  --color-blue-soft: #185adb14;
-  --color-violet: #087da8;
-  --color-violet-soft: #32c5ff18;
-  --color-positive: #087a5b;
-  --color-positive-soft: #087a5b14;
-  --color-negative: #c33250;
-  --color-negative-soft: #c3325014;
-  --color-gold: #8a5a00;
-  --color-gold-soft: #8a5a0014;
-  --color-lime: #6d8b00;
-  --color-lime-soft: #c4f04d24;
+  --color-blue: #0071e3;
+  --color-blue-soft: #0071e314;
+  --color-violet: #5856d6;
+  --color-violet-soft: #5856d614;
+  /* En claro, verde y rojo se oscurecen para conservar contraste AA sobre blanco. */
+  --color-positive: #16834b;
+  --color-positive-soft: #16834b14;
+  --color-negative: #d70015;
+  --color-negative-soft: #d7001514;
+  --color-gold: #9a6700;
+  --color-gold-soft: #9a670014;
+  --color-lime: #547b00;
+  --color-lime-soft: #547b0014;
 
-  --shadow-soft: 0 1px 2px #0713240a, 0 14px 38px -24px #07132438;
-  --shadow-lifted: 0 2px 5px #07132412, 0 30px 72px -28px #07132445;
-  --shadow-glow-blue: 0 0 0 1px #185adb24, 0 18px 48px -24px #185adb66;
+  --shadow-soft: 0 1px 2px #0000000f, 0 12px 32px -24px #00000038;
+  --shadow-lifted: 0 2px 5px #00000014, 0 28px 64px -28px #00000045;
+  --shadow-focus: 0 0 0 1px var(--color-blue);
 }
 
 /* ── Alto contraste ───────────────────────────────────────────────────────── */
@@ -111,10 +167,12 @@
   --color-negative-soft: #ff8fa033;
   --color-gold: #ffd27f;
   --color-gold-soft: #ffd27f33;
+  --color-lime: #d4ff8a;
+  --color-lime-soft: #d4ff8a33;
 
   --shadow-soft: none;
   --shadow-lifted: none;
-  --shadow-glow-blue: 0 0 0 2px #8ab4ff;
+  --shadow-focus: 0 0 0 2px #8ab4ff;
 }
 
 /* La web pública tiene una identidad propia: clara, editorial y luminosa.
@@ -148,7 +206,7 @@
 
   --shadow-soft: 0 1px 2px #0713240a, 0 16px 42px -26px #0713243d;
   --shadow-lifted: 0 2px 6px #07132414, 0 34px 78px -28px #07132452;
-  --shadow-glow-blue: 0 0 0 1px #185adb2b, 0 18px 52px -22px #185adb70;
+  --shadow-focus: 0 0 0 1px #185adb2b, 0 18px 52px -22px #185adb70;
 
   min-height: 100dvh;
   overflow: hidden;
@@ -197,7 +255,7 @@
 }
 
 .marketing-nav-shell {
-  border-radius: 14px !important;
+  border-radius: var(--radius-sm) !important;
   box-shadow: 0 14px 44px -28px #07132452;
 }
 
@@ -262,14 +320,14 @@
   background: color-mix(in srgb, var(--color-surface) 90%, transparent);
   padding: 0.8rem 0.95rem;
   box-shadow: var(--shadow-lifted);
-  backdrop-filter: blur(18px);
+
 }
 
 .marketing-live-dot {
   width: 0.5rem;
   height: 0.5rem;
   flex: 0 0 auto;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--color-positive);
   box-shadow: 0 0 0 0.3rem var(--color-positive-soft), 0 0 1.2rem var(--color-positive);
 }
@@ -282,7 +340,7 @@
   background: color-mix(in srgb, var(--color-surface) 76%, transparent);
   padding: 0.65rem;
   box-shadow: var(--shadow-soft);
-  backdrop-filter: blur(20px);
+
 }
 
 .marketing-signal-rail > * {
@@ -350,7 +408,7 @@
   display: inline-block;
   width: 0.42rem;
   height: 0.42rem;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: currentColor;
   box-shadow: 0 0 0 0.28rem color-mix(in srgb, currentColor 13%, transparent);
 }
@@ -393,7 +451,7 @@
   width: 0.45rem;
   height: 0.45rem;
   border: 2px solid var(--color-bg);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--color-blue);
   box-shadow: 0 0 0 0.25rem var(--color-blue-soft);
 }
@@ -410,7 +468,7 @@
   border: 1px solid var(--color-border);
   background: color-mix(in srgb, var(--color-surface) 82%, transparent);
   box-shadow: var(--shadow-soft);
-  backdrop-filter: blur(18px);
+
 }
 
 .marketing-step-card {
@@ -430,7 +488,7 @@
   width: 2.8rem;
   height: 2.8rem;
   border: 1px solid color-mix(in srgb, var(--color-blue) 20%, transparent);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   content: '';
   opacity: 0;
   transform: scale(0.6);
@@ -487,7 +545,7 @@
   width: 34rem;
   height: 34rem;
   border: 1px solid color-mix(in srgb, var(--color-blue) 12%, transparent);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   pointer-events: none;
   transform: rotate(-18deg);
 }
@@ -498,7 +556,7 @@
   right: 16%;
   width: 0.65rem;
   height: 0.65rem;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--color-blue);
   box-shadow: 0 0 0 0.45rem var(--color-blue-soft), 0 0 2rem var(--color-blue);
   content: '';
@@ -514,7 +572,7 @@
   border-radius: 2rem;
   background: color-mix(in srgb, var(--color-surface) 92%, transparent);
   box-shadow: var(--shadow-lifted);
-  backdrop-filter: blur(24px);
+
 }
 
 .marketing-coach-console::before {
@@ -555,7 +613,7 @@
 
 .marketing-plan-featured {
   border-color: var(--color-blue);
-  box-shadow: var(--shadow-glow-blue);
+  box-shadow: var(--shadow-focus);
   background: linear-gradient(180deg, color-mix(in srgb, var(--color-blue-soft) 54%, var(--color-surface)), var(--color-surface) 42%);
 }
 
@@ -563,7 +621,7 @@
   position: absolute;
   top: -0.6rem;
   left: 1.5rem;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--color-blue);
   padding: 0.35rem 0.65rem;
   color: white;
@@ -610,7 +668,7 @@
   width: 7rem;
   height: 7rem;
   border: 1px solid color-mix(in srgb, var(--color-blue) 18%, transparent);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   content: '';
   pointer-events: none;
 }
@@ -675,7 +733,7 @@
   left: -0.75rem;
   width: 0.2rem;
   height: 1.15rem;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--color-blue);
   box-shadow: 0 0 1rem var(--color-blue);
   content: '';
@@ -735,7 +793,7 @@
   position: absolute;
   inset: 0;
   border: 1px solid color-mix(in srgb, var(--color-blue) 34%, transparent);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   transform: rotate(-24deg) scaleY(0.47);
 }
 
@@ -745,7 +803,7 @@
   right: -0.25rem;
   width: 0.55rem;
   height: 0.55rem;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--color-blue);
   box-shadow: 0 0 0 0.4rem var(--color-blue-soft), 0 0 1.5rem var(--color-blue);
   content: '';
@@ -765,7 +823,7 @@
   border-radius: 1.1rem;
   background: var(--color-blue-soft);
   color: var(--color-blue);
-  box-shadow: var(--shadow-glow-blue);
+  box-shadow: var(--shadow-focus);
 }
 
 .app-focus-orbit-label {
@@ -821,7 +879,7 @@
   position: absolute;
   inset: 0;
   border: 1px solid color-mix(in srgb, var(--color-violet) 34%, transparent);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   transform: rotate(28deg) scaleY(0.43);
   animation: tl-orbit 15s linear infinite;
 }
@@ -832,7 +890,7 @@
   right: -0.25rem;
   width: 0.55rem;
   height: 0.55rem;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--color-violet);
   box-shadow: 0 0 0 0.4rem var(--color-violet-soft), 0 0 1.5rem var(--color-violet);
   content: '';
@@ -894,7 +952,7 @@
   width: 7rem;
   height: 7rem;
   border: 1px solid color-mix(in srgb, var(--color-blue) 16%, transparent);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   content: '';
   pointer-events: none;
   transition: transform 420ms var(--ease-out-soft), border-color 420ms var(--ease-out-soft);
@@ -1052,7 +1110,7 @@
   --color-gold-soft: #8a5a002b;
   color: var(--color-text);
   color-scheme: dark;
-  border-radius: 22px !important;
+  border-radius: var(--radius-lg) !important;
   background:
     radial-gradient(circle at 78% 0%, #185adb24, transparent 23rem),
     #071324 !important;
@@ -1071,7 +1129,7 @@
   width: 0.48rem;
   height: 0.48rem;
   border: 1px solid #ffffff2b;
-  border-radius: 2px;
+  border-radius: var(--radius-2xs);
   background: #5b8dff;
 }
 
@@ -1107,13 +1165,13 @@
   position: absolute;
   inset: 0 auto 0 0;
   width: 4px;
-  border-radius: 4px 0 0 4px;
+  border-radius: var(--radius-2xs) 0 0 var(--radius-2xs);
   background: linear-gradient(180deg, #32c5ff, #185adb 55%, #c4f04d);
   content: '';
 }
 
 .marketing-plan-ribbon {
-  border-radius: 5px;
+  border-radius: var(--radius-2xs);
   background: #071324;
   color: #f7f9fc;
 }
@@ -1160,7 +1218,7 @@
 .app-course-card,
 .app-coach-form,
 .app-discipline-card {
-  backdrop-filter: blur(16px);
+
 }
 
 /* Cabeceras editoriales reutilizables en precios, recursos y legales. */
@@ -1189,7 +1247,7 @@
 .pricing-comparison {
   overflow: hidden;
   border: 1px solid var(--color-border);
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   background: var(--color-surface);
   box-shadow: var(--shadow-soft);
 }
@@ -1258,7 +1316,7 @@ body {
 :focus-visible {
   outline: 2px solid var(--color-blue);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: var(--radius-2xs);
 }
 
 ::selection {
@@ -1276,7 +1334,7 @@ body {
 }
 ::-webkit-scrollbar-thumb {
   background: var(--color-border-strong);
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
   border: 2px solid transparent;
   background-clip: content-box;
 }
@@ -1304,8 +1362,8 @@ body {
 
 @utility glass {
   background-color: color-mix(in srgb, var(--color-surface) 72%, transparent);
-  backdrop-filter: blur(16px) saturate(140%);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
+
+
   border: 1px solid var(--color-border);
 }
 
@@ -1546,7 +1604,7 @@ body {
   --shadow-soft: 0 1px 2px #00000008, 0 8px 30px #0000000a;
   --shadow-lifted: 0 18px 60px #00000016, 0 2px 8px #0000000a;
   --shadow-button: 0 1px 2px #00000012;
-  --shadow-glow-blue: 0 1px 2px #0071e32b;
+  --shadow-focus: 0 1px 2px #0071e32b;
   color-scheme: light;
 }
 
@@ -1577,7 +1635,7 @@ body {
   --shadow-soft: 0 1px 0 #ffffff0a inset, 0 16px 40px #0000003d;
   --shadow-lifted: 0 1px 0 #ffffff14 inset, 0 24px 80px #00000080;
   --shadow-button: 0 1px 2px #00000066;
-  --shadow-glow-blue: 0 1px 2px #00000052;
+  --shadow-focus: 0 1px 2px #00000052;
   color-scheme: dark;
 }
 
@@ -1696,7 +1754,7 @@ body {
   background: #ffffffb8;
   padding: 1.1rem 1.4rem;
   box-shadow: 0 1px 0 #ffffff inset, 0 10px 35px #0000000a;
-  backdrop-filter: blur(24px) saturate(140%);
+
 }
 
 .marketing-hero-product-shell {
@@ -1840,7 +1898,7 @@ body {
 }
 
 .marketing-plan-ribbon {
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--color-blue);
   color: #ffffff;
 }
@@ -2005,7 +2063,7 @@ body {
     radial-gradient(28rem 20rem at 100% 0%, var(--color-blue-soft), transparent 70%),
     var(--color-surface);
   box-shadow: var(--shadow-soft);
-  backdrop-filter: none;
+
 }
 
 .app-focus-card::before,
@@ -2112,7 +2170,7 @@ dialog, [role='dialog'] { letter-spacing: -0.012em; }
   width: 68rem;
   height: 48rem;
   transform: translateX(-50%);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background:
     radial-gradient(circle at 46% 56%, #7bc6ff42 0, #2997ff1f 32%, transparent 68%);
   filter: blur(10px);
@@ -2138,13 +2196,13 @@ dialog, [role='dialog'] { letter-spacing: -0.012em; }
   min-height: 2rem;
   padding: 0.35rem 0.8rem;
   border: 1px solid #0071e31a;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: #eff7ffcc;
   color: #0066cc;
   font-size: 0.74rem;
   font-weight: 600;
   letter-spacing: -0.01em;
-  backdrop-filter: blur(16px);
+
 }
 
 .apple-hero h1 {
@@ -2260,7 +2318,7 @@ dialog, [role='dialog'] { letter-spacing: -0.012em; }
   background: #1c1c1ecc;
   color: #98989d;
   font-size: 0.66rem;
-  backdrop-filter: blur(24px);
+
 }
 
 .window-dots {
@@ -2457,7 +2515,7 @@ dialog, [role='dialog'] { letter-spacing: -0.012em; }
   gap: 0.4rem;
   padding: 0.34rem 0.55rem;
   border: 1px solid #ffffff17;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: #2c2c2ef2;
   color: #d1d1d6;
   font-size: 0.57rem;
@@ -2671,7 +2729,7 @@ dialog, [role='dialog'] { letter-spacing: -0.012em; }
   height: 0.38rem;
   margin-top: 0.85rem;
   overflow: hidden;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: #e8e8ed;
 }
 
@@ -2966,7 +3024,7 @@ dialog, [role='dialog'] { letter-spacing: -0.012em; }
 .method-loop span {
   padding: 0.55rem 0.65rem;
   border: 1px solid #ffffff12;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: #ffffff0a;
 }
 
