@@ -25,3 +25,6 @@ tsconfig.tsbuildinfo
 firebase-debug.log
 firebase-debug.*.log
 apphosting.emulator.yaml
+
+# Assets de motion (video, proyectos AE, audio): pesados y binarios, se versionan fuera de git
+motion/
