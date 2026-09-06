@@ -4,7 +4,8 @@ import { createHash, randomBytes } from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import { SignJWT, jwtVerify } from 'jose';
 import { db } from './db';
-import type { PlanId, Role, SessionUser, ExperienceLevel, Locale } from '@tl/types';
+import { resolveActivePlan } from './active-plan';
+import type { Role, SessionUser, ExperienceLevel, Locale } from '@tl/types';
 
 /**
  * Autenticación por sesión.
@@ -206,11 +207,7 @@ export async function getAuth(): Promise<AuthContext | null> {
   if (session.tokenHash !== hashToken(parsed.raw)) return null;
   if (session.user.status !== 'ACTIVE' || session.user.deletedAt) return null;
 
-  const sub = session.user.subscription;
-  const activePlan: PlanId =
-    sub && (sub.status === 'ACTIVE' || sub.status === 'TRIALING') && sub.currentPeriodEnd > new Date()
-      ? (sub.planId as PlanId)
-      : 'FREE';
+  const activePlan = resolveActivePlan(session.user.subscription);
 
   return {
     sessionId: session.id,

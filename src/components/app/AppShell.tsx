@@ -29,6 +29,7 @@ import {
   ArrowUpRight,
   Compass,
   WalletCards,
+  ChevronLeft,
 } from 'lucide-react';
 import { PLAN_ENTITLEMENTS } from '@tl/types/plans';
 import { Logo } from '@/components/Logo';
@@ -101,6 +102,8 @@ export function AppShell({
 
   const isAdmin = ADMIN_ROLES.includes(user.role);
   const immersive = IMMERSIVE_ROUTES.some((r) => pathname.startsWith(r));
+  const checkout = pathname === '/pago';
+  const backHref = checkout ? '/precios' : pathname.startsWith('/academia/') ? '/academia' : pathname.startsWith('/noticias/') ? '/noticias' : null;
 
   React.useEffect(() => {
     setMenuOpen(false);
@@ -127,7 +130,7 @@ export function AppShell({
   }
 
   return (
-    <div data-app-flow={pathname.startsWith('/onboarding') ? 'onboarding' : 'workspace'} className="app-shell min-h-dvh bg-[var(--color-bg)] lg:flex">
+    <div data-app-flow={pathname.startsWith('/onboarding') ? 'onboarding' : checkout ? 'checkout' : 'workspace'} className="app-shell min-h-dvh bg-[var(--color-bg)] lg:flex">
       {/* ── Barra lateral (escritorio) ──────────────────────────────────── */}
       <aside className="app-sidebar hidden w-64 shrink-0 flex-col border-r border-[var(--color-border)] lg:flex">
         <div className="app-brand-block px-5 py-6">
@@ -175,13 +178,14 @@ export function AppShell({
       {/* ── Contenido ───────────────────────────────────────────────────── */}
       <div className="app-workspace flex min-w-0 flex-1 flex-col">
         {/* Cabecera móvil */}
-        <header className="app-mobile-header sticky top-0 z-40 flex h-16 items-center gap-3 border-b border-[var(--color-border)] px-4 backdrop-blur-xl lg:hidden">
+        <header data-has-back={Boolean(backHref)} className="app-mobile-header sticky top-0 z-40 flex h-16 items-center gap-3 border-b border-[var(--color-border)] px-4 backdrop-blur-xl lg:hidden">
+          {backHref && <Link className="native-back-control" href={backHref} aria-label={checkout ? 'Volver a planes' : 'Volver a la sección'}><ChevronLeft size={25} aria-hidden="true" /></Link>}
           <button
             type="button"
             onClick={() => setMenuOpen((v) => !v)}
             aria-expanded={menuOpen}
             aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
-            className="flex size-9 items-center justify-center rounded-[var(--radius-xs)] text-[var(--color-muted)]"
+            className="app-menu-trigger flex size-9 items-center justify-center rounded-[var(--radius-xs)] text-[var(--color-muted)]"
           >
             {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
@@ -408,6 +412,7 @@ const BREADCRUMB_LABELS: Record<string, string> = {
   perfil: 'Perfil y ajustes',
   ayuda: 'Centro de ayuda',
   onboarding: 'Configuración inicial',
+  pago: 'Confirmar plan',
 };
 
 function Breadcrumb({ pathname }: { pathname: string }) {

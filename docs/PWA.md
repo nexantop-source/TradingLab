@@ -29,6 +29,19 @@ This implementation does **not** copy its source, stickers, screens or animation
 
 On iPhone, open `/app` in Safari, choose Share → Add to Home Screen and enable **Open as Web App** when offered. A bookmark opened in Safari cannot programmatically hide browser controls. See [Apple's installation instructions](https://support.apple.com/es-es/guide/iphone/iphea86e5236/ios). This remains a PWA, not a compiled Swift application.
 
+## Native home, orientation and billing refresh (6 September 2026 UTC)
+
+- The installed dashboard has a dedicated layout: next lesson, original layered 13A sculpture, demo wallet, actual lesson/XP progress, simulated market references and links to open positions and the journal. The desktop dashboard remains separate; there are no invented performance charts or progress values.
+- A three-step first-visit orientation is skippable, supports Back/Escape and restores focus. It can be replayed with **Conoce tu app**. Its versioned localStorage flag is presentation-only and never bypasses the server-side assessment, account authentication or checkout intent. No automatic carousel; OS and account reduced-motion preferences are honored.
+- Explore is the automatic base entitlement when no eligible paid period exists. It is a status, not a radio option or checkout. Plus/Pro are optional upgrades. `resolveActivePlan` retains paid access through its valid period and fails closed to Free for absent, expired, canceled or invalid plans.
+- Plans show the total USD reference for the selected month/year. Checkout reviews the COP total before navigating to Wompi. It has a Back control and hides the installed tab bar during payment; payment ID, reference, conversion and security details use expandable disclosure. No recurring debits are enabled.
+- Account settings use grouped native navigation with heading focus after switching sections. Light/dark presentations preserve the account controls and privacy settings.
+- The billing Origin guard now compares against the configured public HTTPS URL in production, not Firebase's internal request origin. Foreign origins and untrusted forwarded headers do not bypass the guard. See `WOMPI-READINESS.md`.
+
+Validation: 284 unit tests, typecheck and production build passed. The isolated `scripts/qa-native-checkout.cjs` flow tests Chromium and WebKit at 320/390/430 px, tour dismissal/replay/focus/reduced motion, automatic Free presentation, paid selection, annual intent, real local subscribe route behind a TLS proxy, COP link/ID, idempotent retry, foreign-origin rejection and error recovery. It uses new temporary SQLite databases, fabricated keys and blocked external requests; it never navigates to Wompi or charges a card. Physical iPhone testing remains a separate acceptance check.
+
+To run that fixture, build with `NEXT_PUBLIC_APP_URL=https://127.0.0.1:3443`, stop processes occupying local ports 3010/3443, set `PLAYWRIGHT_MODULE`, `PWA_QA_OPENSSL` and an absolute `PWA_QA_OUTPUT`, then run `node scripts/qa-native-checkout.cjs`. Firebase builds with its own public URL from `apphosting.yaml`; do not change production configuration to the local fixture URL.
+
 ## Privacy and offline contract
 
 `public/sw.js` stores **only** `/offline.html`, fetched without credentials. No session HTML, React Server Component responses, API requests, market prices, account information, passwords, payment sources or checkout details are stored in Cache Storage. It never queues requests. Authenticated routes remain dynamic; API privacy rules remain in their existing handlers.

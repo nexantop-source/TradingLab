@@ -127,11 +127,15 @@ if (!output || !path.isAbsolute(output)) throw new Error('PWA_QA_OUTPUT must nam
       }
       await page.waitForURL('**/panel');
       await page.waitForLoadState('networkidle');
-      await page.getByRole('heading', { name: standalone ? 'Tu espacio.' : 'Todo tu espacio, de un vistazo.', exact: true }).waitFor();
+      if (standalone) {
+        const tour = page.locator('.native-orientation');
+        if (await tour.isVisible()) await tour.getByRole('button', { name: 'Omitir' }).click();
+      }
+      await page.getByRole('heading', { name: standalone ? 'Un paso más claro.' : 'Todo tu espacio, de un vistazo.', exact: true }).waitFor();
       await fits();
       await page.screenshot({ path: path.join(output, 'pwa-panel-mobile.png'), fullPage: true, animations: 'disabled' });
       if (standalone) {
-        assert(await page.getByRole('heading', { name: 'Tu espacio.', exact: true }).isVisible());
+        assert(await page.getByRole('heading', { name: 'Un paso más claro.', exact: true }).isVisible());
         assert(!(await page.locator('.dashboard-browser-intro').isVisible()));
         await page.screenshot({ path: path.join(output, 'pwa-native-home.png'), animations: 'disabled' });
         for (const width of [320, 430]) { await page.setViewportSize({ width, height: 844 }); await fits(); }

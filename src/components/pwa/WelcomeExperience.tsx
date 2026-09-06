@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { useMotionPreference } from './useMotionPreference';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Logo } from '@/components/Logo';
-import { MarketArtwork } from './MarketArtwork';
+import { LearningSculpture } from './LearningSculpture';
 import { InstallApp } from './InstallApp';
 
 const SCENES = [
@@ -26,7 +26,7 @@ export function WelcomeExperience() {
       <div className="ios-welcome-layout">
         <motion.div className="ios-welcome-art" drag={reduce ? false : 'x'} dragConstraints={{ left: 0, right: 0 }} dragElastic={0.12}
           onDragEnd={(_, info) => { if (Math.abs(info.offset.x) > 45 || Math.abs(info.velocity.x) > 350) move(info.offset.x + info.velocity.x * 0.08 < 0 ? 1 : -1); }} style={{ touchAction: 'pan-y' }}>
-          <MarketArtwork scene={scene} />
+          <LearningSculpture scene={scene} />
         </motion.div>
         <section className="ios-welcome-copy" aria-label="Descubre TradingLab">
           <span className="ios-eyebrow">{current.eyebrow}</span>

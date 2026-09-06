@@ -4,7 +4,7 @@ import * as React from 'react';
 import { motion } from 'framer-motion';
 import { useMotionPreference } from '@/components/pwa/useMotionPreference';
 import { useTheme } from '@tl/ui/ThemeProvider';
-import { MarketArtwork } from '@/components/pwa/MarketArtwork';
+import { LearningSculpture } from '@/components/pwa/LearningSculpture';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Check, ArrowRight, ArrowLeft } from 'lucide-react';
@@ -132,7 +132,7 @@ export function OnboardingFlow({
       <motion.div ref={stageRef} key={step} className="onboarding-stage" initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 210, damping: 30 }}>
       {step === 'bienvenida' && (
         <Card className="p-7">
-          <div className="onboarding-intro-art"><MarketArtwork compact /></div>
+          <div className="onboarding-intro-art"><LearningSculpture /></div>
           <h1 className="text-2xl font-semibold tracking-[-0.02em]">
             Bienvenido, {userName.split(' ')[0]}
           </h1>

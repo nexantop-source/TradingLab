@@ -8,13 +8,36 @@ compartido y el receptor Nexant se implementaron; ver `WOMPI-EVENTS.md` para
 el contrato, activación, pruebas y límites de recuperación. El estado histórico
 de abajo describe el punto de partida, no sustituye verificar el build servido.
 
-## Evidencia actual
+## Evidencia histórica anterior a la activación
 
 - La consulta pública de `/api/billing/status` devuelve 404 / `BILLING_PROVIDER_UNAVAILABLE`.
 - `apphosting.yaml` selecciona `BILLING_PROVIDER=disabled`. Hay referencias a secretos de llave pública, integridad y eventos; no una referencia de llave privada para transacciones iniciadas por servidor.
 - La implementación actual genera un checkout por un periodo. El texto de compra y los términos excluyen expresamente débitos recurrentes; esas compras no constituyen un mandato de renovación.
 - Existe `/api/billing/webhook`: limita el cuerpo, comprueba firma y ambiente, consulta la transacción a Wompi y reconcilia de forma idempotente. No existe aún un hub compartido operativo con Nexant.
 - El propietario confirmó que la URL Shopify/Conexa ya no se usa. Se puede sustituir cuando el nuevo destino esté desplegado y verificado; esta confirmación no significa que el cambio ya se haya realizado.
+
+## Corrección de checkout tras instalación PWA (6 de septiembre UTC)
+
+La revisión de la captura reprodujo `403 CROSS_SITE_REQUEST` incluso enviando
+el Origin público correcto. Firebase termina HTTPS antes del servidor Next;
+comparar `Origin` con `req.nextUrl.origin` rechazaba el dominio legítimo cuando
+Next veía el listener interno. No era un rechazo de tarjeta ni de las llaves.
+
+`src/lib/request-origin.ts` compara ahora con `NEXT_PUBLIC_APP_URL` configurado
+por el servidor en producción, exige HTTPS y no confía en Host ni cabeceras
+forwarded. Orígenes ajenos, `null`, puertos distintos, downgrade HTTP y señales
+cross-site siguen rechazados. Referer exacto o Fetch Metadata same-origin
+permiten los casos sin Origin; sin ninguna señal, falla cerrado. La sesión,
+los límites, la firma Wompi y la idempotencia siguen siendo obligatorios.
+
+18 pruebas unitarias del guard; integración de checkout local real detrás de
+proxy HTTPS en Chromium y WebKit: 200 al preparar, ID y referencia vinculados,
+COP firmado y reintento con el mismo ID. Origen ajeno: 403 en subscribe/cancel.
+La prueba de webhook con dobles locales comprueba activación una sola vez,
+firma inválida, intento pendiente sin acceso y aislamiento TradingLab/Nexant.
+Todas estas pruebas usan llaves ficticias, sin tarjetas ni cobros externos.
+
+Referencia de seguridad: [OWASP, verificación de origen detrás de proxy](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#identifying-the-target-origin).
 
 ## Lo que permite Wompi
 

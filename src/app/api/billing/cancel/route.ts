@@ -4,6 +4,7 @@ import { fail, handleError, ok } from '@/lib/api';
 import { requireAuth } from '@/lib/auth';
 import { billingProvider } from '@/lib/billing';
 import { enforce } from '@/lib/rate-limit';
+import { isSameOriginRequest } from '@/lib/request-origin';
 
 const MAX_CANCEL_BYTES = 2 * 1024;
 const bodySchema = z
@@ -14,13 +15,6 @@ const bodySchema = z
   })
   .strict();
 
-function sameOrigin(req: NextRequest): boolean {
-  const fetchSite = req.headers.get('sec-fetch-site');
-  if (fetchSite && fetchSite !== 'same-origin') return false;
-  const origin = req.headers.get('origin');
-  return !origin || origin === req.nextUrl.origin;
-}
-
 /**
  * Cancelación en un paso.
  *
@@ -29,7 +23,7 @@ function sameOrigin(req: NextRequest): boolean {
  */
 export async function POST(req: NextRequest) {
   try {
-    if (!sameOrigin(req)) return fail('CROSS_SITE_REQUEST', 'Solicitud de cancelación no permitida.', 403);
+    if (!isSameOriginRequest(req)) return fail('CROSS_SITE_REQUEST', 'Solicitud de cancelación no permitida.', 403);
     if (!req.headers.get('content-type')?.toLowerCase().startsWith('application/json')) {
       return fail('UNSUPPORTED_MEDIA_TYPE', 'La cancelación debe enviarse como JSON.', 415);
     }

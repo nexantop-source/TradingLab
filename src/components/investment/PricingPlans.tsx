@@ -3,11 +3,11 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Check, Compass, Layers3, Sparkles, ShieldCheck, BookOpen, ChevronDown } from 'lucide-react';
 import { PLAN_ENTITLEMENTS, yearlyDiscountPercent } from '@tl/types/plans';
-import { PLANS } from '@tl/types';
+import { PLANS, type PlanId } from '@tl/types';
 import { FluidControl } from './FluidControl';
 import { PAYMENT_REGION_NOTICE } from '@/lib/payment-copy';
 
-export function PricingPlans({ heading = true }: { heading?: boolean }) {
+export function PricingPlans({ heading = true, currentPlan = null }: { heading?: boolean; currentPlan?: PlanId | null }) {
   const [interval, setInterval] = useState<'MONTHLY' | 'YEARLY'>('MONTHLY');
   return <section className="invest-section invest-pricing visual-pricing" id="precios">
     {heading && <div className="invest-section-heading centered"><span className="invest-eyebrow">TU RITMO. TU PLAN.</span><h2>Un espacio para cada<br />forma de crecer.</h2><p>Empieza gratis. Amplía tus herramientas cuando las necesites.</p></div>}
@@ -24,8 +24,8 @@ export function PricingPlans({ heading = true }: { heading?: boolean }) {
         <span className="invest-plan-emblem"><PlanIcon size={26} strokeWidth={1.5} aria-hidden="true" /></span>
         <h3>{p.name}</h3><p className="invest-plan-tagline">{p.tagline}</p>
         <div className="invest-plan-price"><strong>${price.toLocaleString('en-US', { minimumFractionDigits: price ? 2 : 0, maximumFractionDigits: 2 })}</strong><span>USD / mes</span></div>
-        <p className="invest-billing-note">{id === 'FREE' ? 'Gratis, sin tarjeta.' : yearly ? `USD ${p.priceYearlyUsd} al año · ahorras ${yearlyDiscountPercent(id)}%` : 'Facturación mensual. Cancela desde tu perfil.'}</p>
-        <Link className={`invest-button ${id === 'STANDARD' ? '' : 'secondary'}`} href={id === 'FREE' ? '/crear-cuenta' : `/crear-cuenta?plan=${id}&interval=${interval}`}>{id === 'FREE' ? 'Empezar gratis' : `Elegir ${p.name}`}<ArrowRight size={16} /></Link>
+        <p className="invest-billing-note">{id === 'FREE' ? 'Tu acceso base. Sin activación ni tarjeta.' : yearly ? `USD ${p.priceYearlyUsd} por un año · ahorras ${yearlyDiscountPercent(id)}%` : 'Un mes de acceso. Sin renovación automática.'}</p>
+        {id === 'FREE' ? <div className="invest-free-included"><Check size={16} aria-hidden="true" />{currentPlan === 'FREE' ? 'Ya está activo' : currentPlan ? 'Incluido al vencer tu plan de pago' : 'Incluido al crear tu cuenta'}</div> : <Link className={`invest-button ${id === 'STANDARD' ? '' : 'secondary'}`} href={currentPlan === id ? '/perfil' : `${currentPlan ? '/pago' : '/crear-cuenta'}?plan=${id}&interval=${interval}`}>{currentPlan === id ? 'Ver mi suscripción' : `Elegir ${p.name}`}<ArrowRight size={16} /></Link>}
         <ul>{features.map(f => <li key={f}><Check size={16} aria-hidden="true" />{f}</li>)}</ul>
       </article>;
     })}</div>

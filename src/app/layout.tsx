@@ -11,6 +11,7 @@ import './instrument-icons.css';
 import './marketing-visuals.css';
 import './mobile-app.css';
 import './native-app.css';
+import './native-home.css';
 
 const sans = localFont({
   src: '../../identidad visual/fuentes/instrument-sans-latin.woff2',

@@ -9,19 +9,13 @@ import { DISCLAIMERS } from '@tl/types/compliance';
 import { WompiError } from '@/lib/wompi';
 import { enforce } from '@/lib/rate-limit';
 import { db } from '@/lib/db';
+import { isSameOriginRequest } from '@/lib/request-origin';
 
 const MAX_CHECKOUT_BYTES = 8 * 1024;
 
-function sameOrigin(req: NextRequest): boolean {
-  const fetchSite = req.headers.get('sec-fetch-site');
-  if (fetchSite && fetchSite !== 'same-origin') return false;
-  const origin = req.headers.get('origin');
-  return !origin || origin === req.nextUrl.origin;
-}
-
 export async function POST(req: NextRequest) {
   try {
-    if (!sameOrigin(req)) return fail('CROSS_SITE_REQUEST', 'Solicitud de pago no permitida.', 403);
+    if (!isSameOriginRequest(req)) return fail('CROSS_SITE_REQUEST', 'No pudimos validar el origen del pago. Vuelve a abrir TradingLab desde su dirección oficial e inténtalo de nuevo.', 403);
     if (!req.headers.get('content-type')?.toLowerCase().startsWith('application/json')) {
       return fail('UNSUPPORTED_MEDIA_TYPE', 'El checkout debe enviarse como JSON.', 415);
     }

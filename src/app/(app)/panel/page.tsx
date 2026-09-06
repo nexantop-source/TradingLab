@@ -121,7 +121,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="dashboard-page app-content-page mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6">
-      <NativeHome name={user.name} balanceCents={account.balanceCents} dailyChange={dailyChange} streak={userRow?.streakDays ?? 0} lesson={nextLesson} markets={quotes.slice(0, 4).map(q => ({ symbol: q.symbol, name: getSymbol(q.symbol)?.name ?? q.symbol, assetClass: getSymbol(q.symbol)?.assetClass ?? 'STOCK', precision: getSymbol(q.symbol)?.precision ?? 2, price: q.price, change: q.changePercent }))} />
+      <NativeHome name={user.name} plan={user.plan} balanceCents={account.balanceCents} dailyChange={dailyChange} streak={userRow?.streakDays ?? 0} completedLessons={completedLessons} totalLessons={totalLessons} level={levelInfo.level} xp={userRow?.xp ?? 0} openPositions={openPositions.length} lesson={nextLesson} markets={quotes.slice(0, 4).map(q => ({ symbol: q.symbol, name: getSymbol(q.symbol)?.name ?? q.symbol, assetClass: getSymbol(q.symbol)?.assetClass ?? 'STOCK', precision: getSymbol(q.symbol)?.precision ?? 2, price: q.price, change: q.changePercent }))} />
       {/* ── Cabecera ─────────────────────────────────────────────────────── */}
       <header className="dashboard-browser-intro flex flex-wrap items-end justify-between gap-4">
         <div>
@@ -217,7 +217,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* ── Cuerpo ───────────────────────────────────────────────────────── */}
-      <div className="grid gap-4 lg:grid-cols-[1.6fr_1fr]">
+      <div className="dashboard-browser-body grid gap-4 lg:grid-cols-[1.6fr_1fr]">
         <div className="space-y-4">
           {/* Simulaciones abiertas */}
           <Card>

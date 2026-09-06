@@ -7,12 +7,14 @@ import { Badge, Button, Callout, Card, Checkbox, Field, Modal, Select, Tabs, cn 
 import { VirtualBalance } from '@tl/ui/compliance';
 import { THEME_OPTIONS, useTheme } from '@tl/ui/ThemeProvider';
 import { InstallApp } from '@/components/pwa/InstallApp';
+import { isStandalone } from '@/components/pwa/appMode';
 import type { SessionUser, ThemeId } from '@tl/types';
 import { ASSET_CLASS_LABEL } from '@tl/types';
 import { apiFetch, ApiRequestError } from '@/lib/client-api';
 import { formatCurrency, formatDateTime, formatPaymentDescription } from '@/lib/format';
 import { AdPrivacyControl } from '@/components/ads/AdPrivacy';
 import { PAYMENT_REGION_NOTICE } from '@/lib/payment-copy';
+import { ChevronLeft, ChevronRight, CreditCard, Palette, ShieldCheck } from 'lucide-react';
 
 const PAYMENT_STATUS_META = {
   PENDING: { label: 'Pendiente', tone: 'blue' },
@@ -92,6 +94,14 @@ export function ProfileView({
   const router = useRouter();
   const { theme, setTheme, reduceMotion, setReduceMotion } = useTheme();
   const [tab, setTab] = React.useState<'cuenta' | 'suscripcion' | 'accesibilidad' | 'privacidad'>('cuenta');
+  const nativeHeading = React.useRef<HTMLElement>(null);
+  const initialTab = React.useRef(true);
+  React.useEffect(() => {
+    if (initialTab.current) { initialTab.current = false; return; }
+    if (!isStandalone() || !window.matchMedia('(max-width: 1023px)').matches) return;
+    const title = nativeHeading.current?.querySelector('h1');
+    if (title) { title.tabIndex = -1; title.focus({ preventScroll: true }); }
+  }, [tab]);
   const [message, setMessage] = React.useState<{ tone: 'ok' | 'error'; text: string } | null>(null);
   const [confirmReset, setConfirmReset] = React.useState(false);
   const [confirmCancel, setConfirmCancel] = React.useState(false);
@@ -142,13 +152,15 @@ export function ProfileView({
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-5 px-4 py-6 sm:px-6">
-      <header>
+    <div data-profile-section={tab} className="profile-page mx-auto max-w-3xl space-y-5 px-4 py-6 sm:px-6">
+      <header className="profile-browser-heading">
         <h1 className="text-2xl font-semibold tracking-[-0.02em]">Perfil y ajustes</h1>
         <p className="mt-1 text-[13px] text-[var(--color-muted)]">
           {user.name} · {user.email}
         </p>
       </header>
+
+      <header ref={nativeHeading} className="native-account-heading">{tab === 'cuenta' ? <><span className="native-account-avatar" aria-hidden="true">{user.name.slice(0, 2).toUpperCase()}</span><h1>{user.name}</h1><p>{user.email}</p><span className="native-account-plan">TradingLab {planFeatures.name}</span></> : <><button onClick={() => setTab('cuenta')}><ChevronLeft size={20} />Mi cuenta</button><h1>{tab === 'suscripcion' ? 'Mi suscripción' : tab === 'accesibilidad' ? 'Apariencia' : 'Privacidad y seguridad'}</h1></>}</header>
 
       {message && (
         <Callout tone={message.tone === 'ok' ? 'success' : 'danger'}>{message.text}</Callout>
@@ -157,7 +169,7 @@ export function ProfileView({
       {checkoutTransactionId && <PaymentReturnStatus transactionId={checkoutTransactionId} />}
       <InstallApp />
 
-      <Tabs
+      <div className="profile-browser-tabs"><Tabs
         ariaLabel="Secciones del perfil"
         active={tab}
         onChange={setTab}
@@ -167,7 +179,8 @@ export function ProfileView({
           { id: 'accesibilidad', label: 'Apariencia y accesibilidad' },
           { id: 'privacidad', label: 'Privacidad y seguridad' },
         ]}
-      />
+      /></div>
+      {tab === 'cuenta' && <nav className="native-account-menu" aria-label="Ajustes de mi cuenta"><button onClick={() => setTab('suscripcion')}><CreditCard size={20} /><span>Mi suscripción<small>{planFeatures.name} · {subscription ? 'Ver periodo y pagos' : 'Plan gratuito'}</small></span><ChevronRight size={18} /></button><button onClick={() => setTab('accesibilidad')}><Palette size={20} /><span>Apariencia y accesibilidad<small>Tema, contraste y movimiento</small></span><ChevronRight size={18} /></button><button onClick={() => setTab('privacidad')}><ShieldCheck size={20} /><span>Privacidad y seguridad<small>Sesiones y preferencias</small></span><ChevronRight size={18} /></button></nav>}
 
       {/* ── Cuenta ───────────────────────────────────────────────────────── */}
       {tab === 'cuenta' && (
@@ -296,7 +309,8 @@ export function ProfileView({
                 </Callout>
               ) : (
                 <>
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <Link href="/precios" className="native-profile-upgrade native-primary-button">Conocer Plus y Pro<ChevronRight size={18} /></Link>
+                  <div className="browser-profile-upgrade mt-4 grid gap-3 sm:grid-cols-2">
                     {(['STANDARD', 'PREMIUM'] as const)
                       .filter((p) => p !== user.plan)
                       .map((p) => (

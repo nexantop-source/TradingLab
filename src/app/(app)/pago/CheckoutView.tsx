@@ -3,13 +3,13 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, Check, Copy, ExternalLink, LockKeyhole, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Copy, ExternalLink, LockKeyhole, ShieldCheck, ChevronDown } from 'lucide-react';
 import { Badge, Button, Callout, Card } from '@tl/ui';
 import { apiFetch, ApiRequestError } from '@/lib/client-api';
 import type { CheckoutIntent } from '@/lib/checkout-intent';
 import { safeWompiCheckoutUrl } from '@/lib/checkout-url';
 import { PLAN_ENTITLEMENTS } from '@tl/types/plans';
-import { PAYMENT_REGION_NOTICE, PAYMENT_REFERENCE_NOTICE } from '@/lib/payment-copy';
+import { PAYMENT_REGION_NOTICE } from '@/lib/payment-copy';
 
 interface PreparedCheckout {
   status: 'ACTIVE' | 'TRIALING' | 'REDIRECT';
@@ -112,7 +112,7 @@ export function CheckoutView({
   if (hasActivePaidPeriod) {
     const currentPlanName = existingSubscription.planId === 'PREMIUM' ? PLAN_ENTITLEMENTS.PREMIUM.name : PLAN_ENTITLEMENTS.STANDARD.name;
     return (
-      <div className="app-content-page mx-auto max-w-3xl px-4 py-10 sm:px-6">
+      <div className="checkout-page app-content-page mx-auto max-w-3xl px-4 py-10 sm:px-6">
         <Card className="p-7">
           <Badge tone="positive">Plan activo</Badge>
           <h1 className="mt-4 text-3xl font-semibold tracking-[-0.04em]">Ya tienes un periodo activo.</h1>
@@ -130,17 +130,18 @@ export function CheckoutView({
   }
 
   return (
-    <div className="app-content-page mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:py-12">
-      <Link href="/precios" className="inline-flex items-center gap-2 text-[12px] font-medium text-[var(--color-muted)] hover:text-[var(--color-text)]">
+    <div className="checkout-page app-content-page mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:py-12">
+      <Link href="/precios" className="checkout-back inline-flex items-center gap-2 text-[12px] font-medium text-[var(--color-muted)] hover:text-[var(--color-text)]">
         <ArrowLeft className="size-3.5" aria-hidden="true" /> Volver a planes
       </Link>
 
-      <div className="mt-5 grid gap-5 lg:grid-cols-[1.08fr_0.92fr]">
-        <Card className="overflow-hidden">
-          <div className="border-b border-[var(--color-border)] bg-[var(--color-blue-soft)] p-6 sm:p-8">
+      <ol className="checkout-progress" aria-label="Pasos del pago"><li><Check size={12} />Plan elegido</li><li aria-current={!prepared ? 'step' : undefined}>1. Revisar total</li><li aria-current={prepared ? 'step' : undefined}>2. Pagar en Wompi</li></ol>
+      <div className="checkout-layout mt-5 grid gap-5 lg:grid-cols-[1.08fr_0.92fr]">
+        <Card className="checkout-plan overflow-hidden">
+          <div className="checkout-plan-summary border-b border-[var(--color-border)] bg-[var(--color-blue-soft)] p-6 sm:p-8">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <Badge tone="blue">{intent.interval === 'YEARLY' ? 'Facturación anual' : 'Facturación mensual'}</Badge>
-              <span className="num text-[11px] text-[var(--color-subtle)]">PAGO EDUCATIVO · NO DEPÓSITO</span>
+              <Badge tone="blue">{intent.interval === 'YEARLY' ? '1 año de acceso' : '1 mes de acceso'}</Badge>
+              <span className="num text-[11px] text-[var(--color-subtle)]">MEMBRESÍA EDUCATIVA</span>
             </div>
             <h1 className="mt-5 text-4xl font-semibold tracking-[-0.05em]">Plan {plan.name}</h1>
             <p className="mt-2 text-[14px] text-[var(--color-muted)]">{plan.tagline}</p>
@@ -148,13 +149,11 @@ export function CheckoutView({
               <p className="num text-3xl font-semibold tracking-[-0.04em]">
                 USD {plan.referencePriceUsd.toFixed(2)}
               </p>
-              <p className="mt-1.5 text-[11px] text-[var(--color-muted)]">
-                {PAYMENT_REFERENCE_NOTICE}
-              </p>
+              <p className="mt-1.5 text-[11px] text-[var(--color-muted)]">Precio de referencia por {intent.interval === 'YEARLY' ? 'un año' : 'un mes'}. El cobro final se realiza en COP.</p>
             </div>
           </div>
-          <div className="p-6 sm:p-8">
-            <h2 className="text-[13px] font-semibold">Incluido desde la activación</h2>
+          <details className="checkout-details p-6 sm:p-8">
+            <summary>Qué incluye {plan.name}<ChevronDown size={16} aria-hidden="true" /></summary>
             <ul className="mt-4 grid gap-3 sm:grid-cols-2">
               {plan.highlights.map((item) => (
                 <li key={item} className="flex gap-2.5 text-[12px] leading-snug text-[var(--color-muted)]">
@@ -163,30 +162,30 @@ export function CheckoutView({
                 </li>
               ))}
             </ul>
-          </div>
+          </details>
         </Card>
 
         <div className="space-y-4">
-          <Callout tone="info" title="Colombia · Pagos en COP">{PAYMENT_REGION_NOTICE}</Callout>
-          <Card className="p-6">
+          <div className="checkout-currency"><ShieldCheck size={20} aria-hidden="true" /><p>TradingLab es de Colombia. Convertimos USD a COP con la TRM vigente y te mostramos el total antes de pagar.</p></div>
+          <Card className="checkout-payment p-6">
             <div className="flex items-start gap-3">
               <span className="flex size-10 shrink-0 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--color-positive-soft)] text-[var(--color-positive)]">
                 <LockKeyhole className="size-4" aria-hidden="true" />
               </span>
               <div>
-                <h2 className="text-[14px] font-semibold">Checkout protegido por Wompi</h2>
+                <h2 className="text-[14px] font-semibold">{prepared?.status === 'REDIRECT' ? 'Tu total está listo' : 'Revisa el total en pesos'}</h2>
                 <p className="mt-1 text-[12px] leading-relaxed text-[var(--color-muted)]">
-                  TradingLab no recibe ni almacena el número de tu tarjeta. La membresía se activa solo después de que el servidor valide la firma y confirme la transacción directamente con Wompi.
+                  {prepared?.status === 'REDIRECT' ? 'Confirma este mismo importe en Wompi.' : 'Preparar el importe no realiza ningún cobro.'}
                 </p>
               </div>
             </div>
 
-            {error && <Callout tone="danger" className="mt-5" title="Pago no preparado">{error}</Callout>}
+            {error && <div role="alert"><Callout tone="danger" className="mt-5" title="No pudimos preparar el pago">{error}<p className="mt-2">No se ha enviado ningún cobro desde esta pantalla. Puedes reintentar.</p></Callout></div>}
 
             {prepared?.status === 'REDIRECT' ? (
               <div className="mt-6 space-y-4">
                 <div className="rounded-[var(--radius-md)] border border-[var(--color-border-strong)] bg-[var(--color-bg)] p-4">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-subtle)]">Importe firmado por el servidor</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-subtle)]">Total a pagar</p>
                   <p className="num mt-2 text-2xl font-semibold">
                     {prepared.currency === 'COP' && prepared.amountInCents != null
                       ? `COP ${new Intl.NumberFormat('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(prepared.amountInCents / 100)}`
@@ -194,21 +193,21 @@ export function CheckoutView({
                   </p>
                   <p className="mt-1 text-[11px] text-[var(--color-muted)]">Verifica este mismo importe en la pantalla de Wompi antes de autorizar.</p>
                   {prepared.exchangeQuote && (
-                    <div className="mt-4 border-t border-[var(--color-border)] pt-3 text-[11px] leading-relaxed text-[var(--color-muted)]">
+                    <details className="checkout-details mt-4 border-t border-[var(--color-border)] pt-3 text-[11px] leading-relaxed text-[var(--color-muted)]"><summary>Ver conversión y TRM<ChevronDown size={16} aria-hidden="true" /></summary>
                       <p>Base del pago: USD {(prepared.exchangeQuote.usdAmountInCents / 100).toFixed(2)}.</p>
                       <p>TRM aplicada: 1 USD = {new Intl.NumberFormat('es-CO', { minimumFractionDigits: 2 }).format(prepared.exchangeQuote.rateHundredths / 100)} COP.</p>
                       <p>Vigente del {prepared.exchangeQuote.validFrom} al {prepared.exchangeQuote.validThrough} (hora Colombia).</p>
                       <a className="underline underline-offset-2" href="https://www.datos.gov.co/Econom-a-y-Finanzas/Tasa-de-Cambio-Representativa-del-Mercado-TRM/32sa-8pi3" target="_blank" rel="noopener noreferrer">Fuente: Superintendencia Financiera · Datos Abiertos</a>
                       <p className="mt-2">Sin recargo de conversión de TradingLab. Redondeado al centavo de COP. Este importe no cambia mientras el enlace sea válido. Tu banco podría aplicar cargos propios.</p>
-                    </div>
+                    </details>
                   )}
                 </div>
                 <Button size="lg" fullWidth onClick={openWompi}>
-                  Abrir checkout seguro <ExternalLink className="size-4" aria-hidden="true" />
+                  Continuar a Wompi <ExternalLink className="size-4" aria-hidden="true" />
                 </Button>
                 {prepared.environment === 'sandbox' && <Callout tone="info" title="Pago de prueba">Este enlace pertenece al ambiente Sandbox de Wompi. No es un cobro real.</Callout>}
-                <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] p-4">
-                  <p className="text-[12px] font-semibold">Tu pago, vinculado a tu cuenta</p>
+                <details className="checkout-details rounded-[var(--radius-md)] border border-[var(--color-border)] p-4">
+                  <summary>Referencia y enlace de pago<ChevronDown size={16} aria-hidden="true" /></summary>
                   <dl className="mt-3 space-y-3 text-[11px]">
                     <div><dt className="text-[var(--color-muted)]">Referencia en Wompi</dt><dd className="mt-1 break-all font-mono select-all">{prepared.reference}</dd></div>
                     <div><dt className="text-[var(--color-muted)]">ID de pago en TradingLab</dt><dd className="mt-1 break-all font-mono select-all">{prepared.paymentId}</dd></div>
@@ -219,7 +218,7 @@ export function CheckoutView({
                   <input id="wompi-payment-link" type="text" readOnly value={prepared.redirectUrl ?? ''} onFocus={event => event.currentTarget.select()} className="mt-2 w-full min-w-0 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-[11px]" />
                   <Button className="mt-3" fullWidth onClick={copyPaymentLink}><Copy className="size-4" aria-hidden="true" />Copiar enlace de pago</Button>
                   <p role="status" aria-live="polite" className="mt-2 text-[11px] leading-relaxed text-[var(--color-muted)]">{copyMessage}</p>
-                </div>
+                </details>
               </div>
             ) : prepared ? (
               <div className="mt-6">
@@ -232,26 +231,14 @@ export function CheckoutView({
               </div>
             ) : (
               <Button className="mt-6" size="lg" fullWidth loading={loading} onClick={prepareCheckout}>
-                Preparar importe en COP <ArrowRight className="size-4" aria-hidden="true" />
+                {error ? 'Reintentar importe en COP' : 'Ver total en COP'} <ArrowRight className="size-4" aria-hidden="true" />
               </Button>
             )}
 
-            <p className="mt-4 text-[10px] leading-relaxed text-[var(--color-subtle)]">
-              Continuar no deposita dinero para operar. Adquieres acceso temporal a contenido y herramientas de simulación. El retorno del navegador nunca activa una membresía por sí solo.
-            </p>
-            <p className="mt-3 text-[11px] leading-relaxed text-[var(--color-muted)]">Este checkout compra un periodo de acceso. No autoriza renovaciones ni débitos recurrentes automáticos.</p>
+            <p className="checkout-period-note mt-4 text-[12px] leading-relaxed text-[var(--color-muted)]">Un solo periodo. Sin renovación automática.<br />No es un depósito para invertir.</p>
           </Card>
 
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
-            <div className="flex gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-              <ShieldCheck className="size-4 shrink-0 text-[var(--color-blue)]" aria-hidden="true" />
-              <p className="text-[11px] leading-relaxed text-[var(--color-muted)]">Referencia única, firma de integridad e idempotencia contra cobros duplicados.</p>
-            </div>
-            <div className="flex gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-              <LockKeyhole className="size-4 shrink-0 text-[var(--color-blue)]" aria-hidden="true" />
-              <p className="text-[11px] leading-relaxed text-[var(--color-muted)]">Webhook firmado y verificación servidor a servidor antes de cambiar tu plan.</p>
-            </div>
-          </div>
+          <details className="checkout-details checkout-assurance"><summary><LockKeyhole size={16} aria-hidden="true" />Sobre la seguridad de tu pago<ChevronDown size={16} aria-hidden="true" /></summary><p>{PAYMENT_REGION_NOTICE}</p><p>Tu tarjeta se gestiona en Wompi; TradingLab no recibe ni almacena su número. El ID se vincula a esta cuenta automáticamente.</p><p>Usamos una referencia única y firma de integridad. Solo activamos el plan tras validar el evento firmado y verificar la transacción con Wompi. Volver del checkout no activa el plan por sí solo.</p><p>Este checkout compra un periodo de acceso. No autoriza renovaciones ni débitos recurrentes automáticos.</p></details>
         </div>
       </div>
     </div>
