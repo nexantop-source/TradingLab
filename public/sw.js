@@ -1,6 +1,6 @@
 /* Public offline fallback ONLY. Never persist sessions, HTML navigation, APIs,
  * RSC responses, quotes, payments, or user data. No offline request queue. */
-const PUBLIC_CACHE = 'tradinglab-public-v3';
+const PUBLIC_CACHE = 'tradinglab-public-v4';
 const OFFLINE_PAGE = '/offline.html';
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(PUBLIC_CACHE).then(cache => cache.add(new Request(OFFLINE_PAGE, { credentials: 'omit', cache: 'reload' }))));

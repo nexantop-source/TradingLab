@@ -137,7 +137,7 @@ export function SimulationPanel({
     [durationMinutes],
   );
 
-  function validate(): string | null {
+  function validate(chosenDirection = direction): string | null {
     if (marketClosed) return `El mercado de ${symbol.name} está cerrado. Horario de referencia: ${symbol.sessionLabel}.`;
     if (limitReached) {
       return `Has alcanzado el límite de ${entitlements.simulationsPerDay} simulaciones diarias del plan ${entitlements.planName}.`;
@@ -150,10 +150,10 @@ export function SimulationPanel({
     if (mode === 'POSITION') {
       const sl = Number(stopLoss);
       if (stopLoss && Number.isFinite(sl)) {
-        if (direction === 'BULLISH' && sl >= entryPrice) {
+        if (chosenDirection === 'BULLISH' && sl >= quote.ask) {
           return 'En una posición alcista el stop loss debe situarse por debajo del precio de entrada.';
         }
-        if (direction === 'BEARISH' && sl <= entryPrice) {
+        if (chosenDirection === 'BEARISH' && sl <= quote.bid) {
           return 'En una posición bajista el stop loss debe situarse por encima del precio de entrada.';
         }
       }
@@ -164,7 +164,7 @@ export function SimulationPanel({
 
   function requestConfirmation(dir: Direction) {
     setDirection(dir);
-    const error = validate();
+    const error = validate(dir);
     setFieldError(error);
     if (error) return;
     setConfirming(true);

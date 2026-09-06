@@ -30,6 +30,7 @@ import { apiFetch, ApiRequestError } from '@/lib/client-api';
 import type { OpenPositionDto } from '@/lib/simulation-service';
 import { SimulationPanel } from './SimulationPanel';
 import { FluidControl } from '@/components/investment/FluidControl';
+import { SimpleTerminal } from './SimpleTerminal';
 
 export interface TerminalSymbol {
   symbol: string;
@@ -103,8 +104,13 @@ const CHART_TYPES: Array<{ value: ChartType; label: string; title: string }> = [
 ];
 
 export function Terminal(props: TerminalProps) {
+  const [mode, setMode] = React.useState<'simple' | 'advanced'>('simple');
+  return mode === 'simple' ? <SimpleTerminal {...props} onAdvanced={() => setMode('advanced')} /> : <AdvancedTerminal {...props} onSimple={() => setMode('simple')} />;
+}
+
+function AdvancedTerminal(props: TerminalProps & { onSimple: () => void }) {
   const router = useRouter();
-  const [view, setView] = React.useState<'simple' | 'advanced'>('simple');
+  const view = 'advanced';
   const [chartType, setChartType] = React.useState<ChartType>('candles');
   const [timeframe, setTimeframe] = React.useState<Timeframe>(props.timeframe);
   const [candles, setCandles] = React.useState<Candle[]>(props.initialCandles);
@@ -210,7 +216,7 @@ export function Terminal(props: TerminalProps) {
     <div data-view={view} className="app-terminal-shell flex h-[calc(100dvh-3.5rem)] flex-col lg:h-[calc(100dvh-5.5rem)]">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--color-border)] px-4 py-3">
         <Link href="/explorar" className="invest-text-link"><Search size={15} />Cambiar instrumento</Link>
-        <FluidControl label="Complejidad de la terminal" value={view} onChange={setView} options={[{ value: 'simple', label: 'Simple' }, { value: 'advanced', label: 'Avanzado' }]} />
+        <FluidControl label="Complejidad de la terminal" value={view} onChange={(next) => { if (next === 'simple') props.onSimple(); }} options={[{ value: 'simple', label: 'Simple' }, { value: 'advanced', label: 'Avanzado' }]} />
       </div>
       {/* ── Barra superior ───────────────────────────────────────────────── */}
       <header className="app-terminal-header flex shrink-0 flex-wrap items-center gap-3 border-b border-[var(--color-border)] px-4 py-2.5">
@@ -388,7 +394,7 @@ export function Terminal(props: TerminalProps) {
           </div>
 
           {/* Gráfico */}
-          <div className="app-terminal-chart min-h-0 flex-1 overflow-hidden px-1 py-1">
+          <div data-gesture-exclude className="app-terminal-chart min-h-0 flex-1 overflow-hidden px-1 py-1">
             <PriceChart
               candles={candles}
               symbol={props.symbol.symbol}

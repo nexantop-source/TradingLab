@@ -1,8 +1,10 @@
 import 'server-only';
 import { db } from './db';
 import { toJson, fromJson } from './json';
-import { post, postMany, ensureDemoAccount } from './demo-account';
-import { marketData, requireSymbol, snapshotIndicators, activeProviderId } from '@tl/market-data';
+import { demoTransaction, postManyInTransaction, ensureDemoAccount } from './demo-account';
+import { marketData, requireSymbol, snapshotIndicators, activeProviderId, type MarketDataProvider } from '@tl/market-data';
+import type { Simulation } from '@prisma/client';
+import { entryMinuteSampleTimes } from './entry-minute';
 import {
   openSimulation,
   closeSimulation,
@@ -17,6 +19,8 @@ import {
 } from '@tl/simulation-engine';
 import type {
   CloseReason,
+  Candle,
+  DataProvenance,
   Direction,
   IndicatorId,
   PlanId,
@@ -24,6 +28,7 @@ import type {
   Timeframe,
 } from '@tl/types';
 import { TIMEFRAME_SECONDS } from '@tl/types';
+import { entitlements } from '@tl/types/plans';
 import { assertSimulationMode, checkSimulationLimit, filterIndicators } from './entitlements';
 import { ForbiddenError } from './auth';
 import { track } from './analytics';
@@ -76,7 +81,7 @@ export async function createSimulation(params: {
 
   const provider = marketData();
   const status = provider.getMarketStatus(meta.symbol);
-  if (status === 'CLOSED' || status === 'HOLIDAY') {
+  if (status !== 'OPEN') {
     throw new SimulationError(
       `El mercado de ${meta.name} está cerrado en este momento. Consulta su horario de referencia: ${meta.session.label}.`,
       'MARKET_CLOSED',
@@ -136,55 +141,74 @@ export async function createSimulation(params: {
     input.mode === 'HYPOTHESIS' ? new Date(Date.now() + input.durationMinutes * 60_000) : null;
 
   // ── Persistencia y asientos ──────────────────────────────────────────────
-  const simulation = await db.simulation.create({
-    data: {
-      userId,
-      demoAccountId: account.id,
-      portfolioId: input.mode === 'PORTFOLIO' ? input.portfolioId : null,
-      mode: input.mode,
-      symbol: meta.symbol,
-      assetClass: meta.assetClass,
-      direction,
-      status: 'OPEN',
-      outcome: 'PENDING',
-      orderType: input.mode === 'POSITION' ? input.orderType : 'MARKET',
-      stakeCents: input.stakeCents,
-      leverage,
-      quantity: opened.quantity,
-      entryPrice: opened.entryPrice,
-      limitPrice: input.mode === 'POSITION' ? input.limitPrice : null,
-      stopLoss: input.mode === 'POSITION' ? input.stopLoss : null,
-      takeProfit: input.mode === 'POSITION' ? input.takeProfit : null,
-      trailingStopDistance: input.mode === 'POSITION' ? input.trailingStopDistance : null,
-      feeCents: opened.feeCents,
-      openedAt: new Date(),
-      expiresAt,
-      rationale: input.rationale,
-      confidence: input.confidence,
-      perceivedRisk: input.perceivedRisk,
-      engineVersion: ENGINE_VERSION,
-      priceSourceProvider: quote.provenance.provider,
-      priceSourceTimestamp: new Date(quote.provenance.sourceTimestamp),
-      entryLatencyMs: safeLatency(quote.provenance.latencyMs),
-      userTimezone: params.timezone,
-      contextSnapshot: toJson(context),
-    },
-  });
+  const { simulation, balance } = await demoTransaction(async tx => {
+    const dailyLimit = entitlements(plan).simulationsPerDay;
+    if (dailyLimit != null) {
+      // The early limit check is feedback, not the final claim. Serialize
+      // limited opens on the user row and recount in the same transaction so
+      // parallel requests cannot both spend the last daily allowance.
+      await tx.user.update({ where: { id: userId }, data: { updatedAt: new Date() } });
+      const dayStart = new Date();
+      dayStart.setUTCHours(0, 0, 0, 0);
+      const used = await tx.simulation.count({ where: { userId, openedAt: { gte: dayStart } } });
+      if (used >= dailyLimit) {
+        throw new SimulationError(
+          `Has alcanzado el límite de ${dailyLimit} simulaciones diarias del plan ${entitlements(plan).name}. El límite se reinicia a las 00:00 UTC.`,
+          'LIMIT_REACHED',
+        );
+      }
+    }
+    const simulation = await tx.simulation.create({
+      data: {
+        userId,
+        demoAccountId: account.id,
+        portfolioId: input.mode === 'PORTFOLIO' ? input.portfolioId : null,
+        mode: input.mode,
+        symbol: meta.symbol,
+        assetClass: meta.assetClass,
+        direction,
+        status: 'OPEN',
+        outcome: 'PENDING',
+        orderType: input.mode === 'POSITION' ? input.orderType : 'MARKET',
+        stakeCents: input.stakeCents,
+        leverage,
+        quantity: opened.quantity,
+        entryPrice: opened.entryPrice,
+        limitPrice: input.mode === 'POSITION' ? input.limitPrice : null,
+        stopLoss: input.mode === 'POSITION' ? input.stopLoss : null,
+        takeProfit: input.mode === 'POSITION' ? input.takeProfit : null,
+        trailingStopDistance: input.mode === 'POSITION' ? input.trailingStopDistance : null,
+        feeCents: opened.feeCents,
+        openedAt: new Date(),
+        expiresAt,
+        rationale: input.rationale,
+        confidence: input.confidence,
+        perceivedRisk: input.perceivedRisk,
+        engineVersion: ENGINE_VERSION,
+        priceSourceProvider: quote.provenance.provider,
+        priceSourceTimestamp: new Date(quote.provenance.sourceTimestamp),
+        entryLatencyMs: safeLatency(quote.provenance.latencyMs),
+        userTimezone: params.timezone,
+        contextSnapshot: toJson(context),
+      },
+    });
 
-  const balance = await postMany(account.id, [
-    {
-      amountCents: -input.stakeCents,
-      reason: 'SIMULATION_MARGIN_HOLD',
-      reference: simulation.id,
-      memo: `Margen virtual retenido para la simulación de ${meta.symbol}.`,
-    },
-    {
-      amountCents: -opened.feeCents,
-      reason: 'SIMULATION_FEE',
-      reference: simulation.id,
-      memo: 'Spread virtual educativo aplicado en la apertura.',
-    },
-  ]);
+    const balance = await postManyInTransaction(tx, account.id, [
+      {
+        amountCents: -input.stakeCents,
+        reason: 'SIMULATION_MARGIN_HOLD',
+        reference: simulation.id,
+        memo: `Margen virtual retenido para la simulación de ${meta.symbol}.`,
+      },
+      {
+        amountCents: -opened.feeCents,
+        reason: 'SIMULATION_FEE',
+        reference: simulation.id,
+        memo: 'Spread virtual educativo aplicado en la apertura.',
+      },
+    ]);
+    return { simulation, balance };
+  });
 
   const isFirst = (await db.simulation.count({ where: { userId } })) === 1;
   await track(
@@ -251,14 +275,21 @@ export interface CloseResultDto {
   audit: string[];
 }
 
-export async function closeSimulationById(params: {
+interface CloseParams {
   userId: string;
   simulationId: string;
   fraction?: number;
   reason?: CloseReason;
   /** Instante de cierre. Se parametriza para poder liquidar vencimientos pasados. */
   at?: number;
-}): Promise<CloseResultDto> {
+}
+
+export async function closeSimulationById(params: CloseParams): Promise<CloseResultDto> {
+  return closeWithValidatedTrigger(params);
+}
+
+/** The optional evidence is private to this module, never an API field. */
+async function closeWithValidatedTrigger(params: CloseParams, checkedTrigger?: PositionTrigger): Promise<CloseResultDto> {
   const sim = await db.simulation.findFirst({
     where: { id: params.simulationId, userId: params.userId },
   });
@@ -270,9 +301,10 @@ export async function closeSimulationById(params: {
   const meta = requireSymbol(sim.symbol);
   const provider = marketData();
   const at = params.at ?? Date.now();
-  const { price: exitMid, provenance } = await provider.getPriceAt(sim.symbol, at);
+  const { price: exitMid, provenance: quoteProvenance } = await provider.getPriceAt(sim.symbol, at);
+  let provenance = quoteProvenance;
 
-  const fraction = params.fraction ?? 1;
+  let fraction = params.fraction ?? 1;
   let reason: CloseReason = params.reason ?? (fraction < 1 ? 'PARTIAL' : 'MANUAL');
   let effectiveExit = exitMid;
 
@@ -291,28 +323,29 @@ export async function closeSimulationById(params: {
     });
 
     const settlementCents = Math.max(0, sim.stakeCents + settled.pnlCents);
-    const balance = await post({
-      demoAccountId: sim.demoAccountId,
-      amountCents: settlementCents,
-      reason: 'SIMULATION_SETTLEMENT',
-      reference: sim.id,
-      memo: `Liquidación de hipótesis ${sim.direction === 'BEARISH' ? 'bajista' : 'alcista'} sobre ${sim.symbol}.`,
-    });
-
-    await db.simulation.update({
-      where: { id: sim.id },
-      data: {
-        status: 'CLOSED',
-        outcome: settled.outcome,
-        exitPrice: exitMid,
-        pnlCents: settled.pnlCents,
-        closedAt: new Date(at),
-        closeReason: params.reason ?? 'EXPIRY',
-        exitSourceProvider: provenance.provider,
-        exitSourceTimestamp: new Date(provenance.sourceTimestamp),
-        exitLatencyMs: safeLatency(provenance.latencyMs),
-        settlementAudit: toJson(settled.audit),
-      },
+    const balance = await demoTransaction(async tx => {
+      const claimed = await tx.simulation.updateMany({
+        where: { id: sim.id, userId: params.userId, status: 'OPEN', quantity: sim.quantity, stakeCents: sim.stakeCents },
+        data: {
+          status: 'CLOSED',
+          outcome: settled.outcome,
+          exitPrice: exitMid,
+          pnlCents: settled.pnlCents,
+          closedAt: new Date(at),
+          closeReason: params.reason ?? 'EXPIRY',
+          exitSourceProvider: provenance.provider,
+          exitSourceTimestamp: new Date(provenance.sourceTimestamp),
+          exitLatencyMs: safeLatency(provenance.latencyMs),
+          settlementAudit: toJson(settled.audit),
+        },
+      });
+      if (claimed.count !== 1) throw settlementConflict();
+      return postManyInTransaction(tx, sim.demoAccountId, [{
+        amountCents: settlementCents,
+        reason: 'SIMULATION_SETTLEMENT',
+        reference: sim.id,
+        memo: `Liquidación de hipótesis ${sim.direction === 'BEARISH' ? 'bajista' : 'alcista'} sobre ${sim.symbol}.`,
+      }]);
     });
 
     await track(
@@ -334,27 +367,15 @@ export async function closeSimulationById(params: {
   }
 
   // ── Modos posición y portafolio ──────────────────────────────────────────
-  // Si hay stop loss, take profit o trailing, se comprueba si se dispararon.
-  if (!params.reason && (sim.stopLoss != null || sim.takeProfit != null || sim.trailingStopDistance != null)) {
-    const series = await provider.getCandles({
-      symbol: sim.symbol,
-      timeframe: '1m',
-      limit: 600,
-      to: at,
-    });
-    const since = series.candles.filter((c) => c.t >= sim.openedAt.getTime());
-    const trig = checkTriggers({
-      direction: sim.direction as Direction,
-      stopLoss: sim.stopLoss,
-      takeProfit: sim.takeProfit,
-      trailingStopDistance: sim.trailingStopDistance,
-      entryPrice: sim.entryPrice,
-      candles: since,
-    });
-    if (trig.triggered && trig.price != null) {
-      reason = trig.reason!;
-      effectiveExit = trig.price;
-    }
+  // A manual / partial request cannot bypass an already observed protective
+  // trigger. Manual and background-visible polling use identical evidence.
+  const trigger = checkedTrigger ?? (sim.mode === 'POSITION' ? await positionTrigger(provider, sim, at) : null);
+  if (trigger) {
+    if (trigger.fingerprint !== positionFingerprint(sim) || trigger.observedAt > at || trigger.windowStart < sim.openedAt.getTime()) throw settlementConflict();
+    reason = trigger.reason;
+    effectiveExit = trigger.price;
+    provenance = trigger.provenance;
+    fraction = 1;
   }
 
   const result = closeSimulation({
@@ -371,33 +392,39 @@ export async function closeSimulationById(params: {
     openFeeCents: sim.feeCents,
     fraction,
   });
+  if (trigger) result.audit.push(
+    `disparoNivelMedio=${trigger.price} origen=${trigger.partialEntry ? 'minutoEntrada_segundosCompletos' : 'velas_1m'}`,
+    `ventanaDisparoInicio=${new Date(trigger.windowStart).toISOString()} ventanaDisparoFin=${new Date(trigger.windowEnd).toISOString()}`,
+    `evaluadoHasta=${new Date(trigger.observedAt).toISOString()} cierreRegistrado=${new Date(at).toISOString()} lookbackMaximo=600_velas_1m`,
+    'El nivel de protección se usa como precio medio educativo y se aplica el spread de cierre; OHLC no acredita un tick exacto de ejecución.',
+  );
 
-  const balance = await postMany(sim.demoAccountId, [
-    {
+  const fullyClosed = fraction >= 1;
+  const balance = await demoTransaction(async tx => {
+    const claimed = await tx.simulation.updateMany({
+      where: { id: sim.id, userId: params.userId, status: 'OPEN', quantity: sim.quantity, stakeCents: sim.stakeCents },
+      data: {
+        status: fullyClosed ? 'CLOSED' : 'OPEN',
+        outcome: fullyClosed ? result.outcome : 'PENDING',
+        exitPrice: fullyClosed ? result.exitPrice : null,
+        pnlCents: fullyClosed ? result.pnlCents : (sim.pnlCents ?? 0) + result.pnlCents,
+        closedAt: fullyClosed ? new Date(at) : null,
+        closeReason: fullyClosed ? reason : null,
+        quantity: fullyClosed ? sim.quantity : sim.quantity * (1 - fraction),
+        stakeCents: fullyClosed ? sim.stakeCents : Math.round(sim.stakeCents * (1 - fraction)),
+        exitSourceProvider: provenance.provider,
+        exitSourceTimestamp: new Date(provenance.sourceTimestamp),
+        exitLatencyMs: safeLatency(provenance.latencyMs),
+        settlementAudit: toJson(result.audit),
+      },
+    });
+    if (claimed.count !== 1) throw settlementConflict();
+    return postManyInTransaction(tx, sim.demoAccountId, [{
       amountCents: result.settlementCents,
       reason: 'SIMULATION_SETTLEMENT',
       reference: sim.id,
       memo: `Liquidación ${fraction < 1 ? 'parcial' : 'total'} de la posición simulada en ${sim.symbol} (${reason}).`,
-    },
-  ]);
-
-  const fullyClosed = fraction >= 1;
-  await db.simulation.update({
-    where: { id: sim.id },
-    data: {
-      status: fullyClosed ? 'CLOSED' : 'OPEN',
-      outcome: fullyClosed ? result.outcome : 'PENDING',
-      exitPrice: fullyClosed ? result.exitPrice : null,
-      pnlCents: fullyClosed ? result.pnlCents : (sim.pnlCents ?? 0) + result.pnlCents,
-      closedAt: fullyClosed ? new Date(trigAt(reason, at)) : null,
-      closeReason: fullyClosed ? reason : null,
-      quantity: fullyClosed ? sim.quantity : sim.quantity * (1 - fraction),
-      stakeCents: fullyClosed ? sim.stakeCents : Math.round(sim.stakeCents * (1 - fraction)),
-      exitSourceProvider: provenance.provider,
-      exitSourceTimestamp: new Date(provenance.sourceTimestamp),
-      exitLatencyMs: provenance.latencyMs,
-      settlementAudit: toJson(result.audit),
-    },
+    }]);
   });
 
   await track(
@@ -425,8 +452,73 @@ export async function closeSimulationById(params: {
   };
 }
 
-function trigAt(reason: CloseReason, fallback: number): number {
-  return fallback;
+function settlementConflict() {
+  return new SimulationError('Esta simulación ya fue cerrada o cambió durante el cierre. Actualiza tus posiciones antes de intentarlo de nuevo.', 'INVALID_INPUT');
+}
+
+type ProtectionReason = 'STOP_LOSS' | 'TAKE_PROFIT' | 'TRAILING_STOP';
+interface PositionTrigger {
+  fingerprint: string; reason: ProtectionReason; price: number;
+  observedAt: number; windowStart: number; windowEnd: number;
+  provenance: DataProvenance; partialEntry: boolean;
+}
+
+function positionFingerprint(sim: Simulation): string {
+  return JSON.stringify([sim.id, sim.userId, sim.symbol, sim.openedAt.getTime(), sim.entryPrice, sim.direction, sim.stopLoss, sim.takeProfit, sim.trailingStopDistance, sim.quantity, sim.stakeCents]);
+}
+
+/** Bounded, opportunistic protection evaluation. Entry-minute OHLC would include
+ * movement from before the position existed, so reconstruct only that fragment
+ * from at most 60 completed-second observations. No future or pre-entry price.
+ */
+async function positionTrigger(provider: MarketDataProvider, sim: Simulation, at: number): Promise<PositionTrigger | null> {
+  if (sim.stopLoss == null && sim.takeProfit == null && sim.trailingStopDistance == null) return null;
+  const observedAt = Math.floor(Math.min(at, Date.now()) / 1000) * 1000;
+  const openedAt = sim.openedAt.getTime();
+  if (observedAt < openedAt) return null;
+  const nextMinute = Math.floor(openedAt / 60_000) * 60_000 + 60_000;
+  const lookbackStart = Math.floor(observedAt / 60_000) * 60_000 - 599 * 60_000;
+  const series = await provider.getCandles({ symbol: sim.symbol, timeframe: '1m', limit: 600, to: observedAt });
+  const candles = series.candles.filter(candle => candle.t >= Math.max(nextMinute, lookbackStart) && candle.t <= observedAt
+    && provider.getMarketStatus(sim.symbol, candle.t) === 'OPEN');
+  let fragment: Candle | null = null;
+  let fragmentProvenance: DataProvenance | null = null;
+  let fragmentEnd: number | null = null;
+  const times = openedAt >= lookbackStart ? entryMinuteSampleTimes(openedAt, observedAt) : [];
+  if (times.length) {
+    const samples = [];
+    for (const time of times) {
+      const sample = await provider.getPriceAt(sim.symbol, time);
+      if (!Number.isFinite(sample.price) || sample.price <= 0 || !Number.isFinite(sample.provenance.sourceTimestamp) || sample.provenance.sourceTimestamp < 0 || sample.provenance.sourceTimestamp > time) {
+        throw new SimulationError('No hay una observación válida del precio para evaluar la protección.', 'INVALID_INPUT');
+      }
+      if (sample.provenance.sourceTimestamp < openedAt) {
+        // Older positions may have been opened during a now-disallowed
+        // pre-open session. A declared frozen close is not a post-entry price
+        // observation: omit it, but still let the student close the position.
+        const legitimatelyFrozen = sample.provenance.freshness === 'MARKET_CLOSED'
+          && ['CLOSED', 'PRE_OPEN', 'HOLIDAY'].includes(sample.provenance.marketStatus);
+        if (legitimatelyFrozen) continue;
+        throw new SimulationError('No hay una observación válida del precio para evaluar la protección.', 'INVALID_INPUT');
+      }
+      samples.push({ ...sample, time });
+    }
+    if (samples.length) {
+      const prices = samples.map(sample => sample.price);
+      fragment = { t: samples[0].time, o: prices[0], h: Math.max(...prices), l: Math.min(...prices), c: prices[prices.length - 1], v: 0 };
+      fragmentProvenance = samples[samples.length - 1].provenance;
+      fragmentEnd = samples[samples.length - 1].time;
+      candles.unshift(fragment);
+    }
+  }
+  const trigger = checkTriggers({ direction: sim.direction as Direction, stopLoss: sim.stopLoss, takeProfit: sim.takeProfit, trailingStopDistance: sim.trailingStopDistance, entryPrice: sim.entryPrice, candles });
+  if (!trigger.triggered || trigger.at == null || trigger.price == null || !Number.isFinite(trigger.price) || trigger.price <= 0 || !['STOP_LOSS', 'TAKE_PROFIT', 'TRAILING_STOP'].includes(trigger.reason ?? '')) return null;
+  const partialEntry = fragment != null && trigger.at === fragment.t;
+  return {
+    fingerprint: positionFingerprint(sim), price: trigger.price, reason: trigger.reason as ProtectionReason,
+    observedAt, windowStart: trigger.at, windowEnd: Math.min(observedAt, partialEntry ? fragmentEnd! : trigger.at + 60_000),
+    provenance: partialEntry ? fragmentProvenance! : series.provenance, partialEntry,
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -473,23 +565,14 @@ export async function settleDueSimulations(userId: string): Promise<number> {
   for (const p of positions) {
     if (p.stopLoss == null && p.takeProfit == null && p.trailingStopDistance == null) continue;
     try {
-      const series = await provider.getCandles({ symbol: p.symbol, timeframe: '1m', limit: 600 });
-      const since = series.candles.filter((c) => c.t >= p.openedAt.getTime());
-      const trig = checkTriggers({
-        direction: p.direction as Direction,
-        stopLoss: p.stopLoss,
-        takeProfit: p.takeProfit,
-        trailingStopDistance: p.trailingStopDistance,
-        entryPrice: p.entryPrice,
-        candles: since,
-      });
-      if (trig.triggered) {
-        await closeSimulationById({
+      const trig = await positionTrigger(provider, p, now);
+      if (trig) {
+        await closeWithValidatedTrigger({
           userId,
           simulationId: p.id,
-          reason: trig.reason!,
-          at: trig.at ?? now,
-        });
+          reason: trig.reason,
+          at: now,
+        }, trig);
         settled++;
       }
     } catch (error) {

@@ -8,6 +8,7 @@ import { db } from '@/lib/db';
 import { historyCutoff } from '@/lib/entitlements';
 import { fromJson } from '@/lib/json';
 import { requireSymbol } from '@tl/market-data';
+import { ensureDemoAccount } from '@/lib/demo-account';
 
 /** Crea una simulación. */
 export async function POST(req: NextRequest) {
@@ -39,6 +40,7 @@ export async function GET(req: NextRequest) {
     // Liquida vencimientos y disparos antes de responder, para que la vista
     // sea coherente con el estado real.
     await settleDueSimulations(user.id);
+    const account = await ensureDemoAccount(user.id);
 
     const status = req.nextUrl.searchParams.get('status') ?? 'all';
     const limit = Math.min(Number(req.nextUrl.searchParams.get('limit') ?? 50), 200);
@@ -55,6 +57,7 @@ export async function GET(req: NextRequest) {
           });
 
     return ok({
+      balanceCents: account.balanceCents,
       open,
       closed: closed.map((s) => {
         const meta = requireSymbol(s.symbol);

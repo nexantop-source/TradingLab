@@ -4,6 +4,7 @@ import * as React from 'react';
 import { motion } from 'framer-motion';
 import { useMotionPreference } from '@/components/pwa/useMotionPreference';
 import { isStandalone } from '@/components/pwa/appMode';
+import { GestureDrawer } from '@/components/pwa/GestureDrawer';
 import { useTheme } from '@tl/ui/ThemeProvider';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -99,6 +100,7 @@ export function AppShell({
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [notifOpen, setNotifOpen] = React.useState(false);
   const [commandOpen, setCommandOpen] = React.useState(false);
+  const shellRef = React.useRef<HTMLDivElement>(null);
 
   const isAdmin = ADMIN_ROLES.includes(user.role);
   const immersive = IMMERSIVE_ROUTES.some((r) => pathname.startsWith(r));
@@ -115,6 +117,7 @@ export function AppShell({
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault();
+        setMenuOpen(false);
         setCommandOpen((open) => !open);
       }
       if (event.key === 'Escape') setCommandOpen(false);
@@ -130,7 +133,7 @@ export function AppShell({
   }
 
   return (
-    <div data-app-flow={pathname.startsWith('/onboarding') ? 'onboarding' : checkout ? 'checkout' : 'workspace'} className="app-shell min-h-dvh bg-[var(--color-bg)] lg:flex">
+    <div ref={shellRef} data-app-flow={pathname.startsWith('/onboarding') ? 'onboarding' : checkout ? 'checkout' : 'workspace'} className="app-shell min-h-dvh bg-[var(--color-bg)] lg:flex">
       {/* ── Barra lateral (escritorio) ──────────────────────────────────── */}
       <aside className="app-sidebar hidden w-64 shrink-0 flex-col border-r border-[var(--color-border)] lg:flex">
         <div className="app-brand-block px-5 py-6">
@@ -279,14 +282,14 @@ export function AppShell({
       </div>
 
       {/* Menú lateral móvil */}
-      {menuOpen && (
-        <MobileMenu onClose={() => setMenuOpen(false)}>
+      <GestureDrawer open={menuOpen} onOpenChange={setMenuOpen} scopeRef={shellRef} disabled={checkout || pathname.startsWith('/onboarding') || notifOpen || commandOpen}>
             <div className="flex items-center justify-between px-5 py-5">
               <Logo size="sm" />
               <button
                 type="button"
                 onClick={() => setMenuOpen(false)}
                 aria-label="Cerrar menú"
+                data-drawer-close
                 className="flex size-8 items-center justify-center rounded-[var(--radius-xs)] text-[var(--color-muted)]"
               >
                 <X className="size-5" />
@@ -315,26 +318,9 @@ export function AppShell({
                 Cerrar sesión
               </button>
             </div>
-        </MobileMenu>
-      )}
+      </GestureDrawer>
     </div>
   );
-}
-
-/** Native dialog supplies focus containment, Escape and focus restoration. */
-function MobileMenu({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
-  const ref = React.useRef<HTMLDialogElement>(null);
-  const reduce = useMotionPreference();
-  React.useEffect(() => {
-    const dialog = ref.current;
-    dialog?.showModal();
-    return () => dialog?.close();
-  }, []);
-  return <dialog ref={ref} aria-label="Todas las secciones" className="app-menu-sheet" onCancel={event => { event.preventDefault(); onClose(); }} onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
-    <motion.div className="app-menu-sheet-content" initial={reduce ? false : { y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: 'spring', damping: 32, stiffness: 300 }}>
-      <span className="app-sheet-handle" aria-hidden="true" />{children}
-    </motion.div>
-  </dialog>;
 }
 
 function BalanceCard({ cents }: { cents: number }) {

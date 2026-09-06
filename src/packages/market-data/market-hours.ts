@@ -30,13 +30,15 @@ export function lastOpenTimestamp(session: MarketSession, at: number): number {
   if (session.alwaysOpen) return at;
   if (marketStatusFor(session, at) === 'OPEN') return at;
 
-  // Retrocede en pasos de 15 minutos hasta 10 días atrás.
-  const STEP = 15 * 60 * 1000;
-  const LIMIT = (10 * 24 * 60 * 60 * 1000) / STEP;
-  let t = at;
-  for (let i = 0; i < LIMIT; i++) {
-    t -= STEP;
-    if (marketStatusFor(session, t) === 'OPEN') return t;
+  // Resolve the calendar boundary, not steps relative to the request time.
+  // Otherwise every closed-market refresh produces a different "last" price.
+  const day = new Date(at);
+  const midnight = Date.UTC(day.getUTCFullYear(), day.getUTCMonth(), day.getUTCDate());
+  for (let offset = 0; offset < 10; offset++) {
+    const start = midnight - offset * 86_400_000;
+    if (!session.days.includes(new Date(start).getUTCDay())) continue;
+    const last = start + session.closeMinuteUtc * 60_000 - 1;
+    if (last <= at && marketStatusFor(session, last) === 'OPEN') return last;
   }
   return at;
 }

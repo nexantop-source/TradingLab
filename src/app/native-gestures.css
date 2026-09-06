@@ -1,0 +1,40 @@
+/* Installed navigation only. No touch-action rule on the workspace: charts,
+   horizontal carousels, form controls, scrolling and pinch zoom keep ownership. */
+@media (max-width: 1023px) { html[data-app-mode='standalone'] { overscroll-behavior-x: none; } }
+.native-gesture-drawer {
+  position: fixed; inset: 0; margin: 0; padding: 0;
+  width: 100%; max-width: none; height: 100dvh; max-height: none;
+  border: 0; background: transparent; color: var(--color-text);
+  overflow: hidden; overscroll-behavior: contain;
+}
+.native-gesture-drawer[open] { display: block; }
+.native-gesture-drawer::backdrop { background: transparent; }
+.native-drawer-scrim { position: absolute; inset: 0; background: #020a13a8; backdrop-filter: blur(4px); }
+.native-drawer-panel {
+  position: relative; height: 100%; box-sizing: border-box;
+  padding-top: max(8px, env(safe-area-inset-top));
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  overflow-y: auto; overscroll-behavior-y: contain;
+  color: var(--color-text); background: color-mix(in srgb, var(--color-surface) 96%, transparent);
+  border-right: 1px solid var(--color-border-strong);
+  border-radius: 0 26px 26px 0;
+  box-shadow: 16px 0 64px #020a1340, inset -1px 0 0 #ffffff0a;
+  backdrop-filter: blur(30px) saturate(135%);
+  will-change: transform;
+}
+.native-drawer-panel a, .native-drawer-panel button { min-height: 48px; }
+.native-drawer-panel .app-nav-link { gap: 14px; font-size: 14px; border-radius: 14px; }
+.native-drawer-panel .app-nav-link svg { width: 19px; height: 19px; }
+.native-drawer-panel button:active, .native-drawer-panel a:active { opacity: .72; }
+.native-drawer-panel [data-drawer-close] { width: 44px; height: 44px; border-radius: 50%; background: var(--color-overlay); }
+.native-drawer-panel .app-balance-card { padding: 19px; border-radius: 21px; }
+.native-drawer-hint { display: flex; align-items: center; justify-content: center; gap: 7px; margin: 8px 16px 0; font-size: 11px; color: var(--color-muted); }
+.native-drawer-hint span { font-size: 18px; }
+.native-gesture-drawer[data-dragging] { user-select: none; -webkit-user-select: none; }
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .native-drawer-panel { background: var(--color-surface); backdrop-filter: none; }
+  .native-drawer-scrim { backdrop-filter: none; background: #020a13cc; }
+}
+html[data-high-contrast='true'] .native-drawer-panel { background: var(--color-surface); backdrop-filter: none; border-right: 2px solid currentColor; }
+@media (prefers-reduced-motion: reduce) { .native-drawer-panel { will-change: auto; } }
+html[data-reduce-motion='true'] .native-drawer-panel { will-change: auto; }

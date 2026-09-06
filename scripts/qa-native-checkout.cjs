@@ -56,10 +56,13 @@ if (!output || !isAbsolute(output)) throw Error('Set an absolute PWA_QA_OUTPUT d
         await context.addInitScript(() => Object.defineProperty(navigator, 'standalone', { get: () => true }));
         await context.route('**/*', route => new URL(route.request().url()).origin === BASE ? route.continue() : route.abort());
         const page = await context.newPage();
+        if (engine === 'chromium' && process.env.PWA_QA_HYDRATION_DIAG === '1') await require('./qa-hydration-diagnostics.cjs')(page);
         const errors = [];
+        const nativeChecks = [];
         page.on('pageerror', e => { errors.push(e.message); console.error('Browser error', new URL(page.url()).pathname, e.message); });
         const screenshot = name => page.screenshot({ path: join(output, `${engine}-${name}.png`), fullPage: true, animations: 'disabled' });
         const fits = async () => assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'Horizontal overflow');
+        if (process.env.PWA_QA_NATIVE_TRADING === '1') nativeChecks.push(await require('./qa-welcome-scenes.cjs')(page, engine, BASE, output));
         await page.goto(BASE + '/entrar', { waitUntil: 'networkidle' });
         await page.locator('#email').fill(`native-qa-${engine}@example.invalid`);
         await page.locator('#password').fill('Local-only-QA-2026!');
@@ -98,6 +101,10 @@ if (!output || !isAbsolute(output)) throw Error('Set an absolute PWA_QA_OUTPUT d
         await page.emulateMedia({ reducedMotion: 'no-preference' });
         for (const width of [320, 430]) { await page.setViewportSize({ width, height: 844 }); await fits(); }
         await page.setViewportSize({ width: 390, height: 844 });
+        if (process.env.PWA_QA_NATIVE_TRADING === '1') {
+          nativeChecks.push(await require('./qa-native-gestures.cjs')(page, engine));
+          nativeChecks.push(await require('./qa-simple-terminal.cjs')(page, engine, BASE, output));
+        }
         await page.goto(BASE + '/perfil', { waitUntil: 'networkidle' });
         await page.getByRole('heading', { name: 'María Demo', exact: true }).waitFor();
         await screenshot('account-dark');
@@ -178,7 +185,7 @@ if (!output || !isAbsolute(output)) throw Error('Set an absolute PWA_QA_OUTPUT d
         await web.locator('.browser-pricing-page').waitFor();
         assert(!(await web.locator('.native-plans').isVisible()));
         assert.deepEqual(errors, []);
-        results.push({ engine, passed: ['tour_focus_skip_persistence_replay', 'native_home', 'free_always_included_not_selectable', 'account_navigation', 'plan_selection_touch_and_keyboard', 'annual_intent', 'checkout_focus', '320_390_430_layout', 'real_subscribe_route_200_behind_proxy', 'COP_link_and_ID', 'idempotent_retry', 'foreign_origin_blocked', 'error_and_retry_UI', 'light_dark', 'normal_web_unchanged'], pageErrors: errors });
+        results.push({ engine, passed: ['tour_focus_skip_persistence_replay', 'native_home', 'free_always_included_not_selectable', 'account_navigation', 'plan_selection_touch_and_keyboard', 'annual_intent', 'checkout_focus', '320_390_430_layout', 'real_subscribe_route_200_behind_proxy', 'COP_link_and_ID', 'idempotent_retry', 'foreign_origin_blocked', 'error_and_retry_UI', 'light_dark', 'normal_web_unchanged'], nativeChecks, pageErrors: errors });
       } finally { await browser.close(); }
     }
     assert.equal(await db.payment.count(), 2);

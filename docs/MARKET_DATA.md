@@ -167,8 +167,9 @@ procedencia verificable en una plataforma cuyo propósito es enseñar a verifica
 
 ## Política sobre bibliotecas de gráficos
 
-El gráfico de TradingLab es una implementación propia sobre `<canvas>`, sin dependencias de
-terceros. Esto evita de raíz el conflicto que describe el pliego: no hay ninguna atribución
+El gráfico avanzado de TradingLab es una implementación propia sobre `<canvas>`; la terminal
+simple utiliza SVG propio con observaciones autenticadas de la serie demo cada segundo
+(`/api/market/pulse`). Ninguno usa una biblioteca gráfica de terceros. No hay ninguna atribución
 obligatoria que alguien pueda sentir la tentación de ocultar.
 
 Si en el futuro se adopta una biblioteca con licencia comercial:

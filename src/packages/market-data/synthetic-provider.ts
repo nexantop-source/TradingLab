@@ -97,7 +97,7 @@ export class SyntheticMarketDataProvider implements MarketDataProvider {
     let dayHigh = -Infinity;
     let dayLow = Infinity;
     const steps = 48;
-    const elapsed = Math.max(effectiveAt - dayStart, 60_000);
+    const elapsed = Math.max(effectiveAt - dayStart, 0);
     for (let i = 0; i <= steps; i++) {
       const p = priceAt(seriesParams(meta), dayStart + (elapsed * i) / steps);
       if (p > dayHigh) dayHigh = p;
@@ -105,7 +105,7 @@ export class SyntheticMarketDataProvider implements MarketDataProvider {
     }
 
     const change = price - previousClose;
-    const dayCandle = candleAt(seriesParams(meta), dayStart, elapsed);
+    const dayCandle = candleAt(seriesParams(meta), dayStart, 86_400_000, elapsed);
 
     return {
       symbol: meta.symbol,
@@ -157,7 +157,7 @@ export class SyntheticMarketDataProvider implements MarketDataProvider {
       const status = marketStatusFor(meta.session, openTime);
       // Fuera de sesión no se generan velas: el gráfico refleja el calendario real.
       if (status === 'CLOSED' || status === 'HOLIDAY') continue;
-      const raw = candleAt(sp, openTime, durationMs);
+      const raw = candleAt(sp, openTime, durationMs, Math.max(0, Math.min(durationMs, to - openTime)));
       candles.push({
         t: openTime,
         o: roundToTick(raw.o, meta.tickSize, meta.precision),

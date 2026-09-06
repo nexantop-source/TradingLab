@@ -27,9 +27,10 @@ export default async function TerminalPage({
 
   await settleDueSimulations(user.id);
 
-  const requested = (params.symbol ?? 'EURUSD').toUpperCase();
-  const meta = getSymbol(requested) ?? getSymbol('EURUSD')!;
-  const timeframe = (params.tf ?? '1h') as '1m' | '5m' | '15m' | '30m' | '1h' | '4h' | '1d' | '1w';
+  const requested = (params.symbol ?? 'BTCUSD').toUpperCase();
+  const meta = getSymbol(requested) ?? getSymbol('BTCUSD')!;
+  const timeframes = ['1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w'] as const;
+  const timeframe = timeframes.find(value => value === params.tf) ?? '1h';
 
   const provider = marketData();
   const account = await ensureDemoAccount(user.id);
@@ -91,6 +92,7 @@ export default async function TerminalPage({
 
   return (
     <Terminal
+      key={meta.symbol}
       user={user}
       balanceCents={account.balanceCents}
       symbol={{

@@ -1,0 +1,26 @@
+.simple-live-chart { --chart-accent: #19b68a; color: var(--chart-accent); position: relative; min-width: 0; isolation: isolate; }
+[data-theme='dark'] .simple-live-chart { --chart-accent: #51dfab; }
+.simple-live-chart__caption { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0 10px; color: var(--color-muted); font-size: .67rem; letter-spacing: .025em; }
+.simple-live-chart__caption > span:first-child { display: inline-flex; gap: 6px; align-items: center; }
+.simple-live-chart__caption i { width: 5px; height: 5px; border-radius: 100%; background: var(--chart-accent); }
+.simple-live-chart[data-stale='true'] .simple-live-chart__caption i { background: #d6aa50; }
+.simple-live-chart__plot { display: block; width: 100%; height: auto; overflow: visible; touch-action: pan-y; user-select: none; }
+.simple-live-chart__grid line { stroke: var(--color-border); stroke-width: .7; stroke-dasharray: 3 7; vector-effect: non-scaling-stroke; }
+.simple-live-chart__grid text, .simple-live-chart__time { fill: var(--color-muted); font-family: inherit; font-size: 11px; font-variant-numeric: tabular-nums; }
+.simple-live-chart__line { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.simple-live-chart__current-line { stroke: currentColor; stroke-width: .6; stroke-dasharray: 3 6; opacity: .45; vector-effect: non-scaling-stroke; }
+.simple-live-chart__halo { fill: currentColor; opacity: .14; }
+.simple-live-chart__point { fill: currentColor; }
+.simple-live-chart__price-label rect { fill: var(--chart-accent); }
+.simple-live-chart__price-label text { fill: #06271d; text-anchor: middle; font-size: 11px; font-weight: 720; font-family: inherit; font-variant-numeric: tabular-nums; }
+.simple-live-chart__level { color: var(--color-muted); }
+.simple-live-chart__level--positive { color: #1bbb83; }
+.simple-live-chart__level--negative { color: #ed5e75; }
+.simple-live-chart__level line { stroke: currentColor; stroke-dasharray: 5 5; stroke-width: .8; vector-effect: non-scaling-stroke; }
+.simple-live-chart__level text { fill: currentColor; font-size: 11px; font-family: inherit; paint-order: stroke; stroke: var(--color-surface); stroke-width: 3px; }
+.simple-live-chart__crosshair line { stroke: var(--color-muted); stroke-width: .8; stroke-dasharray: 3 4; vector-effect: non-scaling-stroke; }
+.simple-live-chart__crosshair circle { fill: var(--color-surface); stroke: currentColor; stroke-width: 2; }
+.simple-live-chart__inspection { min-height: 1.5em; text-align: center; font-size: .63rem; font-variant-numeric: tabular-nums; color: var(--color-muted); }
+.simple-live-chart__empty { min-height: 200px; display: grid; place-content: center; gap: 18px; color: var(--color-muted); text-align: center; font-size: .75rem; }
+.simple-live-chart__empty-line { width: 110px; height: 1px; justify-self: center; background: linear-gradient(90deg, transparent, var(--chart-accent), transparent); }
+@media (prefers-contrast: more) { .simple-live-chart__line { stroke-width: 3; } .simple-live-chart__grid line { stroke-dasharray: none; } }

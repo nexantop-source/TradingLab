@@ -12,6 +12,10 @@ import './marketing-visuals.css';
 import './mobile-app.css';
 import './native-app.css';
 import './native-home.css';
+import './native-gestures.css';
+import './welcome-scenes.css';
+import './live-chart.css';
+import './simple-terminal.css';
 
 const sans = localFont({
   src: '../../identidad visual/fuentes/instrument-sans-latin.woff2',
@@ -47,7 +51,7 @@ const mono = localFont({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'),
   title: {
-    default: 'TradingLab · Tu próximo paso empieza con criterio',
+    default: 'TradingLab',
     template: '%s · TradingLab',
   },
   description:

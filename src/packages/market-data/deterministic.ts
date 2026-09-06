@@ -108,15 +108,19 @@ export function candleAt(
   params: SeriesParams,
   openTime: number,
   durationMs: number,
+  elapsedMs = durationMs,
 ): { o: number; h: number; l: number; c: number; v: number } {
+  // Keep the candle's original duration/seed. A forming candle may only
+  // inspect elapsed time; using its scheduled close would reveal the future.
+  const elapsed = Math.max(0, Math.min(elapsedMs, durationMs));
   const SUBSAMPLES = 12;
   let h = -Infinity;
   let l = Infinity;
   const o = priceAt(params, openTime);
-  const c = priceAt(params, openTime + durationMs);
+  const c = priceAt(params, openTime + elapsed);
 
   for (let i = 0; i <= SUBSAMPLES; i++) {
-    const p = priceAt(params, openTime + (durationMs * i) / SUBSAMPLES);
+    const p = priceAt(params, openTime + (elapsed * i) / SUBSAMPLES);
     if (p > h) h = p;
     if (p < l) l = p;
   }
@@ -131,7 +135,8 @@ export function candleAt(
   const seasonal = 0.6 + 0.4 * Math.abs(Math.cos(((hourOfDay - 14) / 24) * Math.PI * 2));
   const range = (h - l) / Math.max(o, 1e-9);
   const base = 1 + rand(seed, bucket) * 1.4;
-  const v = Math.round(base * seasonal * (1 + range * 220) * 10000);
+  const progress = durationMs > 0 ? elapsed / durationMs : 0;
+  const v = Math.round(base * seasonal * (1 + range * 220) * 10000 * progress);
 
   return { o, h, l, c, v };
 }
