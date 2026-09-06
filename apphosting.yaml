@@ -51,11 +51,16 @@ env:
       - RUNTIME
 
   # ── Datos de mercado ───────────────────────────────────────────────────────
-  # `synthetic` usa el motor educativo determinístico incluido en el
-  # repositorio: la aplicación funciona sin contratar ningún proveedor, y la
-  # interfaz indica en todo momento que la serie no proviene de un mercado real.
+  # Datos públicos de Binance Spot para BTC/ETH/SOL cotizados en USDT.
+  # Nuevas operaciones exigen fuente real vigente; no hay fallback sintético.
+  # El motor anterior solo conserva la liquidación de posiciones heredadas.
   - variable: MARKET_DATA_PROVIDER
-    value: synthetic
+    value: binance
+    availability:
+      - RUNTIME
+
+  - variable: REQUIRE_REAL_MARKET_DATA
+    value: "true"
     availability:
       - RUNTIME
 

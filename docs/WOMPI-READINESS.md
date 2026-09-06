@@ -1,5 +1,27 @@
 # Wompi: activación y renovaciones
 
+## Revisión de UX de checkout y billing · 6 de septiembre de 2026
+
+El botón «Pagar con Wompi» prepara el importe COP en servidor y redirige al
+checkout firmado en una sola acción. El importe exacto se muestra en Wompi
+antes de que el titular autorice el pago. Se conserva referencia, ID vinculado
+al usuario e idempotencia del intento; un retorno nunca activa el plan.
+`/billing` muestra el plan efectivo y los últimos 50 pagos del usuario autenticado,
+sin exponer metadatos internos ni tarjetas. No es una factura fiscal.
+
+**No se ha habilitado una prueba de siete días con débito posterior ni renovación
+automática.** Las credenciales recibidas son de producción, incluso las del archivo
+con nombre sandbox. No se usan para ensayos con dinero real. La integración actual
+es de acceso por un periodo. La pantalla informa explícitamente que no hay tarjeta
+guardada para cobros recurrentes. Para esa funcionalidad faltan fuentes de pago
+tokenizadas, mandato específico, cancelación, planificación durable, conciliación
+de respuestas ambiguas y pruebas completas de sandbox; el listado de abajo sigue
+siendo requisito, no trabajo ya completado. Nunca persistir PAN ni CVV.
+
+Prueba de interfaz: el navegador intercepta la navegación a Wompi y sirve una
+página ficticia; solo se crean intenciones locales con llaves falsas y bases
+desechables. No acredita una autorización bancaria real.
+
 Revisión: 5 de septiembre de 2026. **No acredita cobros activos.**
 
 Actualización: el usuario eligió producción y ya configuró la URL compartida.

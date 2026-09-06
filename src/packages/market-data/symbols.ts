@@ -436,6 +436,10 @@ SYMBOLS.push(...EXTRA_FOREX.map(([symbol, name, quoteCurrency, basePrice]): Symb
   annualVolatility: 0.12, annualDrift: 0,
 })));
 
+// New IDs preserve historical USD simulations and identify the actual quote currency.
+for (const [symbol,name,basePrice] of [['BTCUSDT','Bitcoin / Tether',80000],['ETHUSDT','Ethereum / Tether',3000],['SOLUSDT','Solana / Tether',150]] as const) {
+  SYMBOLS.unshift({symbol,name,basePrice,quoteCurrency:'USDT',assetClass:'CRYPTO',precision:2,tickSize:.01,spreadBps:8,session:SESSIONS.CRYPTO,educationalRisk:5,minPlan:'FREE',description:'Referencia Binance Spot en USDT. Ejercicios con saldo virtual, sin ejecución en el exchange.',annualVolatility:.7,annualDrift:0});
+}
 const BY_SYMBOL = new Map(SYMBOLS.map((s) => [s.symbol, s]));
 
 export function getSymbol(symbol: string): SymbolSeed | undefined {

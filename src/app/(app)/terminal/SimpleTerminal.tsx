@@ -6,9 +6,8 @@ import { useRouter } from 'next/navigation';
 import { ArrowDownRight, ArrowUpRight, ChevronDown, SlidersHorizontal, WalletCards } from 'lucide-react';
 import { AssetIcon } from '@/components/investment/AssetIcon';
 import { useMarketPulse } from '@/components/trading/useMarketPulse';
-import { SimpleLiveChart } from '@/components/trading/SimpleLiveChart';
-import { useMotionPreference } from '@/components/pwa/useMotionPreference';
-import { useTheme } from '@tl/ui/ThemeProvider';
+import { TradingChart } from '@/components/trading/TradingChart';
+import { OperationLive } from '@/components/trading/OperationLive';
 import { apiFetch, ApiRequestError } from '@/lib/client-api';
 import type { OpenPositionDto } from '@/lib/simulation-service';
 import type { TerminalProps } from './Terminal';
@@ -19,10 +18,10 @@ interface PositionsSnapshot { open: OpenPositionDto[]; balanceCents: number; sim
 export function SimpleTerminal(props: TerminalProps & { onAdvanced: () => void }) {
   const router = useRouter();
   const pulse = useMarketPulse(props.symbol.symbol, props.quote, props.provenance);
-  const systemReduce = useMotionPreference();
-  const { reduceMotion } = useTheme();
   const [range, setRange] = useState<60 | 120>(120);
-  const [chartType, setChartType] = useState<'line' | 'area'>('area');
+  const [chartType, setChartType] = useState<'line' | 'area' | 'candles'>('candles');
+  const [toolsOpen,setToolsOpen] = useState(false);
+  const [indicator,setIndicator] = useState<'SMA20'|'EMA12'|null>(null);
   const [balance, setBalance] = useState(props.balanceCents);
   const [positions, setPositions] = useState(props.openPositions);
   const [usedToday, setUsedToday] = useState(props.entitlements.simulationsUsedToday);
@@ -61,7 +60,7 @@ export function SimpleTerminal(props: TerminalProps & { onAdvanced: () => void }
     mounted.current = true;
     const update = () => { if (document.hidden || !navigator.onLine) { request.current?.abort(); setPositionsStale(true); } else void refreshPositions(); };
     void refreshPositions();
-    const id = setInterval(update, 10000);
+    const id = setInterval(update, 3000);
     document.addEventListener('visibilitychange', update); window.addEventListener('online', update); window.addEventListener('offline', update);
     return () => { mounted.current = false; clearInterval(id); request.current?.abort(); request.current = null; document.removeEventListener('visibilitychange', update); window.removeEventListener('online', update); window.removeEventListener('offline', update); };
   }, [refreshPositions]);
@@ -83,20 +82,21 @@ export function SimpleTerminal(props: TerminalProps & { onAdvanced: () => void }
 
   const marketClosed = pulse.provenance.marketStatus !== 'OPEN';
   const chartTicks = useMemo(() => pulse.ticks.slice(-(range + 1)), [pulse.ticks, range]);
-  const statusLabel = marketClosed ? 'Sesión cerrada' : pulse.status === 'live' ? 'Simulación · cada segundo' : pulse.status === 'connecting' ? 'Conectando…' : pulse.status === 'offline' ? 'Sin conexión' : pulse.status === 'paused' ? 'En pausa' : 'Datos desactualizados';
+  const statusLabel = marketClosed ? 'Sesión cerrada' : pulse.status === 'live' ? (pulse.provenance.synthetic ? 'Simulación · cada segundo' : 'Datos reales · cada segundo') : pulse.status === 'connecting' ? 'Conectando…' : pulse.status === 'offline' ? 'Sin conexión' : pulse.status === 'paused' ? 'En pausa' : 'Datos desactualizados';
   const thisPosition = positions.find(position => position.symbol === props.symbol.symbol);
   const levels = thisPosition ? [
     { price: thisPosition.entryPrice, label: 'Entrada', tone: 'neutral' as const },
     ...(thisPosition.stopLoss !== null ? [{ price: thisPosition.stopLoss, label: 'SL', tone: 'negative' as const }] : []),
     ...(thisPosition.takeProfit !== null ? [{ price: thisPosition.takeProfit, label: 'TP', tone: 'positive' as const }] : []),
   ] : [];
-  return <div className="simple-terminal" data-terminal="simple">
-    <header className="simple-terminal-top"><Link href="/explorar" className="simple-instrument" aria-label={`Cambiar instrumento: ${props.symbol.name}`}><AssetIcon symbol={props.symbol.symbol} /><span><strong>{props.symbol.symbol}</strong><small>{props.symbol.name}</small></span><ChevronDown size={17} /></Link><button type="button" onClick={props.onAdvanced} className="simple-advanced-button"><SlidersHorizontal size={16} />Avanzado</button></header>
+  return <div className="simple-terminal" data-terminal="simple" data-has-position={Boolean(thisPosition)}>
+    <header className="simple-terminal-top"><Link href="/explorar" className="simple-instrument" aria-label={`Cambiar instrumento: ${props.symbol.name}`}><AssetIcon symbol={props.symbol.symbol} /><span><strong>{props.symbol.symbol}</strong><small>{props.symbol.name}</small></span><ChevronDown size={17} /></Link><button type="button" onClick={()=>setToolsOpen(!toolsOpen)} aria-expanded={toolsOpen} className="simple-advanced-button"><SlidersHorizontal size={16} />Herramientas</button></header>
+    {toolsOpen && <section className="chart-tools" aria-label="Herramientas del gráfico"><div><button aria-pressed={chartType==='candles'} onClick={()=>setChartType('candles')}>Velas · 5 s</button><button aria-pressed={indicator==='SMA20'} onClick={()=>setIndicator(indicator==='SMA20'?null:'SMA20')}>Media SMA20</button>{props.availableIndicators.includes('EMA12')?<button aria-pressed={indicator==='EMA12'} onClick={()=>setIndicator(indicator==='EMA12'?null:'EMA12')}>Media EMA12</button>:<Link href="/precios">EMA12 · Mejorar a Plus</Link>}<button onClick={()=>setIndicator(null)}>Quitar indicador</button></div><p>Arrastra para explorar. Pellizca para ampliar. Las medias usan observaciones de un segundo; las velas agrupan cinco segundos. Entrada, SL y TP aparecen sobre la gráfica cuando están en el rango visible.</p></section>}
     <div className="simple-terminal-grid"><section className="simple-market-panel" aria-label="Precio y gráfico de práctica">
-      <div className="simple-price-heading"><div><span className="simple-demo-pill">MERCADO DEMO</span><p className="simple-live-price" data-testid="simple-live-price">{pulse.quote.price.toLocaleString('en-US', { minimumFractionDigits: props.symbol.precision, maximumFractionDigits: props.symbol.precision })}</p><p className={pulse.quote.changePercent < 0 ? 'simple-negative' : 'simple-positive'}>{pulse.quote.changePercent >= 0 ? '+' : ''}{pulse.quote.changePercent.toFixed(2)} % <span>· variación de referencia 24 h</span></p></div><span className="simple-pulse-state" data-stale={pulse.stale || marketClosed}><i />{statusLabel}</span></div>
-      <div className="simple-chart-controls" data-gesture-exclude><div role="group" aria-label="Ventana del gráfico">{([60, 120] as const).map(n => <button key={n} type="button" aria-pressed={range === n} onClick={() => setRange(n)}>{n / 60} min</button>)}</div><div role="group" aria-label="Estilo del gráfico"><button type="button" aria-pressed={chartType === 'line'} onClick={() => setChartType('line')}>Línea</button><button type="button" aria-pressed={chartType === 'area'} onClick={() => setChartType('area')}>Área</button></div></div>
-      <SimpleLiveChart ticks={chartTicks} symbol={props.symbol.symbol} precision={props.symbol.precision} stale={pulse.stale || marketClosed} reduceMotion={systemReduce || reduceMotion} chartType={chartType} levels={levels} windowSeconds={range} />
-      <p className="simple-market-source">Precios generados para practicar. No son cotizaciones en vivo de una bolsa.</p>
+      <div className="simple-price-heading"><div><span className="simple-demo-pill">MERCADO DEMO</span><p className="simple-live-price" data-testid="simple-live-price">{pulse.quote.price.toLocaleString('en-US', { minimumFractionDigits: props.symbol.precision, maximumFractionDigits: props.symbol.precision })}</p><p className={pulse.quote.changePercent < 0 ? 'simple-negative' : 'simple-positive'}>{pulse.quote.changePercent >= 0 ? '+' : ''}{pulse.quote.changePercent.toFixed(2)} % <span>· variación de referencia 24 h</span></p></div><div className="simple-status-stack"><span className="simple-pulse-state" data-stale={pulse.stale || marketClosed}><i />{statusLabel}</span>{thisPosition && <OperationLive position={thisPosition} price={pulse.quote.price} stale={pulse.stale} serverTime={pulse.provenance.receivedTimestamp}/>}</div></div>
+      <div className="simple-chart-controls" data-gesture-exclude><div role="group" aria-label="Ventana del gráfico">{([60, 120] as const).map(n => <button key={n} type="button" aria-pressed={range === n} onClick={() => setRange(n)}>{n / 60} min</button>)}</div><div role="group" aria-label="Estilo del gráfico"><button type="button" aria-pressed={chartType === 'candles'} onClick={() => setChartType('candles')}>Velas</button><button type="button" aria-pressed={chartType === 'line'} onClick={() => setChartType('line')}>Línea</button><button type="button" aria-pressed={chartType === 'area'} onClick={() => setChartType('area')}>Área</button></div></div>
+      <TradingChart ticks={chartTicks} precision={props.symbol.precision} stale={pulse.stale || marketClosed} synthetic={pulse.provenance.synthetic} type={chartType} indicator={indicator} levels={levels} windowSeconds={range}/>
+      {pulse.provenance.synthetic && <p className="simple-market-source">Instrumento sintético. Para precios de mercado, elige BTCUSDT, ETHUSDT o SOLUSDT.</p>}
       {pulse.stale && pulse.error && <p className="simple-feed-error" role="status">{pulse.error}</p>}
     </section>
     <div className="simple-trade-panel"><div className="simple-wallet"><WalletCards size={19} aria-hidden="true" /><div><small>Saldo virtual disponible</small><strong>USD {money(balance)}</strong></div><Link href="/perfil" aria-label="Gestionar mi cuenta demo">DEMO<ChevronDown size={13} /></Link></div>
@@ -106,7 +106,7 @@ export function SimpleTerminal(props: TerminalProps & { onAdvanced: () => void }
     <section className="simple-positions" aria-label="Mis ejercicios"><header><div role="group" aria-label="Estado de mis ejercicios"><button type="button" aria-pressed={positionsTab === 'open'} onClick={() => setPositionsTab('open')}>Posiciones <span>{positions.length}</span></button><button type="button" aria-pressed={positionsTab === 'closed'} onClick={() => setPositionsTab('closed')}>Cerradas</button></div><Link href="/portafolio">Ver todas<ArrowUpRight size={15} /></Link></header>
       {positionsStale && <p className="simple-order-status">La revisión de tus posiciones está pendiente de conexión.</p>}
       {positionsTab === 'open' ? positions.length ? <ul>{positions.slice(0, 5).map(p => <li key={p.id}><AssetIcon symbol={p.symbol} size="sm" /><span><strong>{p.symbol} · {p.direction === 'BEARISH' ? 'Bajar' : 'Subir'}</strong><small>Entrada {p.entryPrice.toFixed(p.precision)} · {p.stopLoss ? `SL ${p.stopLoss.toFixed(p.precision)}` : 'Sin SL'}</small></span><span className={p.unrealizedPercent < 0 ? 'simple-negative' : 'simple-positive'}>{p.unrealizedPercent >= 0 ? '+' : ''}{p.unrealizedPercent.toFixed(2)} %</span><button type="button" onClick={() => void closePosition(p.id)} disabled={Boolean(closing) || pulse.stale}>{closing === p.id ? 'Cerrando…' : 'Cerrar'}</button></li>)}</ul> : <div className="simple-empty-positions"><span><ArrowUpRight size={18} /><ArrowDownRight size={18} /></span><div><strong>Una idea, un ejercicio.</strong><p>Elige un monto y una dirección para empezar a observar.</p></div></div> : closed.length ? <ul>{closed.map(p => <li key={p.id}><AssetIcon symbol={p.symbol} size="sm" /><span><strong>{p.symbol}</strong><small>{p.closeReason === 'STOP_LOSS' ? 'Stop loss simulado' : p.closeReason === 'TAKE_PROFIT' ? 'Take profit simulado' : 'Ejercicio cerrado'}</small></span><span className={(p.pnlCents ?? 0) < 0 ? 'simple-negative' : 'simple-positive'}>USD {money(p.pnlCents ?? 0)}</span><Link href="/diario">Diario</Link></li>)}</ul> : <p className="simple-empty-history">Aquí verás tus ejercicios cerrados.</p>}
-      <p className="simple-position-disclaimer">El servidor revisa tus simulaciones cada 10 s mientras esta pantalla está abierta. SL/TP se evalúan al revisar; no hay ejecución continua de un broker en segundo plano.</p>
+      <p className="simple-position-disclaimer">Saldo virtual. El servidor revisa posiciones cada 3 s con la pantalla activa; al vencer calcula el cierre con el precio del vencimiento, aunque se consulte después. No hay ejecución de broker en segundo plano.</p>
     </section>
   </div>;
 }

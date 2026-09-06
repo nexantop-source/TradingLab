@@ -89,6 +89,9 @@ export async function createSimulation(params: {
   }
 
   const quote = await provider.getQuote(meta.symbol);
+  if (process.env.REQUIRE_REAL_MARKET_DATA === 'true' && (quote.provenance.synthetic || quote.provenance.freshness !== 'REALTIME' || Date.now() - quote.provenance.sourceTimestamp > 10000 || quote.provenance.sourceTimestamp > Date.now() + 1000)) {
+    throw new SimulationError('No hay una cotización real vigente para este instrumento. No se abrirá ningún ejercicio con precios sintéticos o desactualizados.', 'INVALID_INPUT');
+  }
   const account = await ensureDemoAccount(userId);
 
   // ── Contexto congelado ───────────────────────────────────────────────────
@@ -138,10 +141,16 @@ export async function createSimulation(params: {
   }
 
   const expiresAt =
-    input.mode === 'HYPOTHESIS' ? new Date(Date.now() + input.durationMinutes * 60_000) : null;
+    input.mode === 'HYPOTHESIS' || (input.mode === 'POSITION' && input.durationMinutes != null)
+      ? new Date(Date.now() + input.durationMinutes! * 60_000) : null;
 
   // ── Persistencia y asientos ──────────────────────────────────────────────
   const { simulation, balance } = await demoTransaction(async tx => {
+    // Recheck after context loading and on transaction retries: a quote can
+    // become stale while the provider or database is busy.
+    if (process.env.REQUIRE_REAL_MARKET_DATA === 'true' && Date.now() - quote.provenance.sourceTimestamp > 10000) {
+      throw new SimulationError('La cotización venció antes de abrir el ejercicio. Inténtalo con un precio actualizado.', 'INVALID_INPUT');
+    }
     const dailyLimit = entitlements(plan).simulationsPerDay;
     if (dailyLimit != null) {
       // The early limit check is feedback, not the final claim. Serialize
@@ -300,12 +309,14 @@ async function closeWithValidatedTrigger(params: CloseParams, checkedTrigger?: P
 
   const meta = requireSymbol(sim.symbol);
   const provider = marketData();
-  const at = params.at ?? Date.now();
+  const requestedAt = params.at ?? Date.now();
+  const expiredPosition = sim.mode === 'POSITION' && sim.expiresAt != null && requestedAt >= sim.expiresAt.getTime();
+  const at = expiredPosition ? sim.expiresAt!.getTime() : requestedAt;
   const { price: exitMid, provenance: quoteProvenance } = await provider.getPriceAt(sim.symbol, at);
   let provenance = quoteProvenance;
 
-  let fraction = params.fraction ?? 1;
-  let reason: CloseReason = params.reason ?? (fraction < 1 ? 'PARTIAL' : 'MANUAL');
+  let fraction = expiredPosition ? 1 : params.fraction ?? 1;
+  let reason: CloseReason = expiredPosition ? 'EXPIRY' : params.reason ?? (fraction < 1 ? 'PARTIAL' : 'MANUAL');
   let effectiveExit = exitMid;
 
   // ── Modo hipótesis ───────────────────────────────────────────────────────
@@ -498,7 +509,11 @@ async function positionTrigger(provider: MarketDataProvider, sim: Simulation, at
         // observation: omit it, but still let the student close the position.
         const legitimatelyFrozen = sample.provenance.freshness === 'MARKET_CLOSED'
           && ['CLOSED', 'PRE_OPEN', 'HOLIDAY'].includes(sample.provenance.marketStatus);
-        if (legitimatelyFrozen) continue;
+        // A completed exchange second ends 1 ms before its boundary. Skip
+        // that first pre-entry close, never include it in a protection bar.
+        const precedingExchangeClose = !sample.provenance.synthetic
+          && time - sample.provenance.sourceTimestamp <= 1000;
+        if (legitimatelyFrozen || precedingExchangeClose) continue;
         throw new SimulationError('No hay una observación válida del precio para evaluar la protección.', 'INVALID_INPUT');
       }
       samples.push({ ...sample, time });
@@ -536,7 +551,7 @@ async function positionTrigger(provider: MarketDataProvider, sim: Simulation, at
 export async function settleDueSimulations(userId: string): Promise<number> {
   const now = Date.now();
   const due = await db.simulation.findMany({
-    where: { userId, status: 'OPEN', mode: 'HYPOTHESIS', expiresAt: { lte: new Date(now) } },
+    where: { userId, status: 'OPEN', mode: { in: ['HYPOTHESIS', 'POSITION'] }, expiresAt: { lte: new Date(now) } },
     select: { id: true, expiresAt: true },
     take: 50,
   });

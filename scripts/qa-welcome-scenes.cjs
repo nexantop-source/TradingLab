@@ -34,11 +34,14 @@ module.exports = async function checkWelcomeScenes(page, engine, base, outputDir
       const overflow = Math.max(document.documentElement.scrollWidth, document.body.scrollWidth);
       const targets = Array.from(root.querySelectorAll('button:not(:disabled), a, summary')).filter(element => element.getBoundingClientRect().width > 0).map(element => ({ label: element.getAttribute('aria-label') || element.textContent.trim(), height: element.getBoundingClientRect().height, width: element.getBoundingClientRect().width }));
       const tickets = Array.from(root.querySelectorAll('.welcome-lesson-ticket, .welcome-practice-ticket, .welcome-journal-ticket')).map(element => { const rect = element.getBoundingClientRect(); return { top: rect.top, bottom: rect.bottom }; });
+      const ticketContentFits = Array.from(root.querySelectorAll('.welcome-lesson-ticket, .welcome-practice-ticket, .welcome-journal-ticket')).every(element => element.scrollHeight <= element.clientHeight + 1);
       const riskChip = root.querySelector('.welcome-risk-chip')?.getBoundingClientRect();
-      return { overflow, stageBottom: stage.bottom, contentTop: content.top, targets, tickets, riskBottom: riskChip?.bottom };
+      return { overflow, stageBottom: stage.bottom, contentTop: content.top, targets, tickets, ticketContentFits, riskBottom: riskChip?.bottom };
     });
     assert(bounds.overflow <= width + 1, `Guest introduction must not overflow horizontally at ${width}px`);
     assert(bounds.contentTop >= bounds.stageBottom - 1, 'Artwork must not cover the explanatory copy');
+    assert(bounds.ticketContentFits, 'Learning ticket copy must not spill outside its card');
+    assert(bounds.tickets.every(ticket => ticket.bottom <= bounds.stageBottom + 1), 'Learning tickets must fit within the illustration');
     if (bounds.riskBottom) assert(bounds.riskBottom <= bounds.contentTop + 1, 'Demo risk guidance must not cover the heading');
     for (const target of bounds.targets) assert(target.height >= 43 && target.width >= 43, `Touch target ${target.label} is too small (${target.width} × ${target.height}px)`);
     for (let index = 1; index < bounds.tickets.length; index++) assert(bounds.tickets[index].top >= bounds.tickets[index - 1].bottom - 1, 'Learning ticket text must remain unobscured');
@@ -96,12 +99,15 @@ module.exports = async function checkWelcomeScenes(page, engine, base, outputDir
     // Keep each composition readable at common iPhone sizes, including 320px.
     for (const width of [320, 390, 430]) {
       await page.setViewportSize({ width, height: 844 });
+      const ctaPositions = [];
       for (const [index, name] of ['markets', 'practice', 'learning'].entries()) {
         await page.getByRole('button', { name: new RegExp(`^Pantalla ${index + 1}:`) }).click();
         await settle(name);
-        await verifyLayout(width);
         await capture(name, width);
+        await verifyLayout(width);
+        ctaPositions.push((await page.locator('.welcome-create').boundingBox()).y);
       }
+      assert(Math.max(...ctaPositions) - Math.min(...ctaPositions) <= 2, 'Signup CTA must not jump between scenes');
     }
     checks.push('three_distinct_compositions_320_390_430_no_overlap_44px_targets');
 

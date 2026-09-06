@@ -1,0 +1,110 @@
+/* Task-led mobile hierarchy: navigation, operation, then supporting details. */
+.trading-chart-canvas { height:340px; }
+.trading-chart { color:var(--color-text); }
+.app-plan-chip { margin-left:auto; display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:0 10px; border-radius:99px; font-size:11px; font-weight:650; color:var(--color-positive); white-space:nowrap; }
+.app-plan-chip:hover { background:var(--color-positive-soft); }
+.app-mobile-nav .app-trade-tab { position:relative; color:var(--color-text); font-weight:700; }
+.app-mobile-nav .app-trade-tab > svg { width:29px; height:29px; padding:7px; box-sizing:content-box; background:#b9eed5; color:#12382c; border-radius:15px; box-shadow:0 3px 14px #0b151c30; }
+.home-news { margin:20px 0; }
+.home-news-card { display:block; min-height:145px; padding:23px; border-radius:24px; background:radial-gradient(ellipse at 95% 20%,#63adf54a,transparent 70%),var(--color-surface); border:1px solid var(--color-border); }
+.home-news-card[data-tone='mint'] { background:radial-gradient(ellipse at 95% 20%,#5bd7a944,transparent 70%),var(--color-surface); }
+.home-news-card[data-tone='violet'] { background:radial-gradient(ellipse at 95% 20%,#a78bea40,transparent 70%),var(--color-surface); }
+.home-news-card small { font-size:11px; letter-spacing:.12em; color:var(--color-muted); }
+.home-news-card h2 { font-size:25px; line-height:1.15; letter-spacing:-.045em; max-width:270px; margin:12px 0 8px; }
+.home-news-card p { font-size:12px; line-height:1.5; color:var(--color-muted); max-width:300px; }
+.home-news-card > span { display:flex; gap:12px; align-items:center; font-size:12px; font-weight:650; margin-top:15px; }
+.home-news-controls { display:flex; justify-content:center; align-items:center; gap:12px; }
+.home-news-controls button { min-width:44px; height:44px; display:grid; place-items:center; border-radius:99px; }
+.home-news-controls button[aria-current] { color:var(--color-positive); }
+.home-news-controls span { font-size:11px; color:var(--color-muted); }
+.native-home-v3 .native-home-greeting h1 { font-size:32px; line-height:1.1; }
+.native-home-v3 .native-demo-wallet { margin-top:20px; }
+.native-home-v3 .native-focus { min-height:140px; margin-top:22px; }
+.native-home-v3 .native-focus-art { display:none; }
+.native-home-v3 .native-focus-content { width:100%; padding:22px; }
+.native-home-v3 .native-focus-content h2 { font-size:23px; max-width:100%; }
+.native-home-v3 .native-home-membership { margin:18px 0; padding:8px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.chart-tools { border:1px solid var(--color-border); border-radius:18px; background:var(--color-surface); padding:14px; margin:8px 0; }
+.chart-tools > div { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.chart-tools button, .chart-tools a { min-height:44px; padding:8px 12px; font-size:12px; border-radius:12px; background:var(--color-overlay); }
+.chart-tools button[aria-pressed='true'] { background:var(--color-positive-soft); color:var(--color-positive); }
+.chart-tools p { font-size:11px; color:var(--color-muted); line-height:1.5; margin-top:10px; }
+.operation-duration { display:flex; gap:8px; align-items:center; justify-content:space-between; font-size:12px; margin:10px 0; }
+.operation-duration select { min-height:44px; border-radius:12px; background:var(--color-overlay); color:var(--color-text); padding:8px; font-size:16px; max-width:55%; }
+.operation-live { margin-top:14px; border:1px solid var(--color-border); border-radius:16px; padding:14px; background:var(--color-surface); }
+.operation-live header { display:flex; justify-content:space-between; gap:12px; font-size:12px; }
+.operation-live strong { font-size:21px; display:block; margin-top:9px; font-variant-numeric:tabular-nums; }
+.operation-live small { display:block; font-size:11px; color:var(--color-muted); margin-top:6px; }
+.simple-status-stack { max-width:44%; text-align:right; }
+.simple-status-stack .operation-live { padding:0; margin:7px 0 0; border:0; background:transparent; }
+.simple-status-stack .operation-live header { display:block; font-size:11px; }
+.simple-status-stack .operation-live header > span:first-child { display:none; }
+.simple-status-stack .operation-live strong { font-size:16px; margin-top:4px; }
+.simple-status-stack .operation-live small { font-size:9px; line-height:1.35; margin-top:4px; }
+.upgrade-hint { display:flex; align-items:center; justify-content:space-between; gap:12px; border:1px solid var(--color-border); border-radius:14px; padding:12px; margin:12px 0; font-size:12px; line-height:1.5; background:var(--color-positive-soft); }
+.upgrade-hint a { min-height:44px; display:flex; align-items:center; font-weight:650; white-space:nowrap; text-decoration:underline; }
+.billing-page { max-width:850px; margin:auto; padding:28px 20px 140px; }
+.billing-page h1 { font-size:32px; letter-spacing:-.04em; margin-bottom:8px; }
+.billing-page section { border:1px solid var(--color-border); border-radius:22px; background:var(--color-surface); padding:22px; margin:20px 0; }
+.billing-page h2 { font-size:18px; margin-bottom:12px; }
+.billing-page p { font-size:13px; line-height:1.6; color:var(--color-muted); }
+.billing-page a { display:inline-flex; min-height:44px; align-items:center; gap:9px; color:var(--color-blue); font-size:13px; }
+.billing-page li { display:flex; flex-wrap:wrap; justify-content:space-between; gap:12px; padding:16px 0; border-bottom:1px solid var(--color-border); }
+.billing-page li small { display:block; color:var(--color-muted); font-size:11px; margin-top:5px; }
+@media(max-width:1023px) {
+  .trading-chart-canvas { height:clamp(140px,calc(100svh - 650px - env(safe-area-inset-top) - env(safe-area-inset-bottom)),210px); }
+  .simple-terminal[data-has-position='true'] .trading-chart-canvas { height:clamp(140px,calc(100svh - 685px - env(safe-area-inset-top) - env(safe-area-inset-bottom)),175px); }
+  html[data-app-mode='standalone'] .app-mobile-nav { bottom:0; left:0; right:0; width:100%; max-width:none; border-radius:24px 24px 0 0; padding-bottom:max(9px,env(safe-area-inset-bottom)); padding-top:5px; }
+  html[data-app-mode='standalone'] .app-mobile-nav-item { min-height:66px; padding-top:6px; padding-bottom:5px; }
+  html[data-app-mode='standalone'] .app-mobile-nav { background:var(--color-bg); }
+  html[data-app-mode='standalone'] .app-mobile-nav .app-trade-tab { transform:translateY(-6px); }
+  html[data-app-mode='standalone'] .app-main { padding-bottom:calc(105px + env(safe-area-inset-bottom)); }
+  .app-mobile-header { gap:4px; }
+  html[data-app-mode='standalone'] .native-toolbar-title { font-size:14px; min-width:0; overflow:hidden; text-overflow:ellipsis; }
+  .app-mobile-header > button[aria-label='Abrir búsqueda'] { display:none; }
+  .simple-terminal-top { padding-block:6px; }
+  .simple-market-panel { padding-bottom:0; }
+  .simple-price-heading { margin-top:8px; }
+  .simple-live-chart__inspection { display:none; }
+  .simple-chart-controls { margin-block:6px; }
+  .simple-market-source { font-size:11px; margin:6px 0; }
+  .simple-trade-panel { position:relative; bottom:auto; padding:10px 0 max(10px,env(safe-area-inset-bottom)); background:var(--color-bg); border-top:1px solid var(--color-border); }
+  .simple-trade-panel .simple-wallet { padding:3px 0 7px; margin-bottom:4px; }
+  .simple-wallet > div { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .simple-wallet small { font-size:11px; }
+  .simple-wallet strong { font-size:12px; }
+  .simple-amount-control { height:44px; min-height:44px; }
+  .simple-risk-controls { margin:4px 0; }
+  .simple-risk-controls summary { min-height:44px; padding-block:6px; }
+  .simple-risk-controls summary small { display:none; }
+  .simple-direction-actions button { min-height:52px; }
+  .simple-order-footnote { display:none; }
+  .simple-live-chart__plot { max-height:190px; }
+  .welcome-app .welcome-topbar { position:relative; justify-content:center; min-height:44px; }
+  .welcome-topbar .welcome-signin { position:absolute; right:0; padding-inline:12px; font-size:11px; }
+  .welcome-topbar > a:first-child { max-width:145px; }
+  .welcome-topbar .logo-wordmark { font-size:17px; }
+  .welcome-app .welcome-composition { display:flex; flex-direction:column; gap:16px; min-height:0; margin-top:16px; }
+  .welcome-app .welcome-stage { width:100%; margin-top:0; }
+  .welcome-app .welcome-scene-art, .welcome-app .welcome-market-scene, .welcome-app .welcome-learning-scene { height:395px; min-height:395px; }
+  .welcome-app .welcome-demo-chart svg { height:90px; }
+  .welcome-app .welcome-demo-response { min-height:18px; margin-top:8px; }
+  .welcome-app .welcome-demo-balance { margin-bottom:8px; }
+  .welcome-app .welcome-learning-scene { padding:16px; gap:8px; }
+  .welcome-app .welcome-lesson-ticket, .welcome-app .welcome-practice-ticket, .welcome-app .welcome-journal-ticket { width:100%; flex-shrink:0; padding:10px 12px; }
+  .welcome-app .welcome-academy-label { margin-bottom:2px; }
+  .welcome-app .welcome-content { width:100%; padding:0; }
+  .welcome-app .welcome-story { min-height:176px; }
+  .welcome-app .welcome-story h1 { font-size:clamp(25px,7vw,30px); min-height:3.15em; margin:10px 0 8px; }
+  .welcome-app .welcome-story p { font-size:12px; line-height:1.5; min-height:54px; }
+  .welcome-app .welcome-navigation { margin:4px auto 8px; }
+  .welcome-app .welcome-create { min-height:50px; }
+  .welcome-app .welcome-brand-lens { left:34.5%; top:29%; }
+  .welcome-app .welcome-brand-lens > span:last-child { position:static; inset:auto; width:100%; height:100%; border:0; display:grid; place-items:center; }
+  .welcome-app .welcome-brand-lens svg { display:block; margin:auto; }
+  .welcome-app .welcome-market-caption { bottom:5%; padding-top:8px; }
+  .welcome-app .welcome-market-caption strong { font-size:15px; }
+  .welcome-app .welcome-instrument > .instrument-icon { width:42px; height:42px; padding:7px; }
+}
+@media(max-width:359px) { .welcome-topbar > a:first-child { max-width:132px; } .app-plan-chip { font-size:10px; padding-inline:5px; } }
+@media(prefers-reduced-transparency:reduce) { .home-news-card,.simple-trade-panel { backdrop-filter:none; } }

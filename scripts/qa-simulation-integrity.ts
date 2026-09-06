@@ -14,7 +14,7 @@ async function main() {
   const directory = mkdtempSync(join(tmpdir(), 'tradinglab-simulation-integrity-'));
   const filename = join(directory, 'isolated.db');
   new DatabaseSync(filename).close();
-  Object.assign(process.env, { DATABASE_URL: `file:${filename.replaceAll('\\', '/')}`, DATABASE_PROVIDER: 'sqlite', MARKET_DATA_PROVIDER: 'synthetic', CHECKPOINT_DISABLE: '1' });
+  Object.assign(process.env, { DATABASE_URL: `file:${filename.replaceAll('\\', '/')}`, DATABASE_PROVIDER: 'sqlite', MARKET_DATA_PROVIDER: 'synthetic', REQUIRE_REAL_MARKET_DATA: 'false', CHECKPOINT_DISABLE: '1' });
   globalThis.fetch = async () => { throw Error('NETWORK_BLOCKED_IN_SIMULATION_QA'); };
   const init = spawnSync(process.execPath, [resolve('node_modules/prisma/build/index.js'), 'db', 'push', '--skip-generate'], { env: process.env, encoding: 'utf8' });
   assert.equal(init.status, 0, `Isolated schema creation failed: ${init.stderr}`);
@@ -135,7 +135,7 @@ async function main() {
     await checkLedger(onlyAccount.id); checks.push('concurrent_first_account_single_opening_balance');
 
     const quota = await fixture('parallel-daily-quota');
-    await db.simulation.createMany({ data: Array.from({ length: 19 }, () => ({
+    await db.simulation.createMany({ data: Array.from({ length: 4 }, () => ({
       userId: quota.userId, demoAccountId: quota.accountId, mode: 'POSITION', symbol: 'BTCUSD', assetClass: 'CRYPTO',
       status: 'CLOSED', outcome: 'NEUTRAL', stakeCents: 100, quantity: 0, entryPrice: 100,
       rationale: 'Historical isolated quota fixture, no money movement.', engineVersion: '1.0.0',
@@ -152,7 +152,7 @@ async function main() {
       return quotaCandles(params);
     };
     try {
-      // Both requests pass the initial count of 19. Commit the first before
+      // Both requests pass the initial count of 4. Commit the first before
       // releasing the second: a CAS balance check alone cannot protect quota.
       const first = createSimulation({ userId: quota.userId, plan: 'FREE', timezone: 'UTC', input: input(10_000) });
       void first.then(releaseSecond, releaseSecond);
@@ -161,7 +161,7 @@ async function main() {
       oneWinner(attempts);
       const rejected = attempts.find(result => result.status === 'rejected') as PromiseRejectedResult;
       assert(rejected.reason instanceof SimulationError && rejected.reason.code === 'LIMIT_REACHED');
-      assert.equal(await db.simulation.count({ where: { userId: quota.userId } }), 20);
+      assert.equal(await db.simulation.count({ where: { userId: quota.userId } }), 5);
       assert.equal(await db.simulation.count({ where: { userId: quota.userId, status: 'OPEN' } }), 1);
       assert.equal(await db.demoBalanceLedger.count({ where: { demoAccountId: quota.accountId, reason: 'SIMULATION_MARGIN_HOLD' } }), 1);
       assert.equal(await db.demoBalanceLedger.count({ where: { demoAccountId: quota.accountId, reason: 'SIMULATION_FEE' } }), 1);
@@ -266,6 +266,49 @@ async function main() {
         checks.push('future_invalid_and_stale_open_observations_still_rejected');
       } finally { provider.getMarketStatus = originalStatus; }
     } finally { Date.now = originalNow; }
+
+    provider.getQuote = symbol => quote(symbol, fixedAt);
+    provider.getCandles = params => candles({ ...params, to: fixedAt });
+    provider.getPriceAt = priceAt;
+    const strict = await fixture('real-source-required');
+    const strictLedger = await db.demoBalanceLedger.count({ where: { demoAccountId: strict.accountId } });
+    process.env.REQUIRE_REAL_MARKET_DATA = 'true';
+    try {
+      await assert.rejects(open(strict.userId, 10000), error => error instanceof SimulationError && error.code === 'INVALID_INPUT');
+      const sourceQuote = await quote('BTCUSD', fixedAt);
+      for (const age of [11000, -5000]) {
+        provider.getQuote = async () => ({ ...sourceQuote, provenance: { ...sourceQuote.provenance, synthetic: false, freshness: 'REALTIME', sourceTimestamp: Date.now() - age } });
+        await assert.rejects(open(strict.userId, 10000), error => error instanceof SimulationError && error.code === 'INVALID_INPUT');
+      }
+      assert.equal(await db.simulation.count({ where: { userId: strict.userId } }), 0);
+      assert.equal(await db.demoBalanceLedger.count({ where: { demoAccountId: strict.accountId } }), strictLedger);
+      checks.push('real_only_rejects_synthetic_stale_future_before_debit');
+    } finally { delete process.env.REQUIRE_REAL_MARKET_DATA; provider.getQuote = symbol => quote(symbol, fixedAt); }
+
+    const timed = await fixture('timed-position');
+    const timedInput = { ...input(10000), durationMinutes: 1 } as CreateSimulationInput;
+    const timedOpen = await createSimulation({ userId: timed.userId, plan: 'PREMIUM', timezone: 'UTC', input: timedInput });
+    assert(timedOpen.expiresAt);
+    const expiration = Date.now() - 60000;
+    await db.simulation.update({ where: { id: timedOpen.simulationId }, data: { openedAt: new Date(expiration - 60000), expiresAt: new Date(expiration) } });
+    const observations: number[] = [];
+    provider.getPriceAt = async (symbol, at) => { observations.push(at); return priceAt(symbol, at); };
+    const timedClose = await closeSimulationById({ userId: timed.userId, simulationId: timedOpen.simulationId, fraction: 0.5 });
+    assert.equal(timedClose.closeReason, 'EXPIRY');
+    assert.deepEqual(observations, [expiration]);
+    const timedRow = await db.simulation.findUniqueOrThrow({ where: { id: timedOpen.simulationId } });
+    assert.equal(timedRow.closedAt!.getTime(), expiration);
+    assert.equal(timedRow.status, 'CLOSED');
+    assert.equal(timedRow.stakeCents, 10000);
+    await checkLedger(timed.accountId);
+    checks.push('expired_position_forces_full_close_at_original_deadline');
+    const auto = await fixture('timed-auto');
+    const autoOpen = await createSimulation({ userId: auto.userId, plan: 'PREMIUM', timezone: 'UTC', input: timedInput });
+    await db.simulation.update({ where: { id: autoOpen.simulationId }, data: { openedAt: new Date(expiration - 60000), expiresAt: new Date(expiration) } });
+    assert.equal(await settleDueSimulations(auto.userId), 1);
+    assert.equal(await settleDueSimulations(auto.userId), 0);
+    await checkLedger(auto.accountId);
+    checks.push('timed_position_opportunistic_settlement_exactly_once');
 
     console.log(JSON.stringify({ passed: true, checks, database: 'isolated SQLite', externalRequests: 0, realMoneyMoved: 0, isolatedDirectory: directory }, null, 2));
   } finally { await db.$disconnect(); }

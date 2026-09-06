@@ -28,6 +28,8 @@ if (!output || !isAbsolute(output)) throw Error('Set an absolute PWA_QA_OUTPUT d
     WOMPI_STANDARD_MONTHLY_AMOUNT_IN_CENTS: '5990000', WOMPI_STANDARD_YEARLY_AMOUNT_IN_CENTS: '59900000',
     WOMPI_PREMIUM_MONTHLY_AMOUNT_IN_CENTS: '11990000', WOMPI_PREMIUM_YEARLY_AMOUNT_IN_CENTS: '119900000',
     NEXT_PUBLIC_GOOGLE_ADS_ENABLED: 'false', CHECKPOINT_DISABLE: '1',
+    MARKET_DATA_PROVIDER: process.env.PWA_QA_REAL_FEED === '1' ? 'binance' : 'synthetic',
+    REQUIRE_REAL_MARKET_DATA: process.env.PWA_QA_REAL_FEED === '1' ? 'true' : 'false',
   };
   const schema = spawnSync(process.execPath, [resolve('node_modules/prisma/build/index.js'), 'db', 'push', '--skip-generate'], { env, encoding: 'utf8' });
   assert.equal(schema.status, 0, schema.stderr);
@@ -55,12 +57,15 @@ if (!output || !isAbsolute(output)) throw Error('Set an absolute PWA_QA_OUTPUT d
         const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, ignoreHTTPSErrors: true, locale: 'es-CO', colorScheme: 'dark', serviceWorkers: 'block' });
         await context.addInitScript(() => Object.defineProperty(navigator, 'standalone', { get: () => true }));
         await context.route('**/*', route => new URL(route.request().url()).origin === BASE ? route.continue() : route.abort());
+        // Fulfill checkout navigation entirely in Playwright. No Wompi request
+        // ever leaves this fixture; only fabricated local intents are tested.
+        await context.route('https://checkout.wompi.co/**', route => route.fulfill({ status: 200, contentType: 'text/html', body: '<h1>Isolated checkout navigation</h1>' }));
         const page = await context.newPage();
         if (engine === 'chromium' && process.env.PWA_QA_HYDRATION_DIAG === '1') await require('./qa-hydration-diagnostics.cjs')(page);
         const errors = [];
         const nativeChecks = [];
         page.on('pageerror', e => { errors.push(e.message); console.error('Browser error', new URL(page.url()).pathname, e.message); });
-        const screenshot = name => page.screenshot({ path: join(output, `${engine}-${name}.png`), fullPage: true, animations: 'disabled' });
+        const screenshot = async name => { await page.evaluate(() => scrollTo(0, 0)); return page.screenshot({ path: join(output, `${engine}-${name}.png`), fullPage: true, animations: 'disabled' }); };
         const fits = async () => assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'Horizontal overflow');
         if (process.env.PWA_QA_NATIVE_TRADING === '1') nativeChecks.push(await require('./qa-welcome-scenes.cjs')(page, engine, BASE, output));
         await page.goto(BASE + '/entrar', { waitUntil: 'networkidle' });
@@ -82,7 +87,7 @@ if (!output || !isAbsolute(output)) throw Error('Set an absolute PWA_QA_OUTPUT d
         await page.reload({ waitUntil: 'networkidle' });
         assert(!(await tour.isVisible()), 'Tour must not repeat after dismissal');
         assert(!(await page.locator('.dashboard-browser-body').isVisible()));
-        await page.getByRole('heading', { name: /Un paso más claro/ }).waitFor();
+        await page.getByRole('heading', { name: /Tu siguiente idea/ }).waitFor();
         assert(await page.getByText('Explore incluido', { exact: true }).isVisible());
         await fits(); await screenshot('home-dark');
         await page.getByRole('button', { name: 'Conoce tu app' }).click();
@@ -103,7 +108,7 @@ if (!output || !isAbsolute(output)) throw Error('Set an absolute PWA_QA_OUTPUT d
         await page.setViewportSize({ width: 390, height: 844 });
         if (process.env.PWA_QA_NATIVE_TRADING === '1') {
           nativeChecks.push(await require('./qa-native-gestures.cjs')(page, engine));
-          nativeChecks.push(await require('./qa-simple-terminal.cjs')(page, engine, BASE, output));
+          nativeChecks.push(await require(process.env.PWA_QA_REAL_FEED === '1' ? './qa-real-practice.cjs' : './qa-simple-terminal.cjs')(page, engine, BASE, output));
         }
         await page.goto(BASE + '/perfil', { waitUntil: 'networkidle' });
         await page.getByRole('heading', { name: 'María Demo', exact: true }).waitFor();
@@ -132,21 +137,26 @@ if (!output || !isAbsolute(output)) throw Error('Set an absolute PWA_QA_OUTPUT d
         for (const width of [320, 390, 430]) { await page.setViewportSize({ width, height: 844 }); await fits(); }
         await page.setViewportSize({ width: 390, height: 844 });
         await screenshot('checkout-dark');
+        let preparedBody;
+        await page.route('**/api/billing/subscribe', async route => {
+          const upstream = await route.fetch();
+          preparedBody = await upstream.json();
+          await route.fulfill({ response: upstream });
+        }, { times: 1 });
         const response = page.waitForResponse(r => r.url() === BASE + '/api/billing/subscribe');
-        await page.getByRole('button', { name: 'Ver total en COP' }).click();
+        await page.getByRole('button', { name: 'Pagar con Wompi' }).click();
         const preparedResponse = await response;
         assert.equal(preparedResponse.status(), 200);
-        const prepared = (await preparedResponse.json()).data;
+        const prepared = preparedBody.data;
         assert.equal(prepared.status, 'REDIRECT'); assert.equal(prepared.currency, 'COP');
         assert.equal(prepared.amountInCents, 5990000); assert(prepared.reference); assert(prepared.paymentId);
         const link = new URL(prepared.redirectUrl);
         assert.equal(link.origin, 'https://checkout.wompi.co');
         assert.equal(link.searchParams.get('amount-in-cents'), '5990000');
-        // Do not navigate to Wompi: fabricated key and a persisted local intent only.
-        await page.getByRole('button', { name: 'Continuar a Wompi' }).waitFor();
-        await screenshot('checkout-ready-dark');
-        await page.getByText('Referencia y enlace de pago', { exact: true }).click();
-        assert.equal(await page.locator('#wompi-payment-link').inputValue(), prepared.redirectUrl);
+        await page.waitForURL('https://checkout.wompi.co/**');
+        await page.getByRole('heading', { name: 'Isolated checkout navigation' }).waitFor();
+        assert.equal(page.url(), prepared.redirectUrl);
+        await page.goto(BASE + '/pago?plan=STANDARD&interval=MONTHLY', { waitUntil: 'networkidle' });
         const key = await page.evaluate(() => sessionStorage.getItem('tl-checkout:STANDARD:MONTHLY'));
         const replay = await context.request.post(BASE + '/api/billing/subscribe', { headers: { Origin: BASE, 'Sec-Fetch-Site': 'same-origin' }, data: { planId: 'STANDARD', interval: 'MONTHLY', idempotencyKey: key } });
         assert.equal(replay.status(), 200);
@@ -162,12 +172,16 @@ if (!output || !isAbsolute(output)) throw Error('Set an absolute PWA_QA_OUTPUT d
         // Real foreign-Origin rejection is asserted above. Inject the same
         // response shape here to exercise error UI without browser header rules.
         await page.route('**/api/billing/subscribe', route => route.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ ok: false, error: { code: 'CROSS_SITE_REQUEST', message: 'Origen rechazado en la prueba local.' } }) }), { times: 1 });
-        await page.getByRole('button', { name: 'Ver total en COP' }).click();
+        await page.getByRole('button', { name: 'Pagar con Wompi' }).click();
         await page.getByText('No pudimos preparar el pago', { exact: true }).waitFor();
         await screenshot('checkout-error-light');
-        const [retried] = await Promise.all([page.waitForResponse(r => r.url() === BASE + '/api/billing/subscribe'), page.getByRole('button', { name: 'Reintentar importe en COP' }).click()]);
+        const [retried] = await Promise.all([page.waitForResponse(r => r.url() === BASE + '/api/billing/subscribe'), page.getByRole('button', { name: 'Reintentar pago seguro' }).click()]);
         assert.equal(retried.status(), 200);
-        await page.getByRole('button', { name: 'Continuar a Wompi' }).waitFor();
+        await page.waitForURL('https://checkout.wompi.co/**');
+        await page.goto(BASE + '/billing', { waitUntil: 'networkidle' });
+        await page.getByRole('heading', { name: 'Facturación', exact: true }).waitFor();
+        assert((await page.locator('.billing-page').textContent()).includes(prepared.paymentId));
+        await screenshot('billing-history');
         await page.goto(BASE + '/precios', { waitUntil: 'networkidle' });
         await page.getByRole('radio', { name: /Pro/ }).focus();
         await page.keyboard.press('Space');

@@ -69,12 +69,14 @@ const NAV_SECONDARY = [
 const MOBILE_TABS = [
   { href: '/panel', label: 'Inicio', icon: LayoutDashboard },
   { href: '/explorar', label: 'Mercados', icon: Compass },
-  { href: '/terminal', label: 'Practicar', icon: CandlestickChart },
+  { href: '/terminal', label: 'Operar demo', icon: CandlestickChart },
   { href: '/academia', label: 'Aprender', icon: GraduationCap },
   { href: '/perfil', label: 'Cuenta', icon: Settings },
 ];
 
 const NAV_FOOTER = [
+  { href: '/precios', label: 'Planes y beneficios', icon: Sparkles },
+  { href: '/billing', label: 'Facturación y pagos', icon: WalletCards },
   { href: '/perfil', label: 'Perfil y ajustes', icon: Settings },
   { href: '/ayuda', label: 'Centro de ayuda', icon: LifeBuoy },
 ];
@@ -198,6 +200,7 @@ export function AppShell({
           </Link>
           <span className="native-toolbar-title">{pathname === '/panel' ? 'TradingLab' : pathname === '/explorar' ? 'Mercados' : pathname === '/portafolio' ? 'Portafolio' : BREADCRUMB_LABELS[pathname.split('/')[1]] ?? 'TradingLab'}</span>
 
+          <Link href={user.plan === 'FREE' ? '/precios' : '/billing'} className="app-plan-chip" aria-label={user.plan === 'FREE' ? 'Explore activo. Mejorar mi plan' : `Gestionar plan ${PLAN_ENTITLEMENTS[user.plan].name}`}>{user.plan === 'FREE' ? 'Explore · Mejorar' : PLAN_ENTITLEMENTS[user.plan].name}</Link>
           <span className="app-header-balance num ml-auto flex items-center gap-1.5 text-[13px] font-semibold">
             {(balanceCents / 100).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             <DemoBadge />
@@ -249,7 +252,7 @@ export function AppShell({
         {notifOpen && <NotificationsPanel items={notifications} onClose={() => setNotifOpen(false)} />}
         {commandOpen && <CommandPalette pathname={pathname} onClose={() => setCommandOpen(false)} />}
 
-        <main id="contenido" className={cn('min-w-0 flex-1', !immersive && 'pb-20 lg:pb-0')}>
+        <main id="contenido" className={cn('min-w-0 flex-1', !immersive && 'app-main pb-20 lg:pb-0')}>
           {children}
         </main>
 
@@ -267,7 +270,7 @@ export function AppShell({
                   href={item.href}
                   aria-current={active ? 'page' : undefined}
                   className={cn(
-                    'app-mobile-nav-item flex flex-1 flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors',
+                    'app-mobile-nav-item flex flex-1 flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors', item.href === '/terminal' && 'app-trade-tab',
                     active ? 'text-[var(--color-blue)]' : 'text-[var(--color-muted)]',
                   )}
                 >
@@ -387,7 +390,8 @@ function NavGroup({
 
 const BREADCRUMB_LABELS: Record<string, string> = {
   panel: 'Panel',
-  terminal: 'Terminal de simulación',
+  terminal: 'Operar demo',
+  billing: 'Facturación',
   academia: 'Academia',
   diario: 'Diario educativo',
   estadisticas: 'Estadísticas',

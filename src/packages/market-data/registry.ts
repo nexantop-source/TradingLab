@@ -1,5 +1,6 @@
 import type { MarketDataProvider } from './provider';
 import { SyntheticMarketDataProvider } from './synthetic-provider';
+import { BinanceMarketDataProvider } from './binance-provider';
 
 /**
  * Registro de proveedores.
@@ -22,6 +23,9 @@ const synthetic = new SyntheticMarketDataProvider();
 registerProvider(synthetic);
 // Alias para poder seleccionarlo por nombre corto desde el entorno.
 registry.set('synthetic', synthetic);
+const binance = new BinanceMarketDataProvider();
+registerProvider(binance);
+registry.set('binance', binance);
 
 let activeId = process.env.MARKET_DATA_PROVIDER || 'synthetic';
 
@@ -38,6 +42,9 @@ export function setActiveProvider(id: string): void {
 export function marketData(): MarketDataProvider {
   const p = registry.get(activeId);
   if (p) return p;
+  if (process.env.REQUIRE_REAL_MARKET_DATA === 'true') {
+    throw new Error('La fuente real configurada no está disponible. Práctica temporalmente bloqueada.');
+  }
   if (process.env.NODE_ENV !== 'test') {
     console.warn(
       `[market-data] Proveedor "${activeId}" no registrado. Se usa el motor determinístico local.`,

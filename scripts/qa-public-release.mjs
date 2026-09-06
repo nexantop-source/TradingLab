@@ -25,6 +25,12 @@ assert.match(pulse.headers.get('cache-control') ?? '', /no-store/);
 const terminal = await request('/terminal');
 assert([303, 307].includes(terminal.status));
 assert.equal(new URL(terminal.headers.get('location'), base).pathname, '/entrar');
+const sourceResponse = await request('/api/market/status');
+assert.equal(sourceResponse.status, 200);
+const sources = await sourceResponse.json();
+assert.equal(sources.realOnly, true);
+assert.deepEqual(sources.instruments.map(item => item.symbol), ['BTCUSDT', 'ETHUSDT', 'SOLUSDT']);
+assert(sources.instruments.every(item => item.available && item.source === 'binance-spot-v1'), 'All enabled pairs must reach their real provider from production');
 const events = await request('/api/payments/wompi/events');
 assert.equal(events.status, 200);
 const health = (await events.json()).data;
@@ -36,4 +42,4 @@ const subscribe = await request('/api/billing/subscribe', { method: 'POST', head
 assert.equal(subscribe.status, 401);
 const foreign = await request('/api/billing/subscribe', { method: 'POST', headers: { Origin: 'https://untrusted.example.invalid', 'Content-Type': 'application/json' }, body: '{}' });
 assert.equal(foreign.status, 403);
-console.log(JSON.stringify({ passed: true, base, checks: ['install_name_and_entry', 'guest_welcome', 'public_cache_v4', 'private_pulse_auth', 'terminal_auth_redirect', 'wompi_production_checkout_enabled', 'billing_same_origin_401_foreign_403'], customerActions: 0, realCharges: 0 }, null, 2));
+console.log(JSON.stringify({ passed: true, base, sources, checks: ['install_name_and_entry', 'guest_welcome', 'public_cache_v4', 'private_pulse_auth', 'terminal_auth_redirect', 'real_market_sources_reachable_from_production', 'wompi_production_checkout_enabled', 'billing_same_origin_401_foreign_403'], customerActions: 0, realCharges: 0 }, null, 2));

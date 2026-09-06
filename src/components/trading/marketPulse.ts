@@ -1,6 +1,6 @@
-import type { DataProvenance, Quote } from '@tl/types';
+import type { Candle, DataProvenance, Quote } from '@tl/types';
 
-export interface MarketTick { time: number; price: number }
+export interface MarketTick { time: number; price: number; candle?: Candle }
 export interface MarketPulse {
   symbol: string;
   serverTime: number;
@@ -21,6 +21,10 @@ export function mergeMarketTicks(current: MarketTick[], incoming: MarketTick[], 
   for (const tick of [...current, ...incoming]) {
     if (!Number.isSafeInteger(tick.time) || tick.time % 1000 !== 0 || tick.time < start || tick.time > end) continue;
     if (!Number.isFinite(tick.price) || tick.price <= 0) continue;
+    if (tick.candle && (!Number.isSafeInteger(tick.candle.t) || tick.candle.t > tick.time
+      || ![tick.candle.o,tick.candle.h,tick.candle.l,tick.candle.c].every(n=>Number.isFinite(n)&&n>0)
+      || tick.candle.h < Math.max(tick.candle.o,tick.candle.c)
+      || tick.candle.l > Math.min(tick.candle.o,tick.candle.c) || tick.candle.c !== tick.price)) continue;
     byTime.set(tick.time, tick);
   }
   return [...byTime.values()].sort((a, b) => a.time - b.time).slice(-MAX_PULSE_TICKS);

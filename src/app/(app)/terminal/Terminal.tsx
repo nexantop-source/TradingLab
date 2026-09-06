@@ -104,8 +104,7 @@ const CHART_TYPES: Array<{ value: ChartType; label: string; title: string }> = [
 ];
 
 export function Terminal(props: TerminalProps) {
-  const [mode, setMode] = React.useState<'simple' | 'advanced'>('simple');
-  return mode === 'simple' ? <SimpleTerminal {...props} onAdvanced={() => setMode('advanced')} /> : <AdvancedTerminal {...props} onSimple={() => setMode('simple')} />;
+  return <SimpleTerminal {...props} onAdvanced={() => {}} />;
 }
 
 function AdvancedTerminal(props: TerminalProps & { onSimple: () => void }) {

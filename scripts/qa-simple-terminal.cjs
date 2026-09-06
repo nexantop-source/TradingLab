@@ -100,15 +100,11 @@ module.exports = async function checkSimpleTerminal(page, engine, BASE, outputDi
     for (const width of [320, 390, 430]) {
       await page.setViewportSize({ width, height: 844 });
       await page.waitForFunction(() => {
-        const svg = document.querySelector('.simple-live-chart__plot');
-        return svg && Math.abs(svg.viewBox.baseVal.width - svg.getBoundingClientRect().width) <= 2;
+        const chart = document.querySelector('.trading-chart-canvas');
+        return chart && chart.querySelector('canvas') && chart.getBoundingClientRect().width <= innerWidth;
       });
       assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `Terminal overflows at ${width}px`);
-      const font = await page.locator('.simple-live-chart__grid text').first().evaluate(element => {
-        const svg = element.ownerSVGElement;
-        return parseFloat(getComputedStyle(element).fontSize) * svg.getBoundingClientRect().width / svg.viewBox.baseVal.width;
-      });
-      assert(font >= 10.5, `Chart axis must remain readable at ${width}px; got ${font}px`);
+      assert(await page.locator('.trading-chart canvas').count() > 0, 'TradingView canvas must be mounted');
       await page.evaluate(() => scrollTo(0, 0));
       await screenshot(`dark-${width}`);
       if (width === 390) {
@@ -119,15 +115,15 @@ module.exports = async function checkSimpleTerminal(page, engine, BASE, outputDi
     }
     await page.setViewportSize({ width: 390, height: 844 });
     await page.getByRole('button', { name: '1 min', exact: true }).click();
-    assert.equal(await page.locator('.simple-live-chart__caption > span').last().textContent(), '1 minuto');
+    assert.equal(await page.locator('.trading-chart').getAttribute('data-window'), '60');
     await page.getByRole('button', { name: 'Línea', exact: true }).click();
-    assert.equal(await page.locator('.simple-live-chart__plot path[fill^="url"]').count(), 0);
+    assert.equal(await page.locator('.trading-chart').getAttribute('data-chart-type'), 'line');
     await page.getByRole('button', { name: 'Área', exact: true }).click();
     await page.getByRole('button', { name: '2 min', exact: true }).click();
 
     // Exercise the same document TouchEvent recognizer in both engines. This
     // checks exclusion, not a physical iPhone's reserved OS edge gesture.
-    await page.locator('.simple-live-chart').evaluate(element => {
+    await page.locator('.trading-chart').evaluate(element => {
       const rect = element.getBoundingClientRect();
       const x = rect.left + 25, y = rect.top + 70;
       for (const [type, dx] of [['touchstart', 0], ['touchmove', 70], ['touchmove', 170], ['touchend', 170]]) {
@@ -143,12 +139,12 @@ module.exports = async function checkSimpleTerminal(page, engine, BASE, outputDi
     await page.waitForFunction(() => document.querySelector('.simple-pulse-state')?.textContent === 'Sin conexión');
     assert(await up.isDisabled()); assert(await down.isDisabled());
     const frozenPrice = await page.getByTestId('simple-live-price').textContent();
-    const frozenPath = await page.locator('.simple-live-chart__line').getAttribute('d');
+    const frozenChart = await page.locator('.trading-chart').innerText();
     const offlineRequests = pulseRequests;
     await page.waitForTimeout(1600);
     assert.equal(pulseRequests, offlineRequests, 'Offline polling must stop');
     assert.equal(await page.getByTestId('simple-live-price').textContent(), frozenPrice);
-    assert.equal(await page.locator('.simple-live-chart__line').getAttribute('d'), frozenPath, 'Offline chart must not fabricate movement');
+    assert.equal(await page.locator('.trading-chart').innerText(), frozenChart, 'Offline chart must not fabricate movement');
     await screenshot('offline');
     const restoredResponse = pulseResponse(true);
     await context.setOffline(false);
@@ -175,6 +171,7 @@ module.exports = async function checkSimpleTerminal(page, engine, BASE, outputDi
     await amount.fill('99999'); await up.click();
     assert.match(await terminal.locator('.simple-order-error').textContent(), /saldo/);
     await amount.fill('25,50');
+    await page.getByLabel('Tiempo de operación', { exact: true }).selectOption('2');
     await page.locator('.simple-risk-controls summary').click();
     await page.getByLabel('Distancia de stop loss en porcentaje', { exact: true }).fill('96');
     await up.click();
@@ -253,11 +250,14 @@ module.exports = async function checkSimpleTerminal(page, engine, BASE, outputDi
     assert.equal(posts.length, 1);
     assert.equal(posts[0].mode, 'POSITION'); assert.equal(posts[0].direction, 'BEARISH');
     assert.equal(posts[0].stakeCents, 2550); assert.equal(posts[0].leverage, 1);
+    assert.equal(posts[0].durationMinutes, 2);
+    assert(Date.parse(created.expiresAt) > Date.now());
     assert.equal(posts[0].acknowledgedSimulation, true);
     assert.equal(created.provenance.synthetic, true);
     assert.equal(created.balanceCents, before.balanceCents - 2550 - created.feeCents);
     await review.waitFor({ state: 'hidden' });
     await waitBalance(created.balanceCents);
+    await page.locator('.operation-live').getByText(/restantes/).waitFor();
     await page.waitForTimeout(350);
     assert.equal(await page.locator('.simple-wallet strong').textContent(), money(created.balanceCents), 'An older snapshot must not overwrite the confirmed order balance');
     const open = await snapshot();
@@ -318,10 +318,13 @@ module.exports = async function checkSimpleTerminal(page, engine, BASE, outputDi
     await page.getByRole('button', { name: 'Cerradas', exact: true }).click();
     await screenshot('closed');
 
-    await page.getByRole('button', { name: 'Avanzado', exact: true }).click();
-    await page.locator('[data-view="advanced"]').waitFor();
-    assert(!(await terminal.isVisible()));
-    await page.getByRole('button', { name: 'Simple', exact: true }).click();
+    assert.equal(await page.getByRole('button', { name: 'Avanzado', exact: true }).count(), 0);
+    await page.getByRole('button', { name: 'Herramientas', exact: true }).click();
+    await page.getByRole('button', { name: 'Velas · 5 s', exact: true }).click();
+    assert.equal(await page.locator('.trading-chart').getAttribute('data-chart-type'), 'candles');
+    await page.getByRole('button', { name: 'Media SMA20', exact: true }).click();
+    assert.equal(await page.getByRole('link', { name: 'EMA12 · Mejorar a Plus' }).getAttribute('href'), '/precios');
+    await page.getByRole('button', { name: 'Herramientas', exact: true }).click();
     await terminal.waitFor(); await waitLive();
     await page.evaluate(() => scrollTo(0, 0));
     await screenshot('restored');

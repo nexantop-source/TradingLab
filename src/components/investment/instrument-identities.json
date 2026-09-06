@@ -1,4 +1,7 @@
 {
+  "BTCUSDT": { "label": "Bitcoin / Tether USDT", "src": "/assets/instruments/btc.svg" },
+  "ETHUSDT": { "label": "Ethereum / Tether USDT", "src": "/assets/instruments/eth.svg" },
+  "SOLUSDT": { "label": "Solana / Tether USDT", "src": "/assets/instruments/sol.svg" },
   "AAPL": {
     "label": "Apple",
     "src": "/assets/instruments/apple.svg"

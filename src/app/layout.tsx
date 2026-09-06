@@ -16,6 +16,7 @@ import './native-gestures.css';
 import './welcome-scenes.css';
 import './live-chart.css';
 import './simple-terminal.css';
+import './app-refinement.css';
 
 const sans = localFont({
   src: '../../identidad visual/fuentes/instrument-sans-latin.woff2',

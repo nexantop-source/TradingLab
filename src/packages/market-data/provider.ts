@@ -1,4 +1,5 @@
 import type {
+  Candle,
   CandleSeries,
   Quote,
   Timeframe,
@@ -45,7 +46,7 @@ export interface MarketDataProvider {
    * Precio en un instante concreto. El motor de simulación lo usa para
    * liquidar operaciones de forma determinística y auditable.
    */
-  getPriceAt(symbol: string, timestampMs: number): Promise<{ price: number; provenance: DataProvenance }>;
+  getPriceAt(symbol: string, timestampMs: number): Promise<{ price: number; provenance: DataProvenance; candle?: Candle }>;
 
   /** Estado del mercado del instrumento. */
   getMarketStatus(symbol: string, at?: number): MarketStatus;

@@ -603,7 +603,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: '¿Qué incluye cada plan?',
-    a: 'Explore es gratuito e incluye USD 10.000 virtuales, academia básica, diario y 20 simulaciones al día. Plus amplía la práctica, el historial, los indicadores y las estadísticas, sin publicidad. Pro eleva el cupo del entrenador a 900 análisis mensuales y conserva diez años de historial. Teams se prepara mediante una propuesta para cada equipo.',
+    a: 'Explore es gratuito e incluye USD 10.000 virtuales, academia básica, diario y 5 simulaciones al día. Plus amplía la práctica, el historial, los indicadores y las estadísticas, sin publicidad. Pro eleva el cupo del entrenador a 900 análisis mensuales y conserva diez años de historial. Teams se prepara mediante una propuesta para cada equipo.',
   },
   {
     q: '¿En qué moneda se procesa mi pago?',

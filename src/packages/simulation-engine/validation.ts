@@ -55,6 +55,7 @@ export const createHypothesisSchema = z.object({
 
 export const createPositionSchema = z.object({
   mode: z.literal('POSITION'),
+  durationMinutes: z.union([z.literal(1),z.literal(2),z.literal(5),z.literal(15),z.literal(60)]).nullable().optional(),
   symbol: z.string().min(1).max(20),
   direction: z.enum(DIRECTIONS),
   orderType: z.enum(ORDER_TYPES).default('MARKET'),

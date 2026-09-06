@@ -1,5 +1,46 @@
 # Datos de mercado
 
+## Conexión real y bloqueo de práctica (6 de septiembre de 2026)
+
+App Hosting selecciona `MARKET_DATA_PROVIDER=binance` y
+`REQUIRE_REAL_MARKET_DATA=true`. BTCUSDT, ETHUSDT y SOLUSDT usan datos públicos
+de Binance Spot, no cotizaciones de TradingView. Cada observación es el cierre
+del último segundo completo de la bolsa. No son BTC/USD, ETH/USD ni SOL/USD:
+la moneda cotizada es USDT. El saldo y resultado siguen siendo virtuales y el
+spread/comisiones son modelos educativos, no ejecución ni liquidez de broker.
+
+La API rechaza nuevas aperturas sintéticas, desactualizadas o futuras, antes
+de descontar saldo virtual; vuelve a validar la edad al entrar en la transacción.
+Una caída de Binance bloquea el instrumento: nunca lo sustituye por un generador.
+El explorador autenticado muestra los instrumentos reales disponibles. Acciones,
+ETFs y divisas no están habilitados para nuevas operaciones hasta disponer de
+una fuente real con cobertura y derechos de uso adecuados. Un plan de pago no
+desbloquea una fuente inexistente.
+
+Los símbolos USD antiguos conservan su proveedor determinístico para cerrar
+posiciones heredadas sin cambiar sus resultados. Su procedencia queda visible.
+El catálogo educativo y las ilustraciones del onboarding no son cotizaciones.
+
+La terminal usa Lightweight Charts 5.2, con atribución visible enlazada fuera
+del área de dibujo. La vista predeterminada son velas japonesas de 5 s: agrupan
+las velas OHLC reales de 1 s del exchange, conservando apertura, máximo, mínimo
+y cierre, incluidas las mechas no visibles en los cierres muestreados. La primera
+vela del tramo y la última en formación pueden ser parciales. Las medias usan
+los cierres recibidos. El histórico de
+liquidación usa velas reales y segundos completos sin datos posteriores al corte.
+Duración y ventana visual son controles independientes. El cierre al vencer se
+revisa al consultar la cuenta (3 s con la terminal activa), con el precio histórico
+del vencimiento: no existe un daemon de ejecución de broker en segundo plano.
+
+Validación: `npm test`, `node --conditions=react-server --import tsx scripts/qa-simulation-integrity.ts`
+y `node --import tsx scripts/qa-real-market.ts`. Este último solo consulta el
+servicio público, sin claves ni operaciones. `/api/market/status` permite comprobar
+la disponibilidad real desde el entorno desplegado, con caché de diez segundos;
+no expone cuentas ni llaves.
+
+Fuentes: [API oficial Binance](https://developers.binance.com/en/docs/products/spot/rest-api),
+[atribución Lightweight Charts](https://tradingview.github.io/lightweight-charts/docs/api/interfaces/LayoutOptions#attributionlogo).
+
 ## El contrato
 
 La aplicación nunca habla con un proveedor concreto. Todo pasa por `MarketDataProvider`, definido en

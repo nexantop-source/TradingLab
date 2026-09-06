@@ -86,6 +86,12 @@ export function useMarketPulse(symbol: string, initialQuote: InitialPulseQuote, 
         }
         const data = result.data as MarketPulse;
         if (!validPulse(data, symbol)) throw new Error('No pudimos validar la serie recibida.');
+        if (!data.provenance.synthetic && (data.provenance.freshness !== 'REALTIME'
+          || !Number.isFinite(data.provenance.sourceTimestamp)
+          || data.serverTime - data.provenance.sourceTimestamp > 5000
+          || data.provenance.sourceTimestamp > data.serverTime)) {
+          throw new Error('La fuente real no tiene una cotización vigente. Espera antes de operar.');
+        }
         if (disposed || run !== generation) return;
         cursor = data.serverTime;
         lastReceived = performance.now();

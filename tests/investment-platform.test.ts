@@ -23,7 +23,7 @@ describe('investment catalog and subscription boundaries', () => {
   it('includes risk-managed practice in the limited free plan', () => {
     const free = entitlements('FREE');
     expect(free.simulationModes).toContain('POSITION');
-    expect(free.simulationsPerDay).toBe(20);
+    expect(free.simulationsPerDay).toBe(5);
     expect(free.priceMonthlyUsd).toBe(0);
     expect(free.adDensity).not.toBe('none');
   });

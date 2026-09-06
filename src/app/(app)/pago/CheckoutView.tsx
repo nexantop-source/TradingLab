@@ -47,6 +47,7 @@ export function CheckoutView({
   const [prepared, setPrepared] = React.useState<PreparedCheckout | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [copyMessage, setCopyMessage] = React.useState('');
+  const preparing = React.useRef(false);
   const hasActivePaidPeriod = existingSubscription != null;
 
   function idempotencyKey() {
@@ -61,6 +62,8 @@ export function CheckoutView({
   }
 
   async function prepareCheckout() {
+    if (preparing.current) return;
+    preparing.current = true;
     setLoading(true);
     setError(null);
     setCopyMessage('');
@@ -74,6 +77,9 @@ export function CheckoutView({
         },
       });
       setPrepared(result);
+      if (result.status === 'REDIRECT' && result.redirectUrl) {
+        window.location.assign(safeWompiCheckoutUrl(result.redirectUrl));
+      }
       if (result.status !== 'REDIRECT') {
         window.sessionStorage.removeItem(`tl-checkout:${intent.plan}:${intent.interval}`);
       }
@@ -86,6 +92,7 @@ export function CheckoutView({
       }
       setError(err instanceof ApiRequestError ? err.message : 'No pudimos preparar el pago. Inténtalo de nuevo.');
     } finally {
+      preparing.current = false;
       setLoading(false);
     }
   }
@@ -135,7 +142,7 @@ export function CheckoutView({
         <ArrowLeft className="size-3.5" aria-hidden="true" /> Volver a planes
       </Link>
 
-      <ol className="checkout-progress" aria-label="Pasos del pago"><li><Check size={12} />Plan elegido</li><li aria-current={!prepared ? 'step' : undefined}>1. Revisar total</li><li aria-current={prepared ? 'step' : undefined}>2. Pagar en Wompi</li></ol>
+      <ol className="checkout-progress" aria-label="Pasos del pago"><li><Check size={12} />Plan elegido</li><li aria-current="step">Pago seguro en Wompi</li></ol>
       <div className="checkout-layout mt-5 grid gap-5 lg:grid-cols-[1.08fr_0.92fr]">
         <Card className="checkout-plan overflow-hidden">
           <div className="checkout-plan-summary border-b border-[var(--color-border)] bg-[var(--color-blue-soft)] p-6 sm:p-8">
@@ -166,16 +173,16 @@ export function CheckoutView({
         </Card>
 
         <div className="space-y-4">
-          <div className="checkout-currency"><ShieldCheck size={20} aria-hidden="true" /><p>TradingLab es de Colombia. Convertimos USD a COP con la TRM vigente y te mostramos el total antes de pagar.</p></div>
+          <div className="checkout-currency"><ShieldCheck size={20} aria-hidden="true" /><p>TradingLab es de Colombia. Al continuar calculamos y validamos el importe en COP. Verás el total exacto en Wompi antes de autorizar el pago.</p></div>
           <Card className="checkout-payment p-6">
             <div className="flex items-start gap-3">
               <span className="flex size-10 shrink-0 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--color-positive-soft)] text-[var(--color-positive)]">
                 <LockKeyhole className="size-4" aria-hidden="true" />
               </span>
               <div>
-                <h2 className="text-[14px] font-semibold">{prepared?.status === 'REDIRECT' ? 'Tu total está listo' : 'Revisa el total en pesos'}</h2>
+                <h2 className="text-[14px] font-semibold">{prepared?.status === 'REDIRECT' ? 'Tu pago está listo' : 'Continúa al pago seguro'}</h2>
                 <p className="mt-1 text-[12px] leading-relaxed text-[var(--color-muted)]">
-                  {prepared?.status === 'REDIRECT' ? 'Confirma este mismo importe en Wompi.' : 'Preparar el importe no realiza ningún cobro.'}
+                  {prepared?.status === 'REDIRECT' ? 'Si Wompi no se abrió automáticamente, puedes abrirlo con el botón.' : 'Una sola acción: validamos el precio y abrimos Wompi. Aquí no se carga tu tarjeta.'}
                 </p>
               </div>
             </div>
@@ -231,7 +238,7 @@ export function CheckoutView({
               </div>
             ) : (
               <Button className="mt-6" size="lg" fullWidth loading={loading} onClick={prepareCheckout}>
-                {error ? 'Reintentar importe en COP' : 'Ver total en COP'} <ArrowRight className="size-4" aria-hidden="true" />
+                {error ? 'Reintentar pago seguro' : 'Pagar con Wompi'} <ArrowRight className="size-4" aria-hidden="true" />
               </Button>
             )}
 
