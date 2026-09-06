@@ -144,9 +144,6 @@ export function SimulationPanel({
     }
     if (stakeCents < MIN_STAKE_CENTS) return 'El monto virtual mínimo es USD 1,00.';
     if (stakeCents > balanceCents) return 'No tienes saldo virtual suficiente para este monto.';
-    if (rationale.trim().length < 15) {
-      return 'Explica en al menos 15 caracteres por qué formulas esta hipótesis. Es parte del ejercicio.';
-    }
     if (mode === 'POSITION') {
       const sl = Number(stopLoss);
       if (stopLoss && Number.isFinite(sl)) {
@@ -394,10 +391,9 @@ export function SimulationPanel({
       {/* Razonamiento */}
       <div className="mt-4 space-y-3">
         <Field
-          label="¿Por qué formulas esta hipótesis?"
+          label="Nota opcional para el diario"
           htmlFor="rationale"
-          hint="Mínimo 15 caracteres. Incluye qué precio te demostraría que estás equivocado."
-          required
+          hint="Puedes operar sin escribir una explicación."
         >
           <Textarea
             id="rationale"

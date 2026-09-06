@@ -189,12 +189,9 @@ module.exports = async function checkSimpleTerminal(page, engine, BASE, outputDi
     assert(Number(summary['Stop loss']) > Number(summary['Entrada estimada']));
     assert(Number(summary['Take profit']) < Number(summary['Entrada estimada']));
     assert(await confirm.isDisabled());
-    await review.locator('#simple-rationale').fill('Observo el movimiento demo y comparo el escenario bajista con el riesgo elegido.');
-    assert(await confirm.isDisabled(), 'Rationale alone cannot authorize the exercise');
+    assert.equal(await review.locator('#simple-rationale').count(), 0, 'No mandatory explanation field');
     await review.getByRole('checkbox').check();
-    await review.locator('#simple-rationale').fill('Corto');
-    assert(await confirm.isDisabled(), 'Acknowledgement alone cannot skip educational rationale');
-    await review.locator('#simple-rationale').fill('Observo el movimiento demo y comparo el escenario bajista con el riesgo elegido.');
+    assert(await confirm.isEnabled(), 'Valid practice needs no written explanation');
     assert.equal(posts.length, 0);
     await screenshot('review');
 
@@ -253,6 +250,7 @@ module.exports = async function checkSimpleTerminal(page, engine, BASE, outputDi
     assert.equal(posts[0].durationMinutes, 2);
     assert(Date.parse(created.expiresAt) > Date.now());
     assert.equal(posts[0].acknowledgedSimulation, true);
+    assert.equal(posts[0].rationale, undefined);
     assert.equal(created.provenance.synthetic, true);
     assert.equal(created.balanceCents, before.balanceCents - 2550 - created.feeCents);
     await review.waitFor({ state: 'hidden' });

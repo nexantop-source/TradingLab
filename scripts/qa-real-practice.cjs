@@ -6,7 +6,7 @@ module.exports = async (page, engine, base, output) => {
   assert.equal(base, 'https://127.0.0.1:3443');
   const context = page.context();
   const payload = { mode: 'POSITION', symbol: 'BTCUSD', direction: 'BULLISH', stakeCents: 1000,
-    rationale: 'Prueba aislada de datos reales y control de riesgo.', confidence: 'MEDIUM', perceivedRisk: 3,
+    confidence: 'MEDIUM', perceivedRisk: 3,
     timeframe: '1m', chartType: 'line', acknowledgedSimulation: true, leverage: 1, durationMinutes: 2 };
   const rejected = await context.request.post(base + '/api/simulations', { data: payload });
   assert([400, 422].includes(rejected.status()), 'Synthetic instruments must be rejected on the real-only server');
@@ -25,7 +25,8 @@ module.exports = async (page, engine, base, output) => {
   await page.getByLabel('Tiempo de operación', { exact: true }).selectOption('2');
   await page.locator('.simple-up').first().click();
   const review = page.locator('dialog.simple-review');
-  await review.locator('#simple-rationale').fill(payload.rationale);
+  assert.equal(await review.locator('textarea').count(), 0);
+  assert(await review.getByRole('button', { name: 'Confirmar operación demo', exact: true }).isDisabled());
   await review.getByRole('checkbox').check();
   const creation = page.waitForResponse(r => r.url() === base + '/api/simulations' && r.request().method() === 'POST');
   await review.getByRole('button', { name: 'Confirmar operación demo', exact: true }).click();
@@ -45,6 +46,7 @@ module.exports = async (page, engine, base, output) => {
   assert.equal(after.open.length, 0);
   assert.equal(after.simulationsUsedToday, 1);
   assert.equal(after.closed[0].priceSourceProvider, 'binance-spot-v1');
+  assert.equal(after.closed[0].rationale, '', 'Do not invent a reason for the student');
   assert.equal(after.balanceCents, result.data.balanceCents);
   await page.goto(base + '/terminal?symbol=AAPL');
   await page.getByRole('heading', { name: 'Fuente real pendiente' }).waitFor();

@@ -2,6 +2,10 @@
 
 ## Cambios
 
+- La explicación escrita ya no es obligatoria para abrir prácticas. La terminal
+  no pide texto; la API admite la nota ausente o vacía en los tres modos y guarda
+  una cadena vacía, sin inventar una justificación. El límite de 1000 caracteres
+  para notas voluntarias y la confirmación explícita de saldo virtual permanecen.
 - Una terminal con gráfico Lightweight Charts, herramientas dentro de la vista,
   indicadores por plan, duración 1/2/5/15/60 minutos o cierre manual, cuenta atrás
   y P&L virtual estimado antes de comisión de cierre.
@@ -19,7 +23,7 @@
 
 ## Límites de la entrega
 
-Verificación local: 377 pruebas unitarias, 19 escenarios de integridad de saldo
+Verificación local: 384 pruebas unitarias, 19 escenarios de integridad de saldo
 y liquidación en SQLite desechable, build de producción y recorrido aislado
 Chromium/WebKit a 320/390/430 px. Se verificaron foco, gestos, CTA estable,
 herramientas del gráfico, offline/pausa, cuenta atrás, creación/cierre demo,

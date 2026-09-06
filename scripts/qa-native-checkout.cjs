@@ -13,6 +13,7 @@ const bcrypt = require('bcryptjs');
 const engines = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const BASE = 'https://127.0.0.1:3443';
 const output = process.env.PWA_QA_OUTPUT;
+const focusedReal = process.env.PWA_QA_REAL_FEED === '1' && process.env.PWA_QA_REAL_FEED_ONLY === '1';
 if (!output || !isAbsolute(output)) throw Error('Set an absolute PWA_QA_OUTPUT directory');
 
 (async () => {
@@ -67,7 +68,7 @@ if (!output || !isAbsolute(output)) throw Error('Set an absolute PWA_QA_OUTPUT d
         page.on('pageerror', e => { errors.push(e.message); console.error('Browser error', new URL(page.url()).pathname, e.message); });
         const screenshot = async name => { await page.evaluate(() => scrollTo(0, 0)); return page.screenshot({ path: join(output, `${engine}-${name}.png`), fullPage: true, animations: 'disabled' }); };
         const fits = async () => assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'Horizontal overflow');
-        if (process.env.PWA_QA_NATIVE_TRADING === '1') nativeChecks.push(await require('./qa-welcome-scenes.cjs')(page, engine, BASE, output));
+        if (process.env.PWA_QA_NATIVE_TRADING === '1' && !focusedReal) nativeChecks.push(await require('./qa-welcome-scenes.cjs')(page, engine, BASE, output));
         await page.goto(BASE + '/entrar', { waitUntil: 'networkidle' });
         await page.locator('#email').fill(`native-qa-${engine}@example.invalid`);
         await page.locator('#password').fill('Local-only-QA-2026!');
@@ -75,6 +76,13 @@ if (!output || !isAbsolute(output)) throw Error('Set an absolute PWA_QA_OUTPUT d
         await page.waitForURL('**/panel');
         const tour = page.getByRole('dialog');
         await tour.waitFor();
+        if (focusedReal) {
+          await tour.getByRole('button', { name: 'Omitir', exact: true }).click();
+          nativeChecks.push(await require('./qa-real-practice.cjs')(page, engine, BASE, output));
+          assert.deepEqual(errors, []);
+          results.push({ engine, nativeChecks, pageErrors: errors });
+          continue;
+        }
         await screenshot('onboarding-01');
         assert.equal(await page.evaluate(() => document.activeElement?.id), 'orientation-title');
         await tour.getByRole('button', { name: 'Continuar', exact: true }).click();
@@ -202,8 +210,8 @@ if (!output || !isAbsolute(output)) throw Error('Set an absolute PWA_QA_OUTPUT d
         results.push({ engine, passed: ['tour_focus_skip_persistence_replay', 'native_home', 'free_always_included_not_selectable', 'account_navigation', 'plan_selection_touch_and_keyboard', 'annual_intent', 'checkout_focus', '320_390_430_layout', 'real_subscribe_route_200_behind_proxy', 'COP_link_and_ID', 'idempotent_retry', 'foreign_origin_blocked', 'error_and_retry_UI', 'light_dark', 'normal_web_unchanged'], nativeChecks, pageErrors: errors });
       } finally { await browser.close(); }
     }
-    assert.equal(await db.payment.count(), 2);
-    assert.equal(await db.payment.count({ where: { status: 'PENDING', externalId: null } }), 2);
+    assert.equal(await db.payment.count(), focusedReal ? 0 : 2);
+    assert.equal(await db.payment.count({ where: { status: 'PENDING', externalId: null } }), focusedReal ? 0 : 2);
     assert.equal(await db.subscription.count(), 0);
     console.log(JSON.stringify({ results, realCharges: 0, subscriptionsActivated: 0, isolatedDatabase: directory }, null, 2));
   } finally {

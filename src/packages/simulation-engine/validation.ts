@@ -29,8 +29,8 @@ const stake = z
 const rationale = z
   .string()
   .trim()
-  .min(15, 'Explica en al menos 15 caracteres por qué formulas esta hipótesis. Es parte del ejercicio.')
-  .max(1000, 'El motivo no puede superar los 1000 caracteres.');
+  .max(1000, 'La nota no puede superar los 1000 caracteres.')
+  .default('');
 
 export const createHypothesisSchema = z.object({
   mode: z.literal('HYPOTHESIS'),
