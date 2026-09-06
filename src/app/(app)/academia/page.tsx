@@ -6,6 +6,7 @@ import { getAuth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { Badge, Card, Progress } from '@tl/ui';
 import { AdSlot } from '@/components/AdSlot';
+import { OfflineDownload } from './OfflineDownload';
 import { planAtLeast } from '@tl/types/plans';
 import type { PlanId } from '@tl/types';
 
@@ -82,6 +83,8 @@ export default async function AcademyPage() {
           <span className="app-academy-orbit-label">Aprender · aplicar · revisar</span>
         </div>
       </section>
+
+      <OfflineDownload />
 
       <div className="app-course-grid grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {enriched.map((t) => (

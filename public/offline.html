@@ -1,1 +1,238 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#0c1825"><title>Sin conexión · TradingLab</title><style>body{margin:0;min-height:100dvh;display:grid;place-items:center;background:radial-gradient(ellipse at top,#274953,#0c1825 65%);color:#f6fbff;font:16px/1.6 system-ui}main{max-width:28rem;padding:2rem}small{color:#b4d9d4;letter-spacing:.12em}h1{font-size:2.6rem;line-height:1.12;letter-spacing:-.04em}p{color:#c5d0d9}a{display:inline-flex;padding:1rem 1.5rem;background:#b2efda;border-radius:2rem;color:#12372b;text-decoration:none;font-weight:600;margin-top:1rem}a:focus-visible{outline:3px solid white;outline-offset:5px}</style></head><body><main><small>TRADINGLAB · CONTIGO</small><h1>Una pausa.<br>Tu progreso sigue ahí.</h1><p>No tenemos conexión en este momento. Vuelve a conectarte para acceder a tu cuenta y consultar información actualizada.</p><p>No guardamos pagos, contraseñas ni datos de tu cuenta en el modo sin conexión. Tampoco enviamos operaciones pendientes al reconectar.</p><a href="/app">Volver a intentar</a></main></body></html>
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#09090b">
+<title>Sin conexión · TradingLab</title>
+<!--
+  Lector sin conexión.
+
+  Es una página estática sin dependencias externas a propósito: es lo único que
+  el service worker guarda en caché, así que tiene que funcionar cuando no hay
+  red y sin poder pedir un solo recurso más.
+
+  Lee las lecciones que la propia aplicación guardó en IndexedDB. No accede a
+  cookies, no pide nada al servidor y no conoce la sesión: si no hay descarga
+  previa, simplemente informa de que no hay conexión.
+-->
+<style>
+  :root {
+    --bg: #09090b; --surface: #111113; --elevated: #1a1a1d;
+    --border: #ffffff12; --border-strong: #ffffff1f;
+    --text: #fafafa; --muted: #a1a1a6; --subtle: #71717a;
+    --blue: #0a84ff; --gold: #ffd60a;
+    --r-sm: 12px; --r-md: 16px; --r-full: 999px;
+    --t-2xs: 11px; --t-xs: 13px; --t-sm: 15px; --t-md: 17px; --t-lg: 21px; --t-xl: 26px; --t-2xl: 33px;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100dvh; background: var(--bg); color: var(--text);
+    font: var(--t-sm)/1.55 -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: max(24px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(32px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+  }
+  main { max-width: 46rem; margin: 0 auto; }
+  .eyebrow { font-size: var(--t-2xs); letter-spacing: .14em; color: var(--subtle); text-transform: uppercase; }
+  h1 { font-size: var(--t-2xl); line-height: 1.15; letter-spacing: -.03em; margin: 12px 0 8px; font-weight: 600; }
+  .lede { color: var(--muted); font-size: var(--t-xs); line-height: 1.7; margin: 0; }
+  .status {
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 20px; padding: 8px 14px;
+    border: 1px solid var(--border-strong); border-radius: var(--r-full);
+    font-size: var(--t-2xs); color: var(--muted);
+  }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+  hr { border: 0; border-top: 1px solid var(--border); margin: 28px 0; }
+  h2 { font-size: var(--t-lg); letter-spacing: -.015em; margin: 0 0 4px; font-weight: 600; }
+  .track { font-size: var(--t-2xs); letter-spacing: .08em; text-transform: uppercase; color: var(--subtle); margin: 28px 0 10px; }
+  ul.index { list-style: none; margin: 0; padding: 0; border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; }
+  ul.index li + li { border-top: 1px solid var(--border); }
+  ul.index button {
+    display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px;
+    padding: 12px 16px; background: none; border: 0; color: inherit; text-align: left; cursor: pointer;
+    font: inherit; transition: background-color 150ms;
+  }
+  ul.index button:hover, ul.index button:focus-visible { background: #ffffff0a; }
+  ul.index .t { flex: 1; min-width: 0; font-size: var(--t-xs); font-weight: 500; }
+  ul.index .m { font-size: var(--t-2xs); color: var(--subtle); font-variant-numeric: tabular-nums; flex-shrink: 0; }
+  article h3 { font-size: var(--t-md); margin: 24px 0 8px; font-weight: 600; letter-spacing: -.01em; }
+  article p { color: var(--muted); line-height: 1.75; font-size: var(--t-xs); margin: 0 0 12px; }
+  .block { margin: 16px 0; padding: 16px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); }
+  .block > .kind { font-size: var(--t-2xs); letter-spacing: .1em; text-transform: uppercase; color: var(--subtle); margin-bottom: 8px; }
+  .block ul { margin: 8px 0 0; padding-left: 18px; color: var(--muted); font-size: var(--t-xs); line-height: 1.8; }
+  .missing { border-style: dashed; color: var(--subtle); font-size: var(--t-2xs); text-align: center; padding: 20px; }
+  button.action, a.action {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 44px; padding: 0 20px; margin-top: 20px; border: 0; border-radius: var(--r-full);
+    background: var(--text); color: var(--bg); font: 500 var(--t-xs)/1 inherit; font-family: inherit;
+    text-decoration: none; cursor: pointer;
+  }
+  button.back {
+    background: none; color: var(--muted); border: 1px solid var(--border-strong);
+    margin: 0 0 20px; padding: 0 16px; min-height: 40px;
+  }
+  :focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+  .foot { margin-top: 32px; font-size: var(--t-2xs); color: var(--subtle); line-height: 1.7; }
+</style>
+</head>
+<body>
+<main id="app">
+  <p class="eyebrow">TradingLab</p>
+  <h1>Una pausa.<br>Tu progreso sigue ahí.</h1>
+  <p class="lede">No tenemos conexión en este momento.</p>
+  <p class="status"><span class="dot"></span>Buscando lecciones guardadas…</p>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  var DB = 'tradinglab-offline';
+  var STORE = 'lessons';
+  var app = document.getElementById('app');
+
+  function el(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text != null) node.textContent = text;
+    return node;
+  }
+
+  // Se abre sin `onupgradeneeded`: si la aplicación nunca descargó nada, no
+  // hay almacén que crear y esta página no debe inventarlo.
+  function readLessons(done) {
+    if (typeof indexedDB === 'undefined') return done([]);
+    var request;
+    try { request = indexedDB.open(DB); } catch (e) { return done([]); }
+    request.onerror = function () { done([]); };
+    request.onsuccess = function () {
+      var db = request.result;
+      if (!db.objectStoreNames.contains(STORE)) { db.close(); return done([]); }
+      try {
+        var all = db.transaction(STORE, 'readonly').objectStore(STORE).getAll();
+        all.onsuccess = function () { db.close(); done(all.result || []); };
+        all.onerror = function () { db.close(); done([]); };
+      } catch (e) { db.close(); done([]); }
+    };
+  }
+
+  function renderEmpty() {
+    app.replaceChildren();
+    app.appendChild(el('p', 'eyebrow', 'TRADINGLAB'));
+    var h = el('h1');
+    h.appendChild(document.createTextNode('Una pausa.'));
+    h.appendChild(document.createElement('br'));
+    h.appendChild(document.createTextNode('Tu progreso sigue ahí.'));
+    app.appendChild(h);
+    app.appendChild(el('p', 'lede', 'No tenemos conexión en este momento. Vuelve a conectarte para acceder a tu cuenta y consultar información actualizada.'));
+    app.appendChild(el('p', 'lede', 'La próxima vez, descarga la academia desde Aprender y podrás seguir estudiando sin datos.'));
+    var link = el('a', 'action', 'Volver a intentar');
+    link.href = '/app';
+    app.appendChild(link);
+    app.appendChild(el('p', 'foot', 'No guardamos pagos, contraseñas ni datos de tu cuenta en el modo sin conexión. Tampoco enviamos operaciones pendientes al reconectar.'));
+  }
+
+  function renderIndex(lessons) {
+    app.replaceChildren();
+    app.appendChild(el('p', 'eyebrow', 'SIN CONEXIÓN'));
+    app.appendChild(el('h1', null, 'Sigue estudiando'));
+    app.appendChild(el('p', 'lede', lessons.length + ' lecciones guardadas en este dispositivo. Los gráficos en vivo y tu progreso volverán cuando recuperes la conexión.'));
+
+    var byTrack = {};
+    var order = [];
+    lessons.sort(function (a, b) { return (a.position || 0) - (b.position || 0); });
+    lessons.forEach(function (lesson) {
+      var key = lesson.trackTitle || 'Academia';
+      if (!byTrack[key]) { byTrack[key] = []; order.push(key); }
+      byTrack[key].push(lesson);
+    });
+
+    order.forEach(function (track) {
+      app.appendChild(el('p', 'track', track));
+      var list = el('ul', 'index');
+      byTrack[track].forEach(function (lesson) {
+        var item = document.createElement('li');
+        var button = el('button');
+        button.type = 'button';
+        button.appendChild(el('span', 't', lesson.title));
+        button.appendChild(el('span', 'm', (lesson.estimatedMinutes || 8) + ' min'));
+        button.addEventListener('click', function () { renderLesson(lesson, lessons); });
+        item.appendChild(button);
+        list.appendChild(item);
+      });
+      app.appendChild(list);
+    });
+
+    var link = el('a', 'action', 'Reintentar la conexión');
+    link.href = '/app';
+    app.appendChild(link);
+    app.appendChild(el('p', 'foot', 'Solo se guarda el texto de las lecciones de tu plan. Ni cotizaciones, ni pagos, ni datos de tu cuenta.'));
+  }
+
+  var KIND = {
+    callout: 'Para tener en cuenta',
+    example: 'Ejemplo',
+    exercise: 'Ejercicio',
+    checklist: 'Lista de comprobación',
+    video: 'Vídeo'
+  };
+
+  function renderLesson(lesson, all) {
+    app.replaceChildren();
+    window.scrollTo(0, 0);
+
+    var back = el('button', 'action back', '← Todas las lecciones');
+    back.type = 'button';
+    back.addEventListener('click', function () { renderIndex(all); });
+    app.appendChild(back);
+
+    app.appendChild(el('p', 'eyebrow', (lesson.trackTitle || '') + (lesson.courseTitle ? ' · ' + lesson.courseTitle : '')));
+    var article = document.createElement('article');
+    article.appendChild(el('h2', null, lesson.title));
+    if (lesson.summary) article.appendChild(el('p', 'lede', lesson.summary));
+
+    (lesson.blocks || []).forEach(function (block) {
+      if (block.type === 'text') {
+        if (block.title) article.appendChild(el('h3', null, block.title));
+        if (block.body) article.appendChild(el('p', null, block.body));
+        return;
+      }
+      var box = el('div', 'block');
+      box.appendChild(el('p', 'kind', KIND[block.type] || block.type));
+      if (block.title) box.appendChild(el('h3', null, block.title));
+      if (block.body) box.appendChild(el('p', null, block.body));
+      if (block.items && block.items.length) {
+        var list = document.createElement('ul');
+        block.items.forEach(function (entry) { list.appendChild(el('li', null, entry)); });
+        box.appendChild(list);
+      }
+      article.appendChild(box);
+    });
+
+    if (lesson.liveBlocks > 0) {
+      article.appendChild(el('div', 'block missing',
+        lesson.liveBlocks === 1
+          ? 'Esta lección incluye un gráfico que necesita datos de mercado en vivo. Ábrela con conexión para verlo.'
+          : 'Esta lección incluye ' + lesson.liveBlocks + ' gráficos que necesitan datos de mercado en vivo. Ábrela con conexión para verlos.'));
+    }
+
+    article.appendChild(el('p', 'foot', 'Para responder el cuestionario y registrar tu progreso necesitas conexión.'));
+    app.appendChild(article);
+  }
+
+  readLessons(function (lessons) {
+    if (!lessons.length) return renderEmpty();
+    renderIndex(lessons);
+  });
+
+  // Si la conexión vuelve mientras se lee, se ofrece volver a la aplicación
+  // en lugar de recargar por sorpresa sobre lo que la persona esté leyendo.
+  window.addEventListener('online', function () {
+    var banner = document.querySelector('.status');
+    if (banner) banner.remove();
+  });
+})();
+</script>
+</body>
+</html>

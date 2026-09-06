@@ -8,6 +8,7 @@ import { GestureDrawer } from '@/components/pwa/GestureDrawer';
 import { useTheme } from '@tl/ui/ThemeProvider';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { clearOffline } from '@/lib/offline-academy';
 import {
   LayoutDashboard,
   CandlestickChart,
@@ -130,6 +131,10 @@ export function AppShell({
 
   async function logout() {
     await apiFetch('/api/auth/logout', { method: 'POST' }).catch(() => null);
+    // Las lecciones descargadas son contenido de una suscripción y viven en
+    // este dispositivo: en un equipo compartido no pueden sobrevivir al cierre
+    // de sesión de quien lo pagó. Se borra antes de soltar la navegación.
+    await clearOffline().catch(() => null);
     router.replace(isStandalone() ? '/app' : '/');
     router.refresh();
   }
