@@ -1,5 +1,27 @@
 # Guía de despliegue
 
+> ## ⚠️ Antes de cada despliegue con cambios de esquema
+>
+> `npm run build` ejecuta `db:provider`, `prisma generate` y `next build`, pero
+> **no aplica el esquema a la base desplegada**. Eso se hace aparte:
+>
+> ```
+> node scripts/db-remote.mjs push
+> ```
+>
+> Si se olvida, el cliente de Prisma pide columnas que la base todavía no tiene
+> y **falla toda petición autenticada**, porque `getAuth()` carga el perfil y la
+> suscripción enteros en cada una. El síntoma es que el inicio de sesión parece
+> funcionar —solo toca `User` y `Session`— y a continuación la aplicación no
+> abre, igual en la PWA que en la web.
+>
+> Desde entonces la API responde `DATABASE_SCHEMA_OUTDATED` con un 503 en lugar
+> de un 500 opaco, y `getAuth()` registra el comando exacto en el log del
+> servidor. Si ves cualquiera de los dos, esto es lo que falta.
+>
+> Revisa `git log --stat -- prisma/schema.prisma` para saber si el despliegue
+> que vas a hacer incluye cambios de esquema.
+
 ## Entornos
 
 | Entorno | Base de datos | Datos de mercado | IA | Pagos | Publicidad |

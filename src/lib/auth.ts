@@ -194,14 +194,34 @@ export async function getAuth(): Promise<AuthContext | null> {
   const parsed = await parseCookie(value);
   if (!parsed) return null;
 
-  const session = await db.session.findUnique({
-    where: { id: parsed.sid },
-    include: {
-      user: {
-        include: { profile: true, subscription: true },
+  // Esta consulta pide el perfil y la suscripción **enteros**, así que corre en
+  // toda petición autenticada y es la primera en romperse si la base desplegada
+  // se queda atrás del esquema. El despliegue genera el cliente de Prisma pero
+  // no aplica el esquema (eso es `node scripts/db-remote.mjs push`), y en
+  // producción Next oculta el mensaje del servidor: sin este registro, el
+  // síntoma visible es una aplicación en blanco tras iniciar sesión y ninguna
+  // pista de por qué.
+  let session;
+  try {
+    session = await db.session.findUnique({
+      where: { id: parsed.sid },
+      include: {
+        user: {
+          include: { profile: true, subscription: true },
+        },
       },
-    },
-  });
+    });
+  } catch (error) {
+    const code = (error as { code?: string }).code;
+    const message = error instanceof Error ? error.message : String(error);
+    if (code === 'P2021' || code === 'P2022' || /does not exist in the current database/i.test(message)) {
+      console.error(
+        '[db] La base de datos no está al día con el esquema de la aplicación, así que ninguna sesión se puede resolver. Aplica el esquema con `node scripts/db-remote.mjs push`.',
+        message,
+      );
+    }
+    throw error;
+  }
 
   if (!session || session.revokedAt || session.expiresAt < new Date()) return null;
   if (session.tokenHash !== hashToken(parsed.raw)) return null;
