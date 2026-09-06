@@ -1,24 +1,39 @@
-/* Isolated, signed-out Chromium. Never opens a personal Chrome profile. Local QA only. */
+/* Isolated Chromium/WebKit. Never opens a personal Chrome profile. Local QA only. */
 const assert = require('node:assert/strict');
 const path = require('node:path');
-const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
-const BASE = 'http://127.0.0.1:3010';
+const engines = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const engine = process.env.PWA_QA_ENGINE === 'webkit' ? engines.webkit : engines.chromium;
+const BASE = process.env.PWA_QA_HTTPS === '1' ? 'https://127.0.0.1:3443' : 'http://127.0.0.1:3010';
 const output = process.env.PWA_QA_OUTPUT;
 if (!output || !path.isAbsolute(output)) throw new Error('PWA_QA_OUTPUT must name an existing absolute output directory.');
 
 (async () => {
-  const browser = await chromium.launch({ headless: true });
+  const browser = await engine.launch({ headless: true });
   const errors = [];
   let phase = 'welcome';
   const results = [];
-  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true, locale: 'es-CO' });
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true, locale: 'es-CO', ignoreHTTPSErrors: process.env.PWA_QA_HTTPS === '1' });
+  const standalone = process.env.PWA_QA_STANDALONE === '1';
+  if (standalone) await context.addInitScript(() => { Object.defineProperty(navigator, 'standalone', { get: () => true }); });
   // No external pages, ads, payment gateways, profiles or user credentials in this test.
   await context.route('**/*', route => new URL(route.request().url()).origin === BASE ? route.continue() : route.abort());
   const page = await context.newPage();
   page.on('pageerror', error => { errors.push(`${phase}: ${page.url()}: ${error.message}`); console.error('Browser error:', phase, page.url(), error.message); });
   const fits = async () => assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'Horizontal overflow');
   try {
-    await page.goto(`${BASE}/app`, { waitUntil: 'networkidle' });
+    if (!standalone) {
+      await page.goto(BASE, { waitUntil: 'networkidle' });
+      assert.equal(new URL(page.url()).pathname, '/');
+      await page.locator('.marketing-nav-shell').waitFor({ state: 'visible' });
+      assert(!(await page.locator('.native-public-header').isVisible()));
+      results.push('normal mobile browser keeps the marketing website');
+    }
+    await page.goto(`${BASE}${standalone ? '/' : '/app'}`, { waitUntil: 'networkidle' });
+    if (standalone) {
+      await page.waitForURL('**/app');
+      assert.equal(await page.locator('html').getAttribute('data-app-mode'), 'standalone');
+      results.push('iOS standalone launch from legacy root reaches /app');
+    }
     await page.getByRole('heading', { name: /El mercado cambia/ }).waitFor();
     await fits();
     await page.screenshot({ path: path.join(output, 'pwa-welcome-mobile.png'), fullPage: true, animations: 'disabled' });
@@ -66,15 +81,29 @@ if (!output || !path.isAbsolute(output)) throw new Error('PWA_QA_OUTPUT must nam
     assert.equal(await page.locator('input[type=checkbox][required]').count(), 3);
     await page.screenshot({ path: path.join(output, 'pwa-register-mobile.png'), fullPage: true, animations: 'disabled' });
     results.push('auth: visible labels, password toggle, consent opt-in, mobile layout');
-    if (process.env.PWA_QA_REGISTER === '1') {
-      const email = `pwa-qa-${Date.now()}@example.invalid`;
+    const reuseEmail = process.env.PWA_QA_REUSE_EMAIL;
+    if (reuseEmail && !/^pwa-qa-\d+@example\.invalid$/.test(reuseEmail)) throw new Error('Only local synthetic QA accounts may be reused.');
+    if (process.env.PWA_QA_REGISTER === '1' || reuseEmail) {
+      const email = reuseEmail || `pwa-qa-${Date.now()}@example.invalid`;
       console.log(`Local QA account: ${email}`);
+      if (reuseEmail) {
+        await page.goto(`${BASE}/entrar`, { waitUntil: 'networkidle' });
+        await page.locator('#email').fill(email);
+        await page.locator('#password').fill('Local-only-QA-2026!');
+        const response = page.waitForResponse(r => r.url() === `${BASE}/api/auth/login`);
+        await page.getByRole('button', { name: 'Entrar', exact: true }).click();
+        assert.equal((await response).status(), 200, 'Local QA login failed');
+      } else {
       await page.locator('#name').fill('PWA QA'); await page.locator('#email').fill(email);
       await page.locator('#password').fill('Local-only-QA-2026!');
       await page.locator('#countryCode').selectOption('CO');
       for (const name of ['confirmAge', 'acceptTerms', 'acceptRisk']) await page.locator(`input[name="${name}"]`).check();
+      const response = page.waitForResponse(r => r.url() === `${BASE}/api/auth/register`);
       await page.getByRole('button', { name: 'Crear mi cuenta DEMO' }).click();
-      await page.waitForURL('**/onboarding');
+      assert((await response).ok(), 'Local signup failed (check rate limits); reuse a pending synthetic QA account instead.');
+      }
+      await page.waitForURL(/\/(onboarding|panel)$/);
+      if (new URL(page.url()).pathname === '/onboarding') {
       await page.getByRole('button', { name: 'Empezar', exact: true }).waitFor();
       await page.waitForFunction(() => Number(getComputedStyle(document.querySelector('.onboarding-stage')).opacity) > .999);
       await page.screenshot({ path: path.join(output, 'pwa-onboarding-mobile.png'), fullPage: true, animations: 'disabled' });
@@ -95,13 +124,37 @@ if (!output || !path.isAbsolute(output)) throw new Error('PWA_QA_OUTPUT must nam
       await page.getByRole('button', { name: 'Ver mi resultado' }).click();
       await page.getByRole('heading', { name: 'Repaso de tus respuestas' }).waitFor();
       await page.getByRole('button', { name: 'Ir al panel' }).click();
+      }
       await page.waitForURL('**/panel');
       await page.waitForLoadState('networkidle');
+      await page.getByRole('heading', { name: standalone ? 'Tu espacio.' : 'Todo tu espacio, de un vistazo.', exact: true }).waitFor();
       await fits();
       await page.screenshot({ path: path.join(output, 'pwa-panel-mobile.png'), fullPage: true, animations: 'disabled' });
+      if (standalone) {
+        assert(await page.getByRole('heading', { name: 'Tu espacio.', exact: true }).isVisible());
+        assert(!(await page.locator('.dashboard-browser-intro').isVisible()));
+        await page.screenshot({ path: path.join(output, 'pwa-native-home.png'), animations: 'disabled' });
+        for (const width of [320, 430]) { await page.setViewportSize({ width, height: 844 }); await fits(); }
+        await page.setViewportSize({ width: 390, height: 844 });
+        await page.getByRole('button', { name: 'Abrir menú', exact: true }).click();
+        assert(await page.getByRole('dialog', { name: 'Todas las secciones' }).isVisible());
+        await page.screenshot({ path: path.join(output, 'pwa-native-menu.png'), animations: 'disabled' });
+        await page.keyboard.press('Escape');
+        assert.equal(await page.getByRole('dialog', { name: 'Todas las secciones' }).count(), 0);
+        await page.getByRole('navigation', { name: 'Navegación rápida' }).getByRole('link', { name: 'Cuenta', exact: true }).click();
+        await page.waitForURL('**/perfil');
+        await fits();
+        await page.goto(`${BASE}/precios`, { waitUntil: 'networkidle' });
+        assert(await page.locator('.native-public-header').isVisible());
+        assert(!(await page.locator('.browser-marketing-header').isVisible()));
+        await page.locator('.native-public-header').getByRole('link', { name: 'Mi espacio', exact: true }).click();
+        await page.waitForURL('**/panel');
+        results.push('native dashboard, account tab, accessible sheet, plans keep app chrome');
+      }
       await page.goto(`${BASE}/app`); await page.waitForURL('**/panel');
-      results.push(`local signup + full assessment + account entry redirect: ${email}`);
+      results.push(`local account flow + account entry redirect: ${email}`);
     }
+    if (process.env.PWA_QA_ONLINE_ONLY !== '1') {
     phase = 'offline';
     await context.setOffline(true);
     await page.goto(`${BASE}/app`);
@@ -109,13 +162,15 @@ if (!output || !path.isAbsolute(output)) throw new Error('PWA_QA_OUTPUT must nam
     assert.equal(await page.locator('input').count(), 0);
     await page.screenshot({ path: path.join(output, 'pwa-offline.png'), fullPage: true });
     await context.setOffline(false);
+    results.push('offline: no account form/data');
+    }
     phase = 'reduced motion';
     await page.emulateMedia({ reducedMotion: 'reduce' });
     // New signed-out page, so reduced-motion welcome also works after signup.
     await context.clearCookies();
     await page.goto(`${BASE}/app`, { waitUntil: 'networkidle' });
     assert.equal(await page.locator('.market-art-core').evaluate(element => getComputedStyle(element).transform), 'none');
-    results.push('offline: no account form/data; reduced-motion artwork disabled');
+    results.push('reduced-motion artwork disabled');
     assert.deepEqual(errors, []);
     console.log(JSON.stringify({ passed: results, pageErrors: errors }, null, 2));
   } finally { await browser.close(); }

@@ -4,11 +4,13 @@ import { THEME_INIT_SCRIPT } from '@tl/ui/ThemeProvider';
 import { LEGAL_ENTITY_DESCRIPTOR } from '@tl/types/compliance';
 import { AdPrivacyBanner } from '@/components/ads/AdPrivacy';
 import { PwaRuntime } from '@/components/pwa/PwaRuntime';
+import { APP_MODE_INIT_SCRIPT } from '@/components/pwa/appMode';
 import './globals.css';
 import './investment.css';
 import './instrument-icons.css';
 import './marketing-visuals.css';
 import './mobile-app.css';
+import './native-app.css';
 
 const sans = localFont({
   src: '../../identidad visual/fuentes/instrument-sans-latin.woff2',
@@ -88,6 +90,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         {/* Aplica el tema antes del primer pintado para evitar el destello. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: APP_MODE_INIT_SCRIPT }} />
       </head>
       <body className={`${sans.variable} ${serif.variable} ${mono.variable}`}>
         <a href="#contenido" className="skip-link">

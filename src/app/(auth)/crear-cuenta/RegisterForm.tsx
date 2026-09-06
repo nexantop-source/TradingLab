@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Button, Callout, Checkbox, Field, Input, Select } from '@tl/ui';
 import { PasswordInput } from '@/components/pwa/PasswordInput';
 import { apiFetch, ApiRequestError } from '@/lib/client-api';
@@ -34,7 +33,6 @@ const COUNTRIES = [
 ];
 
 export function RegisterForm({ intent = null }: { intent?: CheckoutIntent | null }) {
-  const router = useRouter();
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
@@ -72,8 +70,8 @@ export function RegisterForm({ intent = null }: { intent?: CheckoutIntent | null
           marketingOptIn: data.get('marketingOptIn') === 'on',
         },
       });
-      router.push(onboardingPath(intent));
-      router.refresh();
+      // Cross the new-session boundary with an uncached document request.
+      window.location.replace(onboardingPath(intent));
     } catch (err) {
       if (err instanceof ApiRequestError) {
         setError(err.message);

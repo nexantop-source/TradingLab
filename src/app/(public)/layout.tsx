@@ -1,6 +1,8 @@
 import { MarketingHeader } from '@/components/marketing/MarketingHeader';
 import { MarketingFooter } from '@/components/marketing/MarketingFooter';
 import { getAuth } from '@/lib/auth';
+import Link from 'next/link';
+import { PublicAppChrome } from '@/components/pwa/PublicAppChrome';
 
 /**
  * La cabecera muestra «Iniciar sesión» o «Ir a mi panel» según la cookie, de
@@ -17,11 +19,13 @@ export default async function PublicLayout({ children }: { children: React.React
   const auth = await getAuth();
   return (
     <div className="marketing-page">
-      <MarketingHeader authenticated={Boolean(auth)} />
+      <div className="browser-marketing-header"><MarketingHeader authenticated={Boolean(auth)} /></div>
+      <PublicAppChrome authenticated={Boolean(auth)} />
       <main id="contenido" className="pt-24">
         {children}
       </main>
-      <MarketingFooter />
+      <div className="browser-marketing-footer"><MarketingFooter /></div>
+      <footer className="native-public-footer"><Link href="/legal/terminos">Términos</Link><Link href="/legal/privacidad">Privacidad</Link><Link href="/legal/riesgo">Riesgos</Link><p>Educación y simulación. No es un broker.</p></footer>
     </div>
   );
 }

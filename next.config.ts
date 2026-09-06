@@ -48,6 +48,10 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        source: '/manifest.webmanifest',
+        headers: [{ key: 'Cache-Control', value: 'no-cache, must-revalidate' }],
+      },
+      {
         source: '/sw.js',
         headers: [
           { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },

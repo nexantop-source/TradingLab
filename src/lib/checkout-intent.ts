@@ -34,3 +34,9 @@ export function checkoutPath(intent: CheckoutIntent): string {
 export function onboardingPath(intent: CheckoutIntent | null): string {
   return `/onboarding${checkoutQuery(intent)}`;
 }
+
+/** Fixed same-origin destinations only, even if the login response is malformed. */
+export function postLoginPath(next: string, intent: CheckoutIntent | null): string {
+  if (next === '/onboarding') return onboardingPath(intent);
+  return intent ? checkoutPath(intent) : '/panel';
+}

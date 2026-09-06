@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { motion } from 'framer-motion';
 import { useMotionPreference } from '@/components/pwa/useMotionPreference';
+import { isStandalone } from '@/components/pwa/appMode';
 import { useTheme } from '@tl/ui/ThemeProvider';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -63,6 +64,14 @@ const NAV_SECONDARY = [
   { href: '/noticias', label: 'Artículos', icon: Newspaper },
 ];
 
+const MOBILE_TABS = [
+  { href: '/panel', label: 'Inicio', icon: LayoutDashboard },
+  { href: '/explorar', label: 'Mercados', icon: Compass },
+  { href: '/terminal', label: 'Practicar', icon: CandlestickChart },
+  { href: '/academia', label: 'Aprender', icon: GraduationCap },
+  { href: '/perfil', label: 'Cuenta', icon: Settings },
+];
+
 const NAV_FOOTER = [
   { href: '/perfil', label: 'Perfil y ajustes', icon: Settings },
   { href: '/ayuda', label: 'Centro de ayuda', icon: LifeBuoy },
@@ -113,12 +122,12 @@ export function AppShell({
 
   async function logout() {
     await apiFetch('/api/auth/logout', { method: 'POST' }).catch(() => null);
-    router.push('/');
+    router.replace(isStandalone() ? '/app' : '/');
     router.refresh();
   }
 
   return (
-    <div className="app-shell min-h-dvh bg-[var(--color-bg)] lg:flex">
+    <div data-app-flow={pathname.startsWith('/onboarding') ? 'onboarding' : 'workspace'} className="app-shell min-h-dvh bg-[var(--color-bg)] lg:flex">
       {/* ── Barra lateral (escritorio) ──────────────────────────────────── */}
       <aside className="app-sidebar hidden w-64 shrink-0 flex-col border-r border-[var(--color-border)] lg:flex">
         <div className="app-brand-block px-5 py-6">
@@ -177,11 +186,12 @@ export function AppShell({
             {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
 
-          <Link href="/panel" aria-label="Ir al panel">
+          <Link className="app-header-brand" href="/panel" aria-label="Ir al panel">
             <Logo size="sm" withWordmark={false} />
           </Link>
+          <span className="native-toolbar-title">{pathname === '/panel' ? 'TradingLab' : pathname === '/explorar' ? 'Mercados' : pathname === '/portafolio' ? 'Portafolio' : BREADCRUMB_LABELS[pathname.split('/')[1]] ?? 'TradingLab'}</span>
 
-          <span className="num ml-auto flex items-center gap-1.5 text-[13px] font-semibold">
+          <span className="app-header-balance num ml-auto flex items-center gap-1.5 text-[13px] font-semibold">
             {(balanceCents / 100).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             <DemoBadge />
           </span>
@@ -242,7 +252,7 @@ export function AppShell({
             aria-label="Navegación rápida"
             className="app-mobile-nav fixed inset-x-0 bottom-0 z-40 flex border-t border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_94%,transparent)] pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_30px_-20px_var(--color-text)] backdrop-blur-xl lg:hidden"
           >
-            {NAV_PRIMARY.map((item) => {
+            {MOBILE_TABS.map((item) => {
               const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
               return (
                 <Link
@@ -266,9 +276,7 @@ export function AppShell({
 
       {/* Menú lateral móvil */}
       {menuOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMenuOpen(false)} />
-          <div className="app-mobile-drawer animate-fade-up relative h-full w-80 overflow-y-auto border-r border-[var(--color-border)]">
+        <MobileMenu onClose={() => setMenuOpen(false)}>
             <div className="flex items-center justify-between px-5 py-5">
               <Logo size="sm" />
               <button
@@ -303,11 +311,26 @@ export function AppShell({
                 Cerrar sesión
               </button>
             </div>
-          </div>
-        </div>
+        </MobileMenu>
       )}
     </div>
   );
+}
+
+/** Native dialog supplies focus containment, Escape and focus restoration. */
+function MobileMenu({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+  const ref = React.useRef<HTMLDialogElement>(null);
+  const reduce = useMotionPreference();
+  React.useEffect(() => {
+    const dialog = ref.current;
+    dialog?.showModal();
+    return () => dialog?.close();
+  }, []);
+  return <dialog ref={ref} aria-label="Todas las secciones" className="app-menu-sheet" onCancel={event => { event.preventDefault(); onClose(); }} onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
+    <motion.div className="app-menu-sheet-content" initial={reduce ? false : { y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: 'spring', damping: 32, stiffness: 300 }}>
+      <span className="app-sheet-handle" aria-hidden="true" />{children}
+    </motion.div>
+  </dialog>;
 }
 
 function BalanceCard({ cents }: { cents: number }) {

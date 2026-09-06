@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { NativeHome } from '@/components/pwa/NativeHome';
 import { AssetIcon } from '@/components/investment/AssetIcon';
 import { MarketOverview } from '@/components/investment/MarketOverview';
 import Link from 'next/link';
@@ -119,9 +120,10 @@ export default async function DashboardPage() {
   const health = await provider.healthCheck();
 
   return (
-    <div className="app-content-page mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6">
+    <div className="dashboard-page app-content-page mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6">
+      <NativeHome name={user.name} balanceCents={account.balanceCents} dailyChange={dailyChange} streak={userRow?.streakDays ?? 0} lesson={nextLesson} markets={quotes.slice(0, 4).map(q => ({ symbol: q.symbol, name: getSymbol(q.symbol)?.name ?? q.symbol, assetClass: getSymbol(q.symbol)?.assetClass ?? 'STOCK', precision: getSymbol(q.symbol)?.precision ?? 2, price: q.price, change: q.changePercent }))} />
       {/* ── Cabecera ─────────────────────────────────────────────────────── */}
-      <header className="flex flex-wrap items-end justify-between gap-4">
+      <header className="dashboard-browser-intro flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="app-page-kicker">Hola, {user.name.split(' ')[0]}</p>
           <h1 className="mt-1 text-3xl font-semibold tracking-[-0.045em] sm:text-4xl">Todo tu espacio, de un vistazo.</h1>
@@ -145,7 +147,7 @@ export default async function DashboardPage() {
       <MarketOverview lessonHref={nextLesson ? `/academia/leccion/${nextLesson.slug}` : '/academia'} markets={quotes.slice(0, 4).map(q => ({ symbol: q.symbol, name: getSymbol(q.symbol)?.name ?? q.symbol, assetClass: getSymbol(q.symbol)?.assetClass ?? 'STOCK', precision: getSymbol(q.symbol)?.precision ?? 2, price: q.price, change: q.changePercent }))} />
 
       {/* ── Fila superior ────────────────────────────────────────────────── */}
-      <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr_1fr]">
+      <div className="dashboard-browser-metrics grid gap-4 lg:grid-cols-[1.4fr_1fr_1fr]">
         <Card elevated className="p-5">
           <VirtualBalance cents={account.balanceCents} size="xl" />
           <div className="mt-4 flex flex-wrap items-center gap-4 border-t border-[var(--color-border)] pt-4">

@@ -1,14 +1,12 @@
 'use client';
 
 import * as React from 'react';
-import { useRouter } from 'next/navigation';
 import { Button, Field, Input, Callout } from '@tl/ui';
 import { PasswordInput } from '@/components/pwa/PasswordInput';
 import { apiFetch, ApiRequestError } from '@/lib/client-api';
-import { checkoutPath, onboardingPath, type CheckoutIntent } from '@/lib/checkout-intent';
+import { postLoginPath, type CheckoutIntent } from '@/lib/checkout-intent';
 
 export function LoginForm({ intent = null }: { intent?: CheckoutIntent | null }) {
-  const router = useRouter();
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
@@ -29,13 +27,9 @@ export function LoginForm({ intent = null }: { intent?: CheckoutIntent | null })
           password: String(data.get('password') ?? ''),
         },
       });
-      const next = intent
-        ? result.next === '/onboarding'
-          ? onboardingPath(intent)
-          : checkoutPath(intent)
-        : result.next;
-      router.push(next);
-      router.refresh();
+      // A new session needs a fresh document, not a race between an anonymous
+      // Router Cache navigation and refresh (notably on installed iOS PWAs).
+      window.location.replace(postLoginPath(result.next, intent));
     } catch (err) {
       if (err instanceof ApiRequestError) {
         setError(err.message);

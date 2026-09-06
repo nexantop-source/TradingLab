@@ -1,8 +1,24 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { isStandalone } from './appMode';
 
 export function PwaRuntime() {
+  const pathname = usePathname();
+  const router = useRouter();
+  useEffect(() => {
+    const update = () => {
+      const app = isStandalone();
+      document.documentElement.dataset.appMode = app ? 'standalone' : 'browser';
+      if (app && pathname === '/') router.replace('/app' + window.location.search + window.location.hash);
+      else delete document.documentElement.dataset.appLaunch;
+    };
+    update();
+    const mode = window.matchMedia('(display-mode: standalone)');
+    mode.addEventListener('change', update);
+    return () => mode.removeEventListener('change', update);
+  }, [pathname, router]);
   const [offline, setOffline] = useState(false);
   const [waiting, setWaiting] = useState<ServiceWorker | null>(null);
   const [updating, setUpdating] = useState(false);
@@ -13,11 +29,15 @@ export function PwaRuntime() {
     window.addEventListener('online', connectivity);
     window.addEventListener('offline', connectivity);
     let stopped = false;
+    let currentRegistration: ServiceWorkerRegistration | undefined;
+    const checkUpdate = () => { if (document.visibilityState === 'visible') void currentRegistration?.update().catch(() => {}); };
+    document.addEventListener('visibilitychange', checkUpdate);
     const controllerChanged = () => { if (requested.current) window.location.reload(); };
     if ('serviceWorker' in navigator && window.isSecureContext) {
       navigator.serviceWorker.addEventListener('controllerchange', controllerChanged);
       void navigator.serviceWorker.register('/sw.js', { scope: '/', updateViaCache: 'none' }).then(registration => {
         if (stopped) return;
+        currentRegistration = registration;
         if (registration.waiting) setWaiting(registration.waiting);
         registration.addEventListener('updatefound', () => {
           const worker = registration.installing;
@@ -29,6 +49,7 @@ export function PwaRuntime() {
     }
     return () => {
       stopped = true;
+      document.removeEventListener('visibilitychange', checkUpdate);
       window.removeEventListener('online', connectivity); window.removeEventListener('offline', connectivity);
       navigator.serviceWorker?.removeEventListener('controllerchange', controllerChanged);
     };

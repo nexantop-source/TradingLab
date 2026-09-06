@@ -18,6 +18,17 @@ This implementation does **not** copy its source, stickers, screens or animation
 - Real Chromium installation prompt when available and manual Safari instructions on iOS. Installation is not falsely reported as complete.
 - Static offline fallback. Updating an installed app requires an explicit action and warns about unsaved changes.
 
+## Installed iPhone presentation (September 2026)
+
+- Detects both `display-mode: standalone` and iOS `navigator.standalone` before paint. An older home-screen installation opening `/` is repaired to `/app`; ordinary Safari visits stay on the website. Payment/auth deep links are never intercepted.
+- On installed mobile, a dedicated home presents the real demo balance, educational progress, next lesson and explicitly simulated market references. It is not just the desktop dashboard squeezed down.
+- Five thumb-accessible tabs, safe-area-aware headers, system typography, reduced-motion support and a modal bottom sheet with focus containment, Escape dismissal and focus restoration.
+- Plans and legal pages retain a compact app header instead of website marketing navigation. All educational disclosures and consent controls remain.
+- After login/registration, a fresh same-origin document establishes the new session without racing an anonymous router refresh. Subscription intent and the onboarding gate are preserved. Secure/HttpOnly cookie settings are unchanged.
+- Returning to the foreground checks for a service-worker update; applying it remains explicit. The manifest identity and `/app` start URL are unchanged, and only obsolete **public** fallback caches are removed.
+
+On iPhone, open `/app` in Safari, choose Share → Add to Home Screen and enable **Open as Web App** when offered. A bookmark opened in Safari cannot programmatically hide browser controls. See [Apple's installation instructions](https://support.apple.com/es-es/guide/iphone/iphea86e5236/ios). This remains a PWA, not a compiled Swift application.
+
 ## Privacy and offline contract
 
 `public/sw.js` stores **only** `/offline.html`, fetched without credentials. No session HTML, React Server Component responses, API requests, market prices, account information, passwords, payment sources or checkout details are stored in Cache Storage. It never queues requests. Authenticated routes remain dynamic; API privacy rules remain in their existing handlers.
@@ -30,7 +41,13 @@ The service worker is served with no-cache/no-store headers; obsolete caches are
 
 Run `npm run typecheck`, `npm test`, `npm run build`.
 
-`scripts/qa-pwa.cjs` uses an isolated headless Chromium with no personal profile and blocks requests outside `http://127.0.0.1:3010`. Provide `PLAYWRIGHT_MODULE` if Playwright is supplied externally and `PWA_QA_OUTPUT` as an existing absolute screenshot directory. `PWA_QA_REGISTER=1` additionally creates a clearly named, local-only `@example.invalid` test account and exercises the assessment. Never point this script at production or real customer accounts.
+September 2026 verification: 256 unit tests passed, typecheck and production build passed. The final production build passed Chromium's installed account/navigation/offline flow, WebKit's HTTPS installed account/navigation flow, and normal-browser public-web regression checks, with zero page errors in those final runs. Physical iPhone installation/keyboard/VoiceOver remain device acceptance checks.
+
+`scripts/qa-pwa.cjs` uses isolated headless Chromium (default) or WebKit (`PWA_QA_ENGINE=webkit`), without a personal profile. It blocks requests outside the fixed local test origin. Provide `PLAYWRIGHT_MODULE` if Playwright is supplied externally and `PWA_QA_OUTPUT` as an existing absolute screenshot directory. `PWA_QA_REGISTER=1` creates a local-only `@example.invalid` test account and exercises the assessment. `PWA_QA_REUSE_EMAIL` can instead reuse a synthetic `pwa-qa-<timestamp>@example.invalid` account, without disabling signup rate limits. Never point this script at production or real customer accounts.
+
+`PWA_QA_STANDALONE=1` simulates iOS standalone detection; this is **not** physical iPhone installation. It checks the legacy root launch, native home, hidden website chrome, widths 320/390/430, account tab, modal sheet and plans navigation. Without this flag the normal responsive website is tested.
+
+WebKit's production Secure-cookie test uses local HTTPS: start Next on `127.0.0.1:3010`, run `scripts/qa-pwa-https.cjs` with `PWA_QA_OPENSSL` pointing at OpenSSL, then use `PWA_QA_HTTPS=1`. The proxy binds only `127.0.0.1:3443`; its one-day test certificate stays in a new temp folder and is never trusted in the OS. The test browser alone ignores that local certificate error. `PWA_QA_ONLINE_ONLY=1` separates WebKit's HTTPS online flow from offline testing because Windows WebKit reports an internal navigation error for the self-signed TLS offline fallback. Chromium covers offline navigation; the service-worker unit suite verifies its privacy contract.
 
 Desktop Chromium emulation is not evidence of a physical iPhone test. Before release, verify installation in Safari on a real iPhone, safe areas with the keyboard, VoiceOver, reduced transparency, and reopening after session expiration. An HTTPS deployment is required outside localhost.
 
