@@ -241,7 +241,6 @@ describe('matriz de planes', () => {
     for (const id of PLANS) {
       const features = PLAN_ENTITLEMENTS[id].features;
       expect(features.backtesting).toBe('none');
-      expect(features.certificates).toBe('none');
       expect(features.exportCsv).toBe(false);
       expect(features.exportPdf).toBe(false);
       expect(features.multiTimeframeAI).toBe(false);
@@ -249,6 +248,15 @@ describe('matriz de planes', () => {
       expect(features.privateTournaments).toBe(false);
       expect(features.weeklyReports).toBe(false);
     }
+  });
+
+  it('los certificados sí existen de punta a punta y diferencian los planes', () => {
+    // Emisión en `src/lib/certificates.ts`, comprobación pública en
+    // `/verificar/[code]` y presentación en el perfil. Es la única capacidad
+    // -no cuota- que separa Plus de Pro.
+    expect(PLAN_ENTITLEMENTS.FREE.features.certificates).toBe('none');
+    expect(PLAN_ENTITLEMENTS.STANDARD.features.certificates).toBe('standard');
+    expect(PLAN_ENTITLEMENTS.PREMIUM.features.certificates).toBe('verified');
   });
 
   it('la comparación de planes es transitiva', () => {

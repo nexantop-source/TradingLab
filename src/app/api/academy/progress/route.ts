@@ -8,6 +8,7 @@ import { ANALYTICS_EVENTS } from '@tl/analytics';
 import { awardXp, evaluateBadges } from '@/lib/gamification';
 import { XP_REWARDS } from '@/content/gamification';
 import { planAtLeast } from '@tl/types/plans';
+import { issueEarnedCertificates } from '@/lib/certificates';
 import type { PlanId } from '@tl/types';
 
 const bodySchema = z.object({
@@ -90,8 +91,20 @@ export async function POST(req: NextRequest) {
     }
 
     const badges = firstCompletion ? await evaluateBadges(user.id) : [];
+    // Completar la última lección de una ruta la cierra: el certificado se
+    // emite en ese momento, no en una revisión diferida que nadie ve.
+    const certificates = firstCompletion ? await issueEarnedCertificates(user.id, user.plan) : [];
 
-    return ok({ lessonSlug: lesson.slug, status: input.status, badgesAwarded: badges });
+    return ok({
+      lessonSlug: lesson.slug,
+      status: input.status,
+      badgesAwarded: badges,
+      certificatesIssued: certificates.map((c) => ({
+        trackTitle: c.trackTitle,
+        verificationCode: c.verificationCode,
+        verified: c.verified,
+      })),
+    });
   } catch (error) {
     return handleError(error);
   }

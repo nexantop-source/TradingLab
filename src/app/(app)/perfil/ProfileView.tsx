@@ -239,10 +239,22 @@ export function ProfileView({
               <h2 className="text-[14px] font-semibold">Certificados</h2>
               <ul className="mt-3 space-y-2">
                 {certificates.map((c) => (
-                  <li key={c.id} className="flex flex-wrap items-center gap-2 rounded-[var(--radius-sm)] border border-[var(--color-border)] p-3">
-                    <span className="flex-1 text-[13px] font-medium">{c.trackTitle}</span>
-                    {c.verified && <Badge tone="positive">Verificable</Badge>}
-                    <span className="num text-[11px] text-[var(--color-subtle)]">{c.verificationCode}</span>
+                  <li key={c.id} className="rounded-[var(--radius-sm)] border border-[var(--color-border)] p-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="flex-1 text-[13px] font-medium">{c.trackTitle}</span>
+                      {c.verified && <Badge tone="positive">Verificable</Badge>}
+                      <span className="num text-[11px] text-[var(--color-subtle)]">{c.verificationCode}</span>
+                    </div>
+                    {c.verified && (
+                      // El enlace es lo que convierte el certificado en algo
+                      // enseñable: sin él, el código no le sirve a un tercero.
+                      <Link
+                        href={`/verificar/${c.verificationCode}`}
+                        className="mt-1.5 inline-block text-[11px] text-[var(--color-blue)]"
+                      >
+                        Ver la página de verificación pública →
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>
