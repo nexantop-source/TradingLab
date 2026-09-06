@@ -95,8 +95,17 @@ export function SimpleTerminal(props: TerminalProps & { onAdvanced: () => void }
     <div className="simple-terminal-grid"><section className="simple-market-panel" aria-label="Precio y gráfico de práctica">
       <div className="simple-price-heading"><div><span className="simple-demo-pill">MERCADO DEMO</span><p className="simple-live-price" data-testid="simple-live-price">{pulse.quote.price.toLocaleString('en-US', { minimumFractionDigits: props.symbol.precision, maximumFractionDigits: props.symbol.precision })}</p><p className={pulse.quote.changePercent < 0 ? 'simple-negative' : 'simple-positive'}>{pulse.quote.changePercent >= 0 ? '+' : ''}{pulse.quote.changePercent.toFixed(2)} % <span>· variación de referencia 24 h</span></p></div><div className="simple-status-stack"><span className="simple-pulse-state" data-stale={pulse.stale || marketClosed}><i />{statusLabel}</span>{thisPosition && <OperationLive position={thisPosition} price={pulse.quote.price} stale={pulse.stale} serverTime={pulse.provenance.receivedTimestamp}/>}</div></div>
       <div className="simple-chart-controls" data-gesture-exclude><div role="group" aria-label="Ventana del gráfico">{([60, 120] as const).map(n => <button key={n} type="button" aria-pressed={range === n} onClick={() => setRange(n)}>{n / 60} min</button>)}</div><div role="group" aria-label="Estilo del gráfico"><button type="button" aria-pressed={chartType === 'candles'} onClick={() => setChartType('candles')}>Velas</button><button type="button" aria-pressed={chartType === 'line'} onClick={() => setChartType('line')}>Línea</button><button type="button" aria-pressed={chartType === 'area'} onClick={() => setChartType('area')}>Área</button></div></div>
-      <TradingChart ticks={chartTicks} precision={props.symbol.precision} stale={pulse.stale || marketClosed} synthetic={pulse.provenance.synthetic} type={chartType} indicator={indicator} levels={levels} windowSeconds={range}/>
-      {pulse.provenance.synthetic && <p className="simple-market-source">Instrumento sintético. Para precios de mercado, elige BTCUSDT, ETHUSDT o SOLUSDT.</p>}
+      <TradingChart
+        ticks={chartTicks}
+        precision={props.symbol.precision}
+        stale={pulse.stale || marketClosed}
+        synthetic={pulse.provenance.synthetic}
+        sourceLabel={pulse.provenance.providerLabel}
+        type={chartType}
+        indicator={indicator}
+        levels={levels}
+        windowSeconds={range}
+      />
       {pulse.stale && pulse.error && <p className="simple-feed-error" role="status">{pulse.error}</p>}
     </section>
     <div className="simple-trade-panel"><div className="simple-wallet"><WalletCards size={19} aria-hidden="true" /><div><small>Saldo virtual disponible</small><strong>USD {money(balance)}</strong></div><Link href="/perfil" aria-label="Gestionar mi cuenta demo">DEMO<ChevronDown size={13} /></Link></div>

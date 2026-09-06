@@ -6,7 +6,7 @@ import { createChart, LineSeries, AreaSeries, CandlestickSeries, ColorType, type
 import type { MarketTick } from './marketPulse';
 import type { ChartLevel } from './SimpleLiveChart';
 import { aggregateCandles } from './aggregateCandles';
-export function TradingChart({ticks,precision,type,windowSeconds,indicator,levels,stale,synthetic}:{ticks:MarketTick[];precision:number;type:'line'|'area'|'candles';windowSeconds:number;indicator:'SMA20'|'EMA12'|null;levels:ChartLevel[];stale:boolean;synthetic:boolean}) {
+export function TradingChart({ticks,precision,type,windowSeconds,indicator,levels,stale,synthetic,sourceLabel}:{ticks:MarketTick[];precision:number;type:'line'|'area'|'candles';windowSeconds:number;indicator:'SMA20'|'EMA12'|null;levels:ChartLevel[];stale:boolean;synthetic:boolean;sourceLabel:string}) {
   const host=useRef<HTMLDivElement>(null);
   const chart=useRef<IChartApi|null>(null);
   const series=useRef<ISeriesApi<'Line'|'Area'|'Candlestick'>|null>(null);
@@ -41,5 +41,5 @@ export function TradingChart({ticks,precision,type,windowSeconds,indicator,level
     hasData.current=true;
   },[ticks,type,indicator,windowSeconds,synthetic]);
   useEffect(()=>{const s=series.current;if(!s)return;for(const l of levelLines.current)s.removePriceLine(l);levelLines.current=levels.map(l=>s.createPriceLine({price:l.price,title:l.label,color:l.tone==='negative'?'#f45d75':l.tone==='positive'?'#34d39e':'#94a7b8',lineWidth:1,lineStyle:2,axisLabelVisible:true}));},[levels,type]);
-  return <div className="trading-chart" data-gesture-exclude data-stale={stale} data-chart-type={type} data-window={windowSeconds}><div ref={host} className="trading-chart-canvas" aria-label="Gráfico interactivo de precios"/><p className="simple-market-source">{synthetic?'Fuente: simulación local':'Fuente: Binance Spot · USDT'} · <a href="https://www.tradingview.com/" target="_blank" rel="noopener noreferrer">Gráficos por TradingView</a></p><span className="sr-only">Último precio {ticks.at(-1)?.price.toFixed(precision)??'pendiente'}. {stale?'Datos desactualizados.':''} Las velas agrupan observaciones de cinco segundos.</span></div>;
+  return <div className="trading-chart" data-gesture-exclude data-stale={stale} data-chart-type={type} data-window={windowSeconds}><div ref={host} className="trading-chart-canvas" aria-label="Gráfico interactivo de precios"/><p className="simple-market-source">{synthetic?'Fuente: simulación local':`Fuente: ${sourceLabel}`} · <a href="https://www.tradingview.com/" target="_blank" rel="noopener noreferrer">Gráficos por TradingView</a></p><span className="sr-only">Último precio {ticks.at(-1)?.price.toFixed(precision)??'pendiente'}. {stale?'Datos desactualizados.':''} Las velas agrupan observaciones de cinco segundos.</span></div>;
 }

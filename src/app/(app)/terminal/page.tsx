@@ -10,7 +10,6 @@ import { entitlements } from '@tl/types/plans';
 import { Terminal } from './Terminal';
 import { fromJson } from '@/lib/json';
 import Link from 'next/link';
-import { isLivePair } from '@/packages/market-data/binance-provider';
 
 export const metadata: Metadata = { title: 'Terminal de simulación' };
 export const dynamic = 'force-dynamic';
@@ -31,9 +30,6 @@ export default async function TerminalPage({
 
   const requested = (params.symbol ?? (process.env.MARKET_DATA_PROVIDER === 'binance' ? 'BTCUSDT' : 'BTCUSD')).toUpperCase();
   const meta = getSymbol(requested) ?? getSymbol('BTCUSD')!;
-  if (process.env.REQUIRE_REAL_MARKET_DATA === 'true' && !isLivePair(meta.symbol)) {
-    return <div className="billing-page"><h1>{meta.name}</h1><section><h2>Fuente real pendiente</h2><p>Este instrumento no está habilitado para abrir ejercicios. Primero debemos conectar una fuente de datos de mercado con cobertura y licencia para este activo. No sustituiremos sus cotizaciones por precios inventados.</p><Link href="/terminal?symbol=BTCUSDT">Practicar Bitcoin / USDT con datos reales →</Link><br/><Link href="/terminal?symbol=ETHUSDT">Ethereum / USDT →</Link><br/><Link href="/terminal?symbol=SOLUSDT">Solana / USDT →</Link></section><Link href="/portafolio">Ver ejercicios anteriores</Link></div>;
-  }
   const timeframes = ['1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w'] as const;
   const timeframe = timeframes.find(value => value === params.tf) ?? '1h';
 
