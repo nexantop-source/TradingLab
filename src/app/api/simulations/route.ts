@@ -41,6 +41,9 @@ export async function GET(req: NextRequest) {
     // sea coherente con el estado real.
     await settleDueSimulations(user.id);
     const account = await ensureDemoAccount(user.id);
+    const dayStart = new Date();
+    dayStart.setUTCHours(0, 0, 0, 0);
+    const simulationsUsedToday = await db.simulation.count({ where: { userId: user.id, openedAt: { gte: dayStart } } });
 
     const status = req.nextUrl.searchParams.get('status') ?? 'all';
     const limit = Math.min(Number(req.nextUrl.searchParams.get('limit') ?? 50), 200);
@@ -58,6 +61,7 @@ export async function GET(req: NextRequest) {
 
     return ok({
       balanceCents: account.balanceCents,
+      simulationsUsedToday,
       open,
       closed: closed.map((s) => {
         const meta = requireSymbol(s.symbol);
@@ -88,7 +92,7 @@ export async function GET(req: NextRequest) {
         };
       }),
       historyCutoff: historyCutoff(user.plan).toISOString(),
-    });
+    }, { headers: { 'Cache-Control': 'private, no-store, max-age=0', Vary: 'Cookie' } });
   } catch (error) {
     return handleError(error);
   }

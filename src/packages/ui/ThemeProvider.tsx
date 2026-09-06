@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import type { ThemeId } from '@tl/types';
+import { STORAGE_THEME, STORAGE_MOTION } from './theme-bootstrap';
 
 /**
  * Gestión de tema y preferencias de accesibilidad.
@@ -20,9 +21,6 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = React.createContext<ThemeContextValue | null>(null);
-
-const STORAGE_THEME = 'tl-theme';
-const STORAGE_MOTION = 'tl-reduce-motion';
 
 export function ThemeProvider({
   children,
@@ -134,27 +132,3 @@ export const THEME_OPTIONS: Array<{ id: ThemeId; label: string; description: str
   { id: 'light', label: 'Claro', description: 'Alternativa profesional para entornos muy iluminados.' },
   { id: 'high-contrast', label: 'Alto contraste', description: 'Contraste reforzado y bordes marcados.' },
 ];
-
-/**
- * Script que aplica el tema antes de pintar, evitando el destello de tema
- * incorrecto. Se inyecta en el `<head>` del layout raíz.
- */
-export const THEME_INIT_SCRIPT = `
-(function(){
-  try {
-    var choice = localStorage.getItem('${STORAGE_THEME}') || 'system';
-    var valid = choice === 'system' || choice === 'dark' || choice === 'light' || choice === 'high-contrast';
-    if (!valid) choice = 'system';
-    var t = choice === 'system'
-      ? (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
-      : choice;
-    var m = localStorage.getItem('${STORAGE_MOTION}') === 'true';
-    document.documentElement.setAttribute('data-theme', t);
-    document.documentElement.setAttribute('data-theme-preference', choice);
-    document.documentElement.setAttribute('data-reduce-motion', String(m));
-  } catch (e) {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    document.documentElement.setAttribute('data-theme-preference', 'system');
-  }
-})();
-`.trim();

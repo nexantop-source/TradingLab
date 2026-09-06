@@ -14,7 +14,7 @@ import type { OpenPositionDto } from '@/lib/simulation-service';
 import type { TerminalProps } from './Terminal';
 import { SimpleOrderTicket } from './SimpleOrderTicket';
 
-interface PositionsSnapshot { open: OpenPositionDto[]; balanceCents: number; closed: Array<{ id: string; symbol: string; pnlCents: number | null; closeReason: string | null }> }
+interface PositionsSnapshot { open: OpenPositionDto[]; balanceCents: number; simulationsUsedToday: number; closed: Array<{ id: string; symbol: string; pnlCents: number | null; closeReason: string | null }> }
 
 export function SimpleTerminal(props: TerminalProps & { onAdvanced: () => void }) {
   const router = useRouter();
@@ -36,7 +36,8 @@ export function SimpleTerminal(props: TerminalProps & { onAdvanced: () => void }
   const mutationPending = useRef(false);
   const closingRef = useRef(false);
   const mounted = useRef(true);
-  useEffect(() => { setBalance(props.balanceCents); setPositions(props.openPositions); setUsedToday(props.entitlements.simulationsUsedToday); }, [props.balanceCents, props.openPositions, props.entitlements.simulationsUsedToday]);
+  // RSC props seed this symbol-keyed mount only. A delayed router.refresh()
+  // has no snapshot generation and cannot overwrite a newer mutation or poll.
 
   const refreshPositions = useCallback(async () => {
     if (!mounted.current || request.current || mutationPending.current || document.hidden || !navigator.onLine) return;
@@ -46,7 +47,7 @@ export function SimpleTerminal(props: TerminalProps & { onAdvanced: () => void }
     try {
       const data = await apiFetch<PositionsSnapshot>('/api/simulations?limit=3', { signal: controller.signal, cache: 'no-store' });
       if (!mounted.current || controller.signal.aborted || generation !== snapshotGeneration.current) return;
-      setPositions(data.open); setClosed(data.closed); setBalance(data.balanceCents); setPositionsStale(false);
+      setPositions(data.open); setClosed(data.closed); setBalance(data.balanceCents); setUsedToday(data.simulationsUsedToday); setPositionsStale(false);
     } catch { if (!controller.signal.aborted && mounted.current) setPositionsStale(true); }
     finally { clearTimeout(timeout); if (request.current === controller) request.current = null; }
   }, []);

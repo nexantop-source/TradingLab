@@ -12,6 +12,14 @@ module.exports = async function checkSimpleTerminal(page, engine, BASE, outputDi
   assert.equal(origin.port, '3443');
   assert(isAbsolute(outputDirectory));
   const context = page.context();
+  const releases = [];
+  const routeCleanup = [];
+  const deferred = () => { let resolve; const promise = new Promise(done => { resolve = done; }); return { promise, resolve }; };
+  const bounded = async (promise, message) => {
+    let timer;
+    try { return await Promise.race([promise, new Promise((_, reject) => { timer = setTimeout(() => reject(Error(message)), 20_000); })]); }
+    finally { clearTimeout(timer); }
+  };
   const posts = [];
   let pulseRequests = 0;
   const requestListener = request => {
@@ -70,6 +78,7 @@ module.exports = async function checkSimpleTerminal(page, engine, BASE, outputDi
     assert.match(firstResponse.headers()['cache-control'], /private.*no-store/);
     const before = await snapshot();
     assert.equal(before.open.length, 0, 'The isolated QA account must begin with no open simulations');
+    assert.equal(before.simulationsUsedToday, 0);
     await waitBalance(before.balanceCents);
 
     // Three actual responses, never a locally generated random animation.
@@ -196,6 +205,7 @@ module.exports = async function checkSimpleTerminal(page, engine, BASE, outputDi
     // must be aborted/invalidated instead of restoring the old virtual balance.
     let releaseSnapshot;
     const heldSnapshot = new Promise(resolve => { releaseSnapshot = resolve; });
+    releases.push(releaseSnapshot);
     let snapshotStarted;
     const startedSnapshot = new Promise(resolve => { snapshotStarted = resolve; });
     await page.route('**/api/simulations?limit=3', async route => {
@@ -206,6 +216,32 @@ module.exports = async function checkSimpleTerminal(page, engine, BASE, outputDi
     await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
     await Promise.race([startedSnapshot, new Promise((_, reject) => setTimeout(() => reject(Error('No pending snapshot for race check')), 15000))]);
     await waitLive();
+
+    // Keep refresh A's actual server response (read after opening, before
+    // closing) in flight. Refresh B stays held while the older A is delivered.
+    const rscPattern = '**/terminal?*';
+    const rscReady = [deferred(), deferred()];
+    const rscRelease = [deferred(), deferred()];
+    const rscDelivered = [deferred(), deferred()];
+    let rscCount = 0;
+    const rscHandler = async route => {
+      if (route.request().headers().rsc !== '1' || rscCount >= 2) return route.fallback();
+      const index = rscCount++;
+      try {
+        const response = await route.fetch();
+        const body = await response.body();
+        rscReady[index].resolve({ status: response.status(), body: body.toString(), contentType: response.headers()['content-type'] });
+        await rscRelease[index].promise;
+        await route.fulfill({ response, body });
+        rscDelivered[index].resolve();
+      } catch (error) {
+        rscReady[index].resolve({ error });
+        rscDelivered[index].resolve();
+      }
+    };
+    await page.route(rscPattern, rscHandler);
+    routeCleanup.push(() => page.unroute(rscPattern, rscHandler));
+    releases.push(...rscRelease.map(gate => gate.resolve));
 
     const createResponse = page.waitForResponse(response => response.url() === BASE + '/api/simulations' && response.request().method() === 'POST');
     await confirm.click();
@@ -226,11 +262,18 @@ module.exports = async function checkSimpleTerminal(page, engine, BASE, outputDi
     assert.equal(await page.locator('.simple-wallet strong').textContent(), money(created.balanceCents), 'An older snapshot must not overwrite the confirmed order balance');
     const open = await snapshot();
     assert(open.open.some(position => position.id === created.simulationId));
+    assert.equal(open.simulationsUsedToday, 1);
+    const heldRsc = await bounded(rscReady[0].promise, 'Refresh A did not produce a retained server response');
+    assert(!heldRsc.error, heldRsc.error?.message);
+    assert.equal(heldRsc.status, 200);
+    assert.match(heldRsc.contentType, /text\/x-component/);
+    assert(heldRsc.body.includes(created.simulationId), 'Held RSC A must contain the newly opened position, before its close');
     const row = page.locator('.simple-positions li').filter({ hasText: 'BTCUSD' });
     await row.getByRole('button', { name: 'Cerrar', exact: true }).waitFor();
     await waitLive();
     await screenshot('position');
     const closeResponse = page.waitForResponse(response => response.url() === BASE + `/api/simulations/${created.simulationId}/close`);
+    const postCloseSnapshot = page.waitForResponse(response => response.url() === BASE + '/api/simulations?limit=3' && response.request().method() === 'GET' && response.status() === 200);
     await row.getByRole('button', { name: 'Cerrar', exact: true }).click();
     const closedResponse = await closeResponse;
     const closedBody = await closedResponse.json();
@@ -240,6 +283,34 @@ module.exports = async function checkSimpleTerminal(page, engine, BASE, outputDi
     assert.equal(closed.closeReason, 'MANUAL');
     assert.equal(closed.balanceCents, created.balanceCents + Math.max(0, 2550 + closed.pnlCents));
     await waitBalance(closed.balanceCents);
+    const currentSnapshotResponse = await postCloseSnapshot;
+    await currentSnapshotResponse.finished();
+    const currentSnapshot = (await currentSnapshotResponse.json()).data;
+    assert.equal(currentSnapshot.balanceCents, closed.balanceCents);
+    assert.equal(currentSnapshot.simulationsUsedToday, 1);
+    await page.waitForFunction(() => document.querySelectorAll('.simple-positions li').length === 0);
+
+    // Prevent a later JSON poll from masking a transient rollback while the
+    // old RSC is applied. Mutation B's authoritative snapshot is already read.
+    const freshJsonRelease = deferred();
+    const freshJsonHandler = async route => { await freshJsonRelease.promise; await route.continue().catch(() => {}); };
+    await page.route('**/api/simulations?limit=3', freshJsonHandler);
+    routeCleanup.push(() => page.unroute('**/api/simulations?limit=3', freshJsonHandler));
+    releases.push(freshJsonRelease.resolve);
+    rscRelease[0].resolve();
+    await bounded(rscDelivered[0].promise, 'Refresh A was not delivered');
+    const heldSecondRsc = await bounded(rscReady[1].promise, 'Refresh B did not remain queued behind refresh A');
+    assert(!heldSecondRsc.error, heldSecondRsc.error?.message);
+    assert.equal(heldSecondRsc.status, 200);
+    await page.waitForTimeout(450);
+    assert.equal(await page.locator('.simple-wallet strong').textContent(), money(closed.balanceCents), 'An older RSC refresh must not restore the pre-close balance');
+    assert.equal(await page.locator('.simple-positions li').count(), 0, 'An older RSC refresh must not restore the closed position');
+    await screenshot('rsc-race');
+    rscRelease[1].resolve();
+    await bounded(rscDelivered[1].promise, 'Refresh B was not delivered');
+    freshJsonRelease.resolve();
+    await page.unroute('**/api/simulations?limit=3', freshJsonHandler);
+    await page.unroute(rscPattern, rscHandler);
     const after = await snapshot();
     assert.equal(after.balanceCents, closed.balanceCents);
     assert(!after.open.some(position => position.id === created.simulationId));
@@ -254,11 +325,13 @@ module.exports = async function checkSimpleTerminal(page, engine, BASE, outputDi
     await terminal.waitFor(); await waitLive();
     await page.evaluate(() => scrollTo(0, 0));
     await screenshot('restored');
-    return { engine, passed: ['default_BTC_simple', 'received_1Hz_demo_ticks', 'readable_axes_320_390_430', 'line_area_and_time_window', 'chart_excludes_drawer', 'offline_freeze_no_polling', 'background_signal_pause_resume', 'amount_validation', 'SL_TP_direction_mapping', 'review_before_POST', 'rationale_and_ack_required', 'real_local_demo_create_201', 'manual_close_and_ledger_balance', 'advanced_toggle'], demoSimulationId: created.simulationId, realOrders: 0, realCharges: 0 };
+    return { engine, passed: ['default_BTC_simple', 'received_1Hz_demo_ticks', 'readable_axes_320_390_430', 'line_area_and_time_window', 'chart_excludes_drawer', 'offline_freeze_no_polling', 'background_signal_pause_resume', 'amount_validation', 'SL_TP_direction_mapping', 'review_before_POST', 'rationale_and_ack_required', 'real_local_demo_create_201', 'stale_snapshot_cannot_restore_balance', 'stale_RSC_cannot_restore_closed_position_or_balance', 'quota_from_authoritative_JSON_snapshot', 'manual_close_and_ledger_balance', 'advanced_toggle'], demoSimulationId: created.simulationId, realOrders: 0, realCharges: 0 };
   } catch (error) {
     await screenshot('failure').catch(() => {});
     throw error;
   } finally {
+    for (const release of releases) release();
+    for (const cleanup of routeCleanup) await cleanup().catch(() => {});
     page.off('request', requestListener);
     await context.setOffline(false);
     await page.evaluate(() => { if (Object.hasOwn(document, 'hidden')) { delete document.hidden; document.dispatchEvent(new Event('visibilitychange')); } }).catch(() => {});

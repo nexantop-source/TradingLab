@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
-import { THEME_INIT_SCRIPT } from '@tl/ui/ThemeProvider';
+import { THEME_INIT_SCRIPT } from '@tl/ui/theme-bootstrap';
 import { LEGAL_ENTITY_DESCRIPTOR } from '@tl/types/compliance';
 import { AdPrivacyBanner } from '@/components/ads/AdPrivacy';
 import { PwaRuntime } from '@/components/pwa/PwaRuntime';
