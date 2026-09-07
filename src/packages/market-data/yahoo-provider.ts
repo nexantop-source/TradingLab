@@ -61,6 +61,33 @@ const MAX_DEPTH_DAYS: Record<string, number> = {
   '1h': 720,
 };
 
+/**
+ * Cuánto puede alejarse la vela del instante pedido, según la temporalidad.
+ *
+ * En el minuto y en la hora el margen es poco más que la propia vela: pedir el
+ * precio de las 15:00 y devolver el de las 14:00 sería inventarse una hora de
+ * quietud que no hubo.
+ *
+ * En la vela diaria el margen es de cinco días, y es a propósito. Es el último
+ * recurso: si se llega hasta aquí es que no existe nada más fino, y la
+ * alternativa a devolver el último precio establecido no es devolver uno mejor,
+ * es no poder liquidar el ejercicio nunca. Cinco días cubren un puente largo
+ * -un festivo pegado a un fin de semana- que es justo cuando pasa.
+ *
+ * Devolverlo no engaña a nadie porque la procedencia viaja con el precio: lleva
+ * la marca de cuándo se cruzó de verdad, así que la auditoría del ejercicio
+ * enseña que se liquidó contra el cierre del viernes y no contra un martes que
+ * nunca existió.
+ */
+const TOLERANCIA_ABIERTO = { '1m': 30 * 60_000, '1h': 2 * 3_600_000, '1d': 5 * 86_400_000 } as const;
+
+/**
+ * Con el mercado cerrado no hay margen que exigir: el último cruce antes del
+ * cierre es el precio durante todo el cierre. Cuatro días cubren un puente
+ * largo; más allá, la vela diaria ya responde por su cuenta.
+ */
+const TOLERANCIA_CERRADO = 4 * 86_400_000;
+
 /** Intervalo de Yahoo para cada temporalidad del catálogo. */
 const INTERVAL: Record<Timeframe, string> = {
   '1m': '1m',
@@ -497,10 +524,24 @@ export class YahooMarketDataProvider implements MarketDataProvider {
   /**
    * Precio en un instante concreto.
    *
-   * Para el momento presente se usa la cotización del día. Para un instante
-   * pasado se busca la última vela de un minuto cerrada antes de esa marca: es
-   * el dato real más cercano que la fuente conserva, y la liquidación de un
-   * ejercicio tiene que poder auditarse contra algo que existió.
+   * Es la función de la que depende que un ejercicio pueda vencer, y estaba
+   * rota para todo lo que no fuera cripto. Buscaba una vela de un minuto junto
+   * a la marca pedida y exigía que estuviera a menos de media hora; una acción
+   * que vence un sábado -o de madrugada, o en un festivo- no tiene ninguna vela
+   * cerca, así que fallaba, la liquidación se abandonaba y **la posición se
+   * quedaba abierta para siempre**. Nadie lo veía: el fallo se registraba en un
+   * `catch` y el ejercicio simplemente no se resolvía nunca.
+   *
+   * La corrección parte de algo que ya sabíamos y no estábamos usando: si el
+   * mercado estaba cerrado en ese instante, el precio de ese instante **es** el
+   * último cruzado antes del cierre. No es una aproximación ni un dato viejo
+   * que se sirve por comodidad: es el precio que tenía el instrumento. Lo que
+   * no se puede hacer -y se sigue sin hacer- es rellenar un hueco con el
+   * mercado abierto, porque ahí sí hubo movimiento que no conocemos.
+   *
+   * Se busca en tres pasadas, de fina a gruesa, porque la fuente guarda el
+   * minuto solo unos días y la hora solo un par de años: un ejercicio de hace
+   * una semana necesita la vela horaria, y uno de hace un año, la diaria.
    */
   async getPriceAt(symbol: string, timestampMs: number) {
     const meta = getSymbol(symbol);
@@ -513,20 +554,68 @@ export class YahooMarketDataProvider implements MarketDataProvider {
       const entry = await cachedSnapshot(this.require(symbol));
       return { price: entry.price, provenance: this.provenance(symbol, entry.sourceTimestamp, entry.fetchedAt, currency) };
     }
-    const series = await this.getCandles({ symbol, timeframe: '1m', limit: 400, to: timestampMs });
-    const candle = series.candles.filter((c) => c.t <= timestampMs).at(-1);
-    if (!candle || timestampMs - candle.t > 30 * 60_000) {
-      throw new MarketDataError(
-        'No hay una observación real en ese instante. No acreditamos un precio que no ocurrió.',
-        'UPSTREAM',
-        this.id,
-      );
+    /**
+     * ¿Se negoció algo entre ese instante y ahora?
+     *
+     * La pregunta no se le hace a nuestro calendario de sesiones, sino a la
+     * fuente. El calendario dice «lunes de 13:30 a 20:00» y no sabe nada de
+     * festivos: el 7 de septiembre de 2026 lo daba por abierto y era el Día del
+     * Trabajo estadounidense, así que un ejercicio que venciera esa tarde no se
+     * podía liquidar y se quedaba abierto para siempre.
+     *
+     * `regularMarketTime` es la marca del último cruce real. Si el instante que
+     * se pide es posterior, entonces desde entonces no se ha negociado nada y el
+     * precio de ese instante **es** ese último cruce. No es una aproximación:
+     * es lo que valía. Y como viene de la fuente, cubre festivos, medias
+     * sesiones y cierres imprevistos sin que tengamos que conocerlos.
+     */
+    const ultimo = await cachedSnapshot(this.require(symbol)).catch(() => null);
+    if (ultimo && timestampMs >= ultimo.sourceTimestamp) {
+      return {
+        price: ultimo.price,
+        provenance: this.provenance(symbol, ultimo.sourceTimestamp, ultimo.fetchedAt, currency),
+      };
     }
-    return {
-      price: candle.c,
-      candle,
-      provenance: this.provenance(symbol, candle.t, Date.now(), currency),
-    };
+
+    // Si el instante es anterior al último cruce, sí hubo mercado por medio y
+    // hace falta la vela de verdad. El calendario vuelve a servir aquí solo
+    // para saber cuánta holgura es razonable.
+    const session = meta?.session;
+    const abierto = session ? marketStatusFor(session, timestampMs) === 'OPEN' : true;
+
+    // De fina a gruesa. El minuto da el precio exacto cuando existe; la hora y
+    // el día cubren los ejercicios más viejos, para los que la fuente ya no
+    // guarda el detalle.
+    for (const timeframe of ['1m', '1h', '1d'] as const) {
+      let candle;
+      try {
+        const series = await this.getCandles({ symbol, timeframe, limit: 400, to: timestampMs });
+        candle = series.candles.filter((c) => c.t <= timestampMs).at(-1);
+      } catch {
+        continue;
+      }
+      if (!candle) continue;
+
+      const distancia = timestampMs - candle.t;
+      // Con el mercado cerrado, el último cruce es el precio de ese instante:
+      // no se movió. Con el mercado abierto se exige cercanía, porque un hueco
+      // ahí esconde movimiento que no conocemos y liquidar contra él falsearía
+      // el resultado del ejercicio.
+      const tolerancia = abierto ? TOLERANCIA_ABIERTO[timeframe] : TOLERANCIA_CERRADO;
+      if (distancia > tolerancia) continue;
+
+      return {
+        price: candle.c,
+        candle,
+        provenance: this.provenance(symbol, candle.t, Date.now(), currency),
+      };
+    }
+
+    throw new MarketDataError(
+      'No hay una observación real en ese instante. No acreditamos un precio que no ocurrió.',
+      'UPSTREAM',
+      this.id,
+    );
   }
 
   getMarketStatus(symbol: string, at = Date.now()): MarketStatus {
