@@ -28,3 +28,7 @@ apphosting.emulator.yaml
 
 # Assets de motion (video, proyectos AE, audio): pesados y binarios, se versionan fuera de git
 motion/
+
+# Material de referencia que se deja caer aqui para revisar un ajuste:
+# capturas, notas sueltas. No es fuente y no se versiona.
+ajustes/

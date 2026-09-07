@@ -32,6 +32,10 @@ export function MarketScene({ reduce }: { reduce: boolean }) {
   const [selected, setSelected] = useState(0);
   const instrument = INSTRUMENTS[selected];
 
+  // La escena es una columna, no un lienzo con piezas en posición absoluta.
+  // Ese era el fallo que se veía en pantalla: el pie de foto flotaba sobre las
+  // fichas y el texto acababa impreso encima de los botones. Tres bloques en
+  // flujo -rótulo, lluvia, pie- no se pueden solapar por construcción.
   return (
     <section className="welcome-market-scene" aria-label="Explorador de instrumentos">
       <span className="welcome-art-label">
@@ -43,32 +47,32 @@ export function MarketScene({ reduce }: { reduce: boolean }) {
         if (index >= 0) setSelected(index);
       }} />
 
-      <div className="welcome-instrument-picker" role="group" aria-label="Toca un instrumento para descubrirlo">
-        {INSTRUMENTS.map((item, index) => (
-          <motion.button
-            key={item.symbol}
-            {...lift(reduce, 0.3 + index * 0.05)}
-            type="button"
-            onClick={() => setSelected(index)}
-            aria-label={`Descubrir ${item.name}`}
-            aria-pressed={selected === index}
-            data-active={selected === index || undefined}
-          >
-            <AssetIcon symbol={item.symbol} size="sm" />
-            <span>{item.name}</span>
-          </motion.button>
-        ))}
-      </div>
-
-      <motion.div className="welcome-market-caption" {...lift(reduce, 0.36)}>
-        <div>
+      {/* El pie de foto es también el selector: los puntos dicen cuántos hay y
+          cuál se mira, y los discos de la pila son el otro modo de elegir. Una
+          fila de fichas encima de esto decía lo mismo dos veces, y era la que
+          chocaba con el texto. */}
+      <motion.footer className="welcome-market-caption" {...lift(reduce, 0.42)}>
+        <AssetIcon symbol={instrument.symbol} size="md" name={instrument.name} />
+        <div className="welcome-caption-copy">
           <span>{instrument.category}</span>
           <strong>{instrument.name}</strong>
+          <p aria-live="polite" aria-atomic="true">{instrument.description}</p>
         </div>
-        <p aria-live="polite" aria-atomic="true">
-          {instrument.description}
-        </p>
-      </motion.div>
+        <div className="welcome-caption-dots" role="group" aria-label="Elegir instrumento">
+          {INSTRUMENTS.map((item, index) => (
+            <button
+              key={item.symbol}
+              type="button"
+              onClick={() => setSelected(index)}
+              aria-label={`Descubrir ${item.name}`}
+              aria-pressed={selected === index}
+              data-active={selected === index || undefined}
+            >
+              <span />
+            </button>
+          ))}
+        </div>
+      </motion.footer>
     </section>
   );
 }

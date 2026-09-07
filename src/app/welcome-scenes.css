@@ -30,25 +30,44 @@ html[data-app-mode='standalone'] .welcome-app.ios-welcome { background: var(--co
 .welcome-app button:active:not(:disabled), .welcome-app a:active { transform: scale(.97); }
 .welcome-app :focus-visible { outline: 3px solid var(--color-text); outline-offset: 4px; }
 
-/* 01 — a world of instruments falling into place. */
-.welcome-market-scene { height: 510px; position: relative; isolation: isolate; overflow: clip; border-radius: var(--radius-xl); background: var(--color-surface); border: 1px solid var(--color-border-strong); display: flex; flex-direction: column; justify-content: flex-start; padding-top: var(--space-10); }
-/* La lluvia se dimensiona contra el alto de la escena, no contra el ancho: es
-   una caida, y lo que se queda corto en una tarjeta baja es el recorrido. */
-.welcome-market-scene .asset-rain { width: min(100%, 352px); flex-shrink: 0; }
-.welcome-world-image { position: absolute; inset: 0; background: url('/assets/visuals/horizon-v1.webp') 73% center / auto 100%; opacity: .7; mix-blend-mode: luminosity; }
-.welcome-world-shade { position: absolute; inset: 0; background: linear-gradient(180deg, var(--color-border-strong), var(--color-elevated) 48%, var(--color-bg) 100%); }
-.welcome-art-label { position: absolute; top: 7%; left: 7%; display: flex; gap: var(--space-2); align-items: center; color: var(--color-text); font-size: var(--text-2xs); letter-spacing: .12em; font-weight: 600; }
-.welcome-orbits { position: absolute; inset: 2% 0 0; width: 100%; height: 82%; stroke: var(--color-border-strong); stroke-width: .8; }
-.welcome-brand-lens { position: absolute; width: 31%; aspect-ratio: 1; left: 35%; top: 30%; display: grid; place-items: center; border-radius: 31%; background: linear-gradient(135deg, var(--color-border-strong), var(--color-overlay) 45%, var(--color-border-strong)); backdrop-filter: blur(14px); border: 1px solid var(--color-text); box-shadow: inset 0 2px 4px var(--color-text), inset 0 -5px 14px var(--color-border), 0 24px 30px var(--color-elevated); }
-.welcome-brand-lens > span { position: absolute; inset: 10%; border: 1px solid var(--color-border-strong); border-radius: 26%; }
-.welcome-brand-lens svg { width: 60px; height: 65px; color: var(--color-text); filter: drop-shadow(0 2px 12px var(--color-text)); }
-.welcome-instrument { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 18%; min-width: 54px; gap: var(--space-2); cursor: pointer; }
-.welcome-instrument > .instrument-icon { width: 54px; height: 54px; padding: var(--space-2); background: var(--color-border); backdrop-filter: blur(14px); border: 1px solid var(--color-border-strong); box-shadow: 0 8px 20px var(--color-border-strong); transition: border-color 160ms ease, background 160ms ease; }
-.welcome-instrument[aria-pressed='true'] > .instrument-icon { background: var(--color-border-strong); border-color: var(--color-text); box-shadow: 0 0 0 4px var(--color-overlay), 0 8px 20px var(--color-border-strong); }
-.welcome-instrument > span:last-child { font-size: var(--text-2xs); font-weight: 600; letter-spacing: -.01em; text-shadow: 0 2px 5px var(--color-bg); color: var(--color-text); white-space: nowrap; }
-.welcome-instrument--north { left: 21%; top: 15%; }.welcome-instrument--east { right: 10%; top: 25%; }.welcome-instrument--south { right: 18%; top: 58%; }.welcome-instrument--west { left: 9%; top: 51%; }
-.welcome-market-caption { position: absolute; left: 7%; right: 7%; bottom: 6%; display: grid; grid-template-columns: .8fr 1.2fr; gap: var(--space-4); align-items: center; border-top: 1px solid var(--color-border-strong); padding-top: var(--space-3); }
-.welcome-market-caption > div { display: grid; gap: var(--space-1); }.welcome-market-caption > div > span { text-transform: uppercase; letter-spacing: .12em; font-size: var(--text-2xs); color: var(--color-muted); }.welcome-market-caption strong { font-size: var(--text-md); letter-spacing: -.04em; font-weight: 550; }.welcome-market-caption p { font-size: var(--text-2xs); line-height: 1.5; color: var(--color-muted); }
+/* 01 - a world of instruments falling into place.
+   La escena es una columna: rotulo, lluvia y pie. Antes el pie flotaba en
+   posicion absoluta sobre una fila de fichas y el texto se imprimia encima de
+   los botones; en flujo eso no puede pasar. */
+.welcome-market-scene {
+  height: 510px;
+  position: relative; isolation: isolate; overflow: clip;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border-strong);
+  background:
+    radial-gradient(120% 70% at 50% 100%, var(--color-blue-soft), transparent 62%),
+    linear-gradient(180deg, var(--color-elevated), var(--color-surface) 55%);
+  display: flex; flex-direction: column;
+  padding: var(--space-6) var(--space-5) var(--space-5);
+  gap: var(--space-3);
+}
+.welcome-art-label { position: relative; inset: auto; display: flex; gap: var(--space-2); align-items: center; flex-shrink: 0; color: var(--color-muted); font-size: var(--text-2xs); letter-spacing: .14em; font-weight: 650; }
+/* La lluvia se queda con todo el alto sobrante. Es una caida: lo que se pierde
+   al recortarla dentro de una tarjeta baja es justamente el recorrido. */
+.welcome-market-scene .asset-rain { flex: 1; width: 100%; min-height: 0; }
+
+.welcome-market-caption {
+  position: relative; inset: auto; flex-shrink: 0;
+  display: flex; align-items: center; gap: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-4);
+}
+.welcome-caption-copy { flex: 1; min-width: 0; }
+.welcome-caption-copy > span { display: block; text-transform: uppercase; letter-spacing: .12em; font-size: var(--text-2xs); font-weight: 650; color: var(--color-blue); }
+.welcome-caption-copy strong { display: block; margin-top: var(--space-1); font-size: var(--text-md); letter-spacing: -.04em; font-weight: 600; }
+.welcome-caption-copy p { margin-top: var(--space-1); font-size: var(--text-2xs); line-height: 1.55; color: var(--color-muted); }
+/* Cuatro puntos, no cuatro fichas: dicen cuantos hay y cual se mira sin robarle
+   el protagonismo a la pila, que es donde de verdad se elige. */
+.welcome-caption-dots { display: flex; flex-direction: column; gap: var(--space-px); flex-shrink: 0; }
+.welcome-caption-dots button { display: grid; place-items: center; width: 24px; min-width: 24px; height: 22px; }
+.welcome-caption-dots button > span { width: 6px; height: 6px; border-radius: 50%; background: var(--color-border-strong); transition: background 180ms ease, height 180ms ease; }
+.welcome-caption-dots button[data-active] > span { height: 16px; border-radius: var(--radius-full); background: var(--color-blue); }
+.welcome-caption-dots button:focus-visible { outline: 2px solid var(--color-blue); outline-offset: 2px; border-radius: var(--radius-xs); }
 
 /* 02 — a tactile, bright instrument panel, not another floating sculpture. */
 .welcome-practice-scene { height: 100%; position: relative; padding: 2% 3% 0; color: var(--color-surface); }
@@ -92,10 +111,9 @@ html[data-app-mode='standalone'] .welcome-app.ios-welcome { background: var(--co
   .welcome-navigation { margin: var(--space-3) auto var(--space-4); }.welcome-create { min-height: 52px; font-size: var(--text-sm); }
   .welcome-account-note { margin: var(--space-2) 0 var(--space-2); font-size: var(--text-2xs); }.welcome-app .pwa-install, .welcome-app .pwa-installed { font-size: var(--text-2xs); }
   .welcome-legal { max-width: 420px; display: flex; flex-wrap: wrap; gap: var(--space-1); font-size: var(--text-2xs); }.welcome-legal > span { flex: 1 1 100%; }.welcome-legal a { min-height: 44px; }
-  .welcome-market-scene { border-radius: var(--radius-xl); height: 395px; }.welcome-brand-lens svg { width: 47px; height: 51px; }
-  .welcome-instrument > .instrument-icon { width: 46px; height: 46px; padding: var(--space-2); }.welcome-instrument > span:last-child { font-size: var(--text-2xs); }
-  .welcome-market-caption { gap: var(--space-2); padding-top: var(--space-3); }.welcome-market-caption strong { font-size: var(--text-md); }.welcome-market-caption p { font-size: var(--text-2xs); }
-  .welcome-instrument--west { top: 45%; }.welcome-instrument--south { top: 46%; }
+  .welcome-market-scene { border-radius: var(--radius-xl); height: 395px; }
+    .welcome-market-scene { padding: var(--space-5) var(--space-4) var(--space-4); }
+  .welcome-market-caption { gap: var(--space-3); padding-top: var(--space-3); }.welcome-caption-copy strong { font-size: var(--text-sm); }.welcome-caption-copy p { font-size: var(--text-2xs); line-height: 1.5; }
   .welcome-demo-balance strong { font-size: var(--text-2xl); }.welcome-demo-balance small { font-size: var(--text-2xs); }.welcome-demo-terminal { border-radius: var(--radius-lg); }
   .welcome-demo-terminal header > div { font-size: var(--text-2xs); }.welcome-demo-terminal .instrument-icon { width: 29px; height: 29px; }
   .welcome-demo-chart svg { height: 130px; aspect-ratio: auto; }
@@ -109,7 +127,7 @@ html[data-app-mode='standalone'] .welcome-app.ios-welcome { background: var(--co
 }
 @media (max-width: 350px) {
   .welcome-app.ios-welcome { padding-inline: var(--space-4); }.welcome-stage { margin-top: var(--space-4); }.welcome-content { padding-top: var(--space-5); }
-  .welcome-art-label, .welcome-academy-label { font-size: var(--text-2xs); }.welcome-market-caption p { font-size: var(--text-2xs); }.welcome-instrument > .instrument-icon { width: 41px; height: 41px; }.welcome-instrument--south { top: 46%; }.welcome-market-caption { bottom: 5%; }
+  .welcome-art-label, .welcome-academy-label { font-size: var(--text-2xs); }.welcome-caption-copy p { display: none; }
   .welcome-demo-balance strong { font-size: var(--text-xl); }.welcome-demo-balance small { font-size: var(--text-2xs); }.welcome-demo-terminal { padding: 4%; }.welcome-demo-terminal header { gap: var(--space-1); }.welcome-example-tag { font-size: var(--text-2xs); }.welcome-risk-chip strong { font-size: var(--text-2xs); }
   .welcome-lesson-ticket { padding: var(--space-3); gap: var(--space-2); }.welcome-lesson-ticket strong { font-size: var(--text-md); }.welcome-lesson-ticket .welcome-ticket-icon { width: 27px; height: 27px; }.welcome-lesson-ticket small { margin-top: var(--space-1); }.welcome-practice-ticket strong { font-size: var(--text-2xs); }
   .welcome-journal-ticket { padding: var(--space-3); }.welcome-journal-ticket p { font-size: var(--text-sm); min-height: 34px; }.welcome-journal-tabs button { font-size: var(--text-2xs); }.welcome-journal-ticket header { font-size: var(--text-2xs); }.welcome-journal-example { font-size: var(--text-2xs); }
@@ -119,46 +137,51 @@ html[data-app-mode='standalone'] .welcome-app.ios-welcome { background: var(--co
   .welcome-stage, .welcome-scene-art { transform: none !important; }.welcome-scene-art svg path, .welcome-scene-art svg ellipse { stroke-dasharray: none !important; stroke-dashoffset: 0 !important; }
 }
 @media (prefers-reduced-transparency: reduce) {
-  .welcome-brand-lens { background: var(--color-blue); backdrop-filter: none; }.welcome-instrument > .instrument-icon { background: var(--color-surface); backdrop-filter: none; }.welcome-practice-ticket { background: var(--color-surface); backdrop-filter: none; }.welcome-journal-ticket { background: var(--color-bg); backdrop-filter: none; }.welcome-risk-chip { background: var(--color-surface); backdrop-filter: none; }
+  .welcome-practice-ticket { background: var(--color-surface); backdrop-filter: none; }.welcome-journal-ticket { background: var(--color-bg); backdrop-filter: none; }.welcome-risk-chip { background: var(--color-surface); backdrop-filter: none; }
 }
 @media (prefers-contrast: more) {
-  .welcome-app.ios-welcome { --welcome-muted: var(--color-muted); }.welcome-brand-lens, .welcome-instrument > .instrument-icon, .welcome-practice-ticket, .welcome-journal-ticket, .welcome-risk-chip { backdrop-filter: none; border: 2px solid var(--color-text); }.welcome-world-image { opacity: .22; }.welcome-world-shade { background: var(--color-elevated); }.welcome-market-caption p { color: var(--color-text); }
+  .welcome-app.ios-welcome { --welcome-muted: var(--color-muted); }.welcome-practice-ticket, .welcome-journal-ticket, .welcome-risk-chip { backdrop-filter: none; border: 2px solid var(--color-text); }.welcome-caption-copy p { color: var(--color-text); }
 }
 @supports not (backdrop-filter: blur(1px)) {
-  .welcome-brand-lens { background: var(--color-blue); }.welcome-instrument > .instrument-icon { background: var(--color-surface); }.welcome-practice-ticket { background: var(--color-surface); }.welcome-journal-ticket { background: var(--color-bg); }.welcome-risk-chip { background: var(--color-surface); }
+  .welcome-practice-ticket { background: var(--color-surface); }.welcome-journal-ticket { background: var(--color-bg); }.welcome-risk-chip { background: var(--color-surface); }
 }
 
-/* ── Lluvia de mercados ──────────────────────────────────────────────────
-   Los SVG del catálogo ya traen su propio fondo -el naranja de Bitcoin, el
-   degradado de Apple-, así que recortarlos en círculo los deja llenos de color
-   en lugar de un glifo flotando sobre un hueco. `object-fit: cover` garantiza
-   que el disco quede lleno aunque el icono no sea cuadrado.
+/* -- Lluvia de mercados --------------------------------------------------
+   Los SVG del catalogo ya traen su propio fondo -el naranja de Bitcoin, el
+   degradado de Apple-, asi que recortarlos en circulo los deja llenos de color
+   en lugar de un glifo flotando sobre un hueco.
 
-   Toda la animación se hace con `transform` y `opacity`, que el navegador
-   compone en la GPU. Nada de `top`, `height` ni `box-shadow` animados: con
-   dieciséis piezas cayendo a la vez, cualquiera de esas tres convertiría la
-   primera pantalla de la aplicación en una presentación a diez fotogramas. */
+   Toda la animacion se hace con `transform` y `opacity`, que el navegador
+   compone en la GPU. Nada de `top`, `height` ni `box-shadow` animados: con doce
+   piezas cayendo a la vez, cualquiera de esas tres convertiria la primera
+   pantalla de la aplicacion en una presentacion a diez fotogramas. */
 .asset-rain {
   position: relative;
-  width: min(100%, 340px);
-  aspect-ratio: 1;
+  width: 100%;
   margin: 0 auto;
   isolation: isolate;
   overflow: clip;
+  /* El borde superior se difumina en vez de cortar: las piezas entran en la
+     escena apareciendo, no asomando por detras de una linea recta.
+     La mascara solo mira el canal alfa, asi que el color del tramo opaco es
+     indiferente: se usa un token en vez de un negro literal porque en esta hoja
+     no hay colores escritos a mano, ni siquiera los que no se ven. */
+  mask-image: linear-gradient(180deg, transparent 0, var(--color-text) 14%, var(--color-text) 100%);
 }
 
+/* Luz de suelo: una elipse difusa pegada a la base. No es un marco -eso era lo
+   que se veia como un rectangulo mas claro dentro de la tarjeta-, es el sitio
+   sobre el que la pila apoya. */
 .rain-glow {
-  position: absolute; inset: 6% 4% 0;
-  border-radius: 50% 50% 34% 34%;
-  background: radial-gradient(ellipse at 50% 82%, var(--color-blue-soft), transparent 68%);
+  position: absolute; left: 6%; right: 6%; bottom: -14%; height: 46%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 50%, var(--color-blue-soft), transparent 70%);
   z-index: 0;
 }
 
-/* El suelo no se ve, se intuye: una línea que se desvanece a los lados y sobre
-   la que el montón apoya. Sin ella los discos parecen flotar. */
 .rain-floor {
-  position: absolute; left: 4%; right: 4%; bottom: 0; height: 1px; z-index: 0;
-  background: linear-gradient(90deg, transparent, var(--color-border-strong) 22%, var(--color-border-strong) 78%, transparent);
+  position: absolute; left: 5%; right: 5%; bottom: 0; height: 1px; z-index: 1;
+  background: linear-gradient(90deg, transparent, var(--color-border-strong) 20%, var(--color-border-strong) 80%, transparent);
 }
 
 .rain-piece {
@@ -166,19 +189,17 @@ html[data-app-mode='standalone'] .welcome-app.ios-welcome { background: var(--co
   display: block;
   aspect-ratio: 1;
   translate: -50% 0;
-  padding: 0;
-  border: 0;
-  background: none;
-  line-height: 0;
+  padding: 0; border: 0; background: none; line-height: 0;
 }
 .rain-piece--tappable { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 
-/* Dos capas de transformación, y no una, porque son dos movimientos con vidas
-   distintas: la caída ocurre una vez y termina; la respiración no termina
-   nunca. Compartir elemento obligaría a que la segunda reescribiera la primera
-   y el disco daría un salto al cambiar de animación. */
+/* Dos capas de transformacion, y no una, porque son dos movimientos con vidas
+   distintas: la caida ocurre una vez y termina; la respiracion no termina
+   nunca. Compartir elemento obligaria a que la segunda reescribiera la primera
+   y el disco daria un salto al cambiar de animacion. */
 .rain-fall {
   display: block; width: 100%; height: 100%;
+  position: relative;
   transform-origin: 50% 100%;
   will-change: transform;
   animation: rain-fall 1.5s var(--rain-delay, 0s) both;
@@ -193,20 +214,32 @@ html[data-app-mode='standalone'] .welcome-app.ios-welcome { background: var(--co
   animation-delay: calc(var(--rain-delay, 0s) + 1.9s);
 }
 .rain-token img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.rain-token--brand { display: grid; place-items: center; background: var(--color-surface); color: var(--color-text); }
 
-.rain-token--brand {
-  display: grid; place-items: center;
-  background: var(--color-surface);
-  color: var(--color-text);
-  border-color: var(--color-border-strong);
+/* La sombra de contacto. Vive debajo del disco, se ensancha en el impacto y se
+   estrecha cuando la pieza sube: es lo que convierte una traslacion vertical en
+   un golpe contra el suelo. Se anima con `transform`, no con `width`. */
+.rain-contact {
+  position: absolute; left: 50%; bottom: -7%; z-index: -1;
+  width: 84%; height: 14%;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, color-mix(in srgb, var(--color-text) 34%, transparent), transparent 72%);
+  opacity: 0;
+  animation: rain-contact 1.5s var(--rain-delay, 0s) both;
 }
 
-.rain-piece--tappable .rain-token { transition: border-color 180ms ease, box-shadow 180ms ease; }
+/* Los discos que se pueden tocar llevan un anillo permanente: sin el, nada
+   distingue lo interactivo de la decoracion y nadie los toca. */
+.rain-piece--tappable .rain-token {
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+  border-color: color-mix(in srgb, var(--color-blue) 55%, var(--color-border-strong));
+}
 .rain-piece--tappable[data-active] .rain-token { border-color: var(--color-blue); box-shadow: 0 0 0 3px var(--color-blue-soft), var(--shadow-lifted); }
 .rain-piece--tappable:focus-visible { outline: 3px solid var(--color-blue); outline-offset: 4px; border-radius: 50%; }
 
 /* El anillo del impacto. Aparece justo cuando la pieza toca el suelo -46 % de
-   la animación, el mismo punto que el aplastamiento- y se expande hacia fuera.
+   la animacion, el mismo punto que el aplastamiento- y se expande hacia fuera.
    Es lo que hace que el golpe se oiga sin sonido. */
 .rain-splash {
   position: absolute; left: 50%; bottom: -3px;
@@ -226,17 +259,17 @@ html[data-app-mode='standalone'] .welcome-app.ios-welcome { background: var(--co
   translate: -50% 0;
   border-radius: 50%; overflow: hidden;
   opacity: 0;
-  filter: blur(.6px);
+  filter: blur(.7px);
   animation: rain-drizzle var(--rain-duration, 7s) var(--rain-delay, 0s) linear infinite;
 }
 .rain-drizzle img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 
-/* La caída, en un solo recorrido.
-   Cada tramo lleva su propia curva porque la física cambia de signo: al bajar
-   se acelera, al subir se frena. Una curva única para todo daría el movimiento
-   uniforme de un ascensor. El aplastamiento -`scale(1.16, .84)`- dura tres
-   centésimas y es la mitad del efecto: sin él, un disco que sube y baja no
-   pesa nada. */
+/* La caida, en un solo recorrido.
+   Cada tramo lleva su propia curva porque la fisica cambia de signo: al bajar
+   se acelera, al subir se frena. Una curva unica para todo daria el movimiento
+   uniforme de un ascensor. El aplastamiento -scale(1.16, .84)- dura tres
+   centesimas y es la mitad del efecto: sin el, un disco que sube y baja no pesa
+   nada. */
 @keyframes rain-fall {
   0% {
     transform: translate3d(0, var(--rain-drop, -700%), 0) scale(1);
@@ -254,7 +287,18 @@ html[data-app-mode='standalone'] .welcome-app.ios-welcome { background: var(--co
   100% { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
 }
 
-/* Ya en reposo: unos pocos píxeles arriba y abajo, cada pieza con su fase.
+/* La sombra sigue a la pieza: ancha y oscura cuando toca, estrecha y clara
+   cuando esta en el aire. Los porcentajes coinciden con los de la caida. */
+@keyframes rain-contact {
+  0%, 40% { transform: scale(.35, .6); opacity: 0; }
+  51%     { transform: scale(1.12, 1); opacity: .5; }
+  63%     { transform: scale(.62, .7); opacity: .22; }
+  75%     { transform: scale(1.05, 1); opacity: .42; }
+  85%     { transform: scale(.8, .85); opacity: .3; }
+  100%    { transform: scale(1, 1); opacity: .38; }
+}
+
+/* Ya en reposo: unos pocos pixeles arriba y abajo, cada pieza con su fase.
    La escena queda viva sin quedarse inquieta. */
 @keyframes rain-breathe {
   0%, 100% { transform: translate3d(0, 0, 0); }
@@ -268,50 +312,21 @@ html[data-app-mode='standalone'] .welcome-app.ios-welcome { background: var(--co
   100%     { transform: scale(1.75); opacity: 0; }
 }
 
-/* Sigue lloviendo detrás, sin llegar nunca al montón: la escena no se reinicia
-   y aun así no se queda quieta del todo. */
+/* Sigue lloviendo detras, sin llegar nunca al monton: la escena no se reinicia
+   y aun asi no se queda quieta del todo. */
 @keyframes rain-drizzle {
   0%   { transform: translate3d(0, -140%, 0); opacity: 0; }
-  10%  { opacity: .42; }
-  62%  { opacity: .2; }
-  78%  { transform: translate3d(0, 780%, 0); opacity: 0; }
-  100% { transform: translate3d(0, 780%, 0); opacity: 0; }
+  10%  { opacity: .34; }
+  62%  { opacity: .16; }
+  78%  { transform: translate3d(0, 720%, 0); opacity: 0; }
+  100% { transform: translate3d(0, 720%, 0); opacity: 0; }
 }
 
-@media (max-width: 767px) {
-  .welcome-market-scene { padding-top: var(--space-8); }
-  .welcome-market-scene .asset-rain { width: min(100%, 268px); }
-}
-@media (max-width: 360px) {
-  .welcome-market-scene .asset-rain { width: min(100%, 244px); }
-}
-
-/* Sin movimiento la pila aparece montada y quieta: nadie pierde información por
+/* Sin movimiento la pila aparece montada y quieta: nadie pierde informacion por
    no querer animaciones. */
 @media (prefers-reduced-motion: reduce) {
-  .rain-fall, .rain-token, .rain-splash, .rain-drizzle { animation: none !important; }
-  .rain-splash, .rain-drizzle { display: none; }
+  .rain-fall, .rain-token, .rain-splash, .rain-drizzle, .rain-contact { animation: none !important; }
+  .rain-splash, .rain-drizzle, .rain-contact { display: none; }
 }
 .asset-rain[data-reduce='true'] .rain-fall,
 .asset-rain[data-reduce='true'] .rain-token { animation: none; }
-
-/* Selector bajo la lluvia. Fichas pequeñas, porque el protagonista es el
-   orbital: si compiten, la escena deja de tener un punto de entrada claro. */
-.welcome-instrument-picker {
-  display: flex; flex-wrap: wrap; justify-content: center;
-  gap: var(--space-2); margin-top: var(--space-4);
-}
-.welcome-instrument-picker button {
-  display: inline-flex; align-items: center; gap: var(--space-2);
-  min-height: 40px; padding: var(--space-1) var(--space-3) var(--space-1) var(--space-1);
-  border: 1px solid var(--color-border); border-radius: var(--radius-full);
-  background: var(--color-surface); color: var(--color-muted);
-  font-size: var(--text-2xs); font-weight: 500; cursor: pointer;
-  transition: color 180ms, border-color 180ms, background-color 180ms;
-}
-.welcome-instrument-picker button[data-active] {
-  color: var(--color-text);
-  border-color: var(--color-blue);
-  background: var(--color-blue-soft);
-}
-.welcome-instrument-picker button:focus-visible { outline: 2px solid var(--color-blue); outline-offset: 2px; }

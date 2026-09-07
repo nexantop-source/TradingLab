@@ -65,12 +65,16 @@ describe('signed-out interactive introduction', () => {
     expect(retardoMarca).toBeGreaterThan(Math.max(...retardos));
   });
 
-  it('deja tocar en la pila los mismos instrumentos que en las fichas', () => {
+  it('deja elegir tocando la pila o los puntos del pie de foto', () => {
     const html = renderToStaticMarkup(createElement(MarketScene, { reduce: false }));
-    // Cada instrumento aparece dos veces -en la lluvia y en su ficha- y las dos
-    // seleccionan lo mismo; comportarse distinto sería desconcertante.
+    // Dos vías para lo mismo: el disco dentro de la lluvia y el punto del pie.
+    // Comportarse distinto sería desconcertante, así que llevan la misma etiqueta.
     expect(html.match(/aria-label="Descubrir Bitcoin"/g)).toHaveLength(2);
     expect(html.match(/aria-label="Descubrir Euro \/ dólar"/g)).toHaveLength(2);
+    // Y el pie de foto va en flujo, debajo de la escena, no flotando encima:
+    // en posición absoluta el texto se imprimía sobre las fichas.
+    expect(html).toContain('welcome-caption-copy');
+    expect(html).not.toContain('welcome-instrument-picker');
   });
 
   it('no anima ni deja piezas en el aire cuando se pide menos movimiento', () => {
