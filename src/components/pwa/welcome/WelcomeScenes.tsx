@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { ArrowDownRight, ArrowUpRight, BookOpen, ChevronRight, Compass, PencilLine, ShieldCheck, Sparkles } from 'lucide-react';
 import { Logo } from '@/components/Logo';
 import { AssetIcon } from '@/components/investment/AssetIcon';
-import { AssetOrbit } from './AssetOrbit';
+import { AssetRain } from './AssetRain';
 
 const INSTRUMENTS = [
   { symbol: 'BTCUSD', name: 'Bitcoin', category: 'Cripto', description: 'Aprende qué mueve un mercado que nunca se detiene.', position: 'north' },
@@ -19,12 +19,14 @@ const lift = (reduce: boolean, delay = 0) => ({ initial: reduce ? false as const
 
 /** Real asset identities; intentionally no made-up quotes, yields, or endorsements. */
 /**
- * Escena 1. La constelación de instrumentos reales.
+ * Escena 1. La lluvia de mercados.
  *
- * Sustituye a las órbitas dibujadas y al logotipo suelto: aquellas eran formas
- * abstractas que podían ilustrar cualquier producto, y esto son las marcas que
- * la persona va a encontrar dentro. Reconocer Apple y Bitcoin en el primer
- * segundo dice qué es esto mejor que cualquier titular.
+ * Son las marcas que la persona va a encontrar dentro, cayendo y amontonándose:
+ * reconocer Apple, Bitcoin o el oro en el primer segundo dice qué es esto mejor
+ * que cualquier titular. La animación vive en `AssetRain`, y el pie de foto de
+ * aquí abajo se sincroniza con ella: tocar un disco de la pila selecciona el
+ * mismo instrumento que tocar su ficha, porque son la misma cosa vista dos
+ * veces y comportarse distinto sería desconcertante.
  */
 export function MarketScene({ reduce }: { reduce: boolean }) {
   const [selected, setSelected] = useState(0);
@@ -36,7 +38,10 @@ export function MarketScene({ reduce }: { reduce: boolean }) {
         <Compass size={14} /> ABRE TU MIRADA
       </span>
 
-      <AssetOrbit reduce={reduce} />
+      <AssetRain reduce={reduce} selected={instrument.symbol} onSelect={symbol => {
+        const index = INSTRUMENTS.findIndex(item => item.symbol === symbol);
+        if (index >= 0) setSelected(index);
+      }} />
 
       <div className="welcome-instrument-picker" role="group" aria-label="Toca un instrumento para descubrirlo">
         {INSTRUMENTS.map((item, index) => (

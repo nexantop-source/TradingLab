@@ -30,8 +30,11 @@ html[data-app-mode='standalone'] .welcome-app.ios-welcome { background: var(--co
 .welcome-app button:active:not(:disabled), .welcome-app a:active { transform: scale(.97); }
 .welcome-app :focus-visible { outline: 3px solid var(--color-text); outline-offset: 4px; }
 
-/* 01 — a lens looking into a world of instruments. */
-.welcome-market-scene { height: 510px; position: relative; isolation: isolate; overflow: clip; border-radius: var(--radius-xl); background: var(--color-surface); border: 1px solid var(--color-border-strong); }
+/* 01 — a world of instruments falling into place. */
+.welcome-market-scene { height: 510px; position: relative; isolation: isolate; overflow: clip; border-radius: var(--radius-xl); background: var(--color-surface); border: 1px solid var(--color-border-strong); display: flex; flex-direction: column; justify-content: flex-start; padding-top: var(--space-10); }
+/* La lluvia se dimensiona contra el alto de la escena, no contra el ancho: es
+   una caida, y lo que se queda corto en una tarjeta baja es el recorrido. */
+.welcome-market-scene .asset-rain { width: min(100%, 352px); flex-shrink: 0; }
 .welcome-world-image { position: absolute; inset: 0; background: url('/assets/visuals/horizon-v1.webp') 73% center / auto 100%; opacity: .7; mix-blend-mode: luminosity; }
 .welcome-world-shade { position: absolute; inset: 0; background: linear-gradient(180deg, var(--color-border-strong), var(--color-elevated) 48%, var(--color-bg) 100%); }
 .welcome-art-label { position: absolute; top: 7%; left: 7%; display: flex; gap: var(--space-2); align-items: center; color: var(--color-text); font-size: var(--text-2xs); letter-spacing: .12em; font-weight: 600; }
@@ -125,87 +128,178 @@ html[data-app-mode='standalone'] .welcome-app.ios-welcome { background: var(--co
   .welcome-brand-lens { background: var(--color-blue); }.welcome-instrument > .instrument-icon { background: var(--color-surface); }.welcome-practice-ticket { background: var(--color-surface); }.welcome-journal-ticket { background: var(--color-bg); }.welcome-risk-chip { background: var(--color-surface); }
 }
 
-/* ── Constelación de instrumentos ────────────────────────────────────────── */
-/* Los SVG del catálogo ya traen su propio fondo -el naranja de Bitcoin, el
+/* ── Lluvia de mercados ──────────────────────────────────────────────────
+   Los SVG del catálogo ya traen su propio fondo -el naranja de Bitcoin, el
    degradado de Apple-, así que recortarlos en círculo los deja llenos de color
    en lugar de un glifo flotando sobre un hueco. `object-fit: cover` garantiza
-   que el disco quede lleno aunque el icono no sea cuadrado. */
-.asset-orbit {
+   que el disco quede lleno aunque el icono no sea cuadrado.
+
+   Toda la animación se hace con `transform` y `opacity`, que el navegador
+   compone en la GPU. Nada de `top`, `height` ni `box-shadow` animados: con
+   dieciséis piezas cayendo a la vez, cualquiera de esas tres convertiría la
+   primera pantalla de la aplicación en una presentación a diez fotogramas. */
+.asset-rain {
   position: relative;
   width: min(100%, 340px);
   aspect-ratio: 1;
   margin: 0 auto;
-  display: grid;
-  place-items: center;
   isolation: isolate;
+  overflow: clip;
 }
 
-.orbit-halo {
-  position: absolute; inset: 12%;
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--color-blue-soft), transparent 68%);
+.rain-glow {
+  position: absolute; inset: 6% 4% 0;
+  border-radius: 50% 50% 34% 34%;
+  background: radial-gradient(ellipse at 50% 82%, var(--color-blue-soft), transparent 68%);
+  z-index: 0;
 }
 
-.orbit-ring { position: absolute; inset: 0; display: grid; place-items: center; will-change: transform; }
-.orbit-slot { position: absolute; top: 50%; left: 50%; display: block; }
+/* El suelo no se ve, se intuye: una línea que se desvanece a los lados y sobre
+   la que el montón apoya. Sin ella los discos parecen flotar. */
+.rain-floor {
+  position: absolute; left: 4%; right: 4%; bottom: 0; height: 1px; z-index: 0;
+  background: linear-gradient(90deg, transparent, var(--color-border-strong) 22%, var(--color-border-strong) 78%, transparent);
+}
 
-.orbit-token {
+.rain-piece {
+  position: absolute;
+  display: block;
+  aspect-ratio: 1;
+  translate: -50% 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  line-height: 0;
+}
+.rain-piece--tappable { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+
+/* Dos capas de transformación, y no una, porque son dos movimientos con vidas
+   distintas: la caída ocurre una vez y termina; la respiración no termina
+   nunca. Compartir elemento obligaría a que la segunda reescribiera la primera
+   y el disco daría un salto al cambiar de animación. */
+.rain-fall {
+  display: block; width: 100%; height: 100%;
+  transform-origin: 50% 100%;
+  will-change: transform;
+  animation: rain-fall 1.5s var(--rain-delay, 0s) both;
+}
+.rain-token {
   display: block; width: 100%; height: 100%;
   border-radius: 50%; overflow: hidden;
   background: var(--color-elevated);
   border: 1px solid var(--color-border-strong);
   box-shadow: var(--shadow-lifted);
-  will-change: transform;
+  animation: rain-breathe 4.6s ease-in-out infinite;
+  animation-delay: calc(var(--rain-delay, 0s) + 1.9s);
 }
-.orbit-token img {
-  display: block; width: 100%; height: 100%;
-  object-fit: cover; border-radius: 50%;
-}
+.rain-token img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 
-.orbit-core {
-  position: relative; z-index: 2;
+.rain-token--brand {
   display: grid; place-items: center;
-  width: 92px; height: 92px;
-  border-radius: 50%;
-  color: var(--color-text);
   background: var(--color-surface);
-  border: 1px solid var(--color-border-strong);
-  box-shadow: var(--shadow-lifted);
+  color: var(--color-text);
+  border-color: var(--color-border-strong);
 }
 
-/* El pulso sugiere que el mercado late, sin fingir un precio concreto. */
-.orbit-pulse {
-  position: absolute; z-index: 1;
-  width: 92px; height: 92px; border-radius: 50%;
+.rain-piece--tappable .rain-token { transition: border-color 180ms ease, box-shadow 180ms ease; }
+.rain-piece--tappable[data-active] .rain-token { border-color: var(--color-blue); box-shadow: 0 0 0 3px var(--color-blue-soft), var(--shadow-lifted); }
+.rain-piece--tappable:focus-visible { outline: 3px solid var(--color-blue); outline-offset: 4px; border-radius: 50%; }
+
+/* El anillo del impacto. Aparece justo cuando la pieza toca el suelo -46 % de
+   la animación, el mismo punto que el aplastamiento- y se expande hacia fuera.
+   Es lo que hace que el golpe se oiga sin sonido. */
+.rain-splash {
+  position: absolute; left: 50%; bottom: -3px;
+  width: 100%; aspect-ratio: 1;
+  translate: -50% 0;
+  border-radius: 50%;
   border: 1px solid var(--color-blue);
-  animation: orbit-pulse 3.4s var(--ease-out-soft) infinite;
+  opacity: 0;
   pointer-events: none;
+  animation: rain-splash 1.5s var(--rain-delay, 0s) both;
 }
-.orbit-pulse--late { animation-delay: 1.7s; }
-@keyframes orbit-pulse {
-  0%   { transform: scale(1);   opacity: 0.55; }
-  70%  { transform: scale(2.5); opacity: 0; }
-  100% { transform: scale(2.5); opacity: 0; }
+.rain-splash--brand { border-color: var(--color-text); }
+
+.rain-drizzle {
+  position: absolute; top: 0; z-index: 0;
+  aspect-ratio: 1;
+  translate: -50% 0;
+  border-radius: 50%; overflow: hidden;
+  opacity: 0;
+  filter: blur(.6px);
+  animation: rain-drizzle var(--rain-duration, 7s) var(--rain-delay, 0s) linear infinite;
+}
+.rain-drizzle img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+
+/* La caída, en un solo recorrido.
+   Cada tramo lleva su propia curva porque la física cambia de signo: al bajar
+   se acelera, al subir se frena. Una curva única para todo daría el movimiento
+   uniforme de un ascensor. El aplastamiento -`scale(1.16, .84)`- dura tres
+   centésimas y es la mitad del efecto: sin él, un disco que sube y baja no
+   pesa nada. */
+@keyframes rain-fall {
+  0% {
+    transform: translate3d(0, var(--rain-drop, -700%), 0) scale(1);
+    opacity: 0;
+    animation-timing-function: cubic-bezier(.44, 0, .78, .28);
+  }
+  7%  { opacity: 1; }
+  46% { transform: translate3d(0, 0, 0) scale(1); animation-timing-function: cubic-bezier(.3, .8, .5, 1); }
+  51% { transform: translate3d(0, 0, 0) scale(1.16, .84); animation-timing-function: cubic-bezier(.22, .86, .4, 1); }
+  63% { transform: translate3d(0, var(--rain-hop, -34%), 0) scale(.95, 1.05); animation-timing-function: cubic-bezier(.6, .04, .85, .38); }
+  75% { transform: translate3d(0, 0, 0) scale(1.09, .91); animation-timing-function: cubic-bezier(.22, .86, .4, 1); }
+  85% { transform: translate3d(0, calc(var(--rain-hop, -34%) * .4), 0) scale(.98, 1.02); animation-timing-function: cubic-bezier(.6, .04, .85, .38); }
+  93% { transform: translate3d(0, 0, 0) scale(1.04, .96); animation-timing-function: ease-out; }
+  97% { transform: translate3d(0, calc(var(--rain-hop, -34%) * .13), 0) scale(1); }
+  100% { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
 }
 
-@media (max-width: 400px) {
-  .asset-orbit { width: min(100%, 290px); }
-  .orbit-core { width: 74px; height: 74px; }
-  .orbit-pulse { width: 74px; height: 74px; }
+/* Ya en reposo: unos pocos píxeles arriba y abajo, cada pieza con su fase.
+   La escena queda viva sin quedarse inquieta. */
+@keyframes rain-breathe {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50%      { transform: translate3d(0, -4%, 0); }
 }
 
-/* Sin movimiento la composición se queda quieta y completa: nadie pierde
-   información por no querer animaciones. */
+@keyframes rain-splash {
+  0%, 45%  { transform: scale(.28); opacity: 0; }
+  49%      { transform: scale(.5); opacity: .55; }
+  68%      { transform: scale(1.75); opacity: 0; }
+  100%     { transform: scale(1.75); opacity: 0; }
+}
+
+/* Sigue lloviendo detrás, sin llegar nunca al montón: la escena no se reinicia
+   y aun así no se queda quieta del todo. */
+@keyframes rain-drizzle {
+  0%   { transform: translate3d(0, -140%, 0); opacity: 0; }
+  10%  { opacity: .42; }
+  62%  { opacity: .2; }
+  78%  { transform: translate3d(0, 780%, 0); opacity: 0; }
+  100% { transform: translate3d(0, 780%, 0); opacity: 0; }
+}
+
+@media (max-width: 767px) {
+  .welcome-market-scene { padding-top: var(--space-8); }
+  .welcome-market-scene .asset-rain { width: min(100%, 268px); }
+}
+@media (max-width: 360px) {
+  .welcome-market-scene .asset-rain { width: min(100%, 244px); }
+}
+
+/* Sin movimiento la pila aparece montada y quieta: nadie pierde información por
+   no querer animaciones. */
 @media (prefers-reduced-motion: reduce) {
-  .orbit-pulse { display: none; }
-  .orbit-ring, .orbit-token { animation: none !important; }
+  .rain-fall, .rain-token, .rain-splash, .rain-drizzle { animation: none !important; }
+  .rain-splash, .rain-drizzle { display: none; }
 }
+.asset-rain[data-reduce='true'] .rain-fall,
+.asset-rain[data-reduce='true'] .rain-token { animation: none; }
 
-/* Selector bajo la constelación. Fichas pequeñas, porque el protagonista es el
+/* Selector bajo la lluvia. Fichas pequeñas, porque el protagonista es el
    orbital: si compiten, la escena deja de tener un punto de entrada claro. */
 .welcome-instrument-picker {
   display: flex; flex-wrap: wrap; justify-content: center;
-  gap: var(--space-2); margin-top: var(--space-5);
+  gap: var(--space-2); margin-top: var(--space-4);
 }
 .welcome-instrument-picker button {
   display: inline-flex; align-items: center; gap: var(--space-2);
