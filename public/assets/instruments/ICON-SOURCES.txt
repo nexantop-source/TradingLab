@@ -1,0 +1,20 @@
+Procedencia y licencia de los iconos de instrumentos
+====================================================
+
+crypto-*.svg     cryptocurrency-icons (CC0-1.0, dominio publico)
+                 https://github.com/spothq/cryptocurrency-icons
+
+flag-*.svg       flag-icons (MIT). Copia integra en FLAG-ICONS-LICENSE.txt
+                 https://github.com/lipis/flag-icons
+
+brand-*.svg      simple-icons (CC0-1.0, dominio publico). El glifo se toma tal
+                 cual y aqui se monta sobre el color oficial de la marca que el
+                 propio paquete declara; el color del trazo -blanco o tinta- se
+                 elige por luminancia para que contraste.
+                 https://github.com/simple-icons/simple-icons
+
+Los nombres y logotipos son marcas de sus titulares. Se usan de forma nominativa
+para identificar el instrumento que se esta mirando, sin sugerir patrocinio,
+afiliacion ni respaldo de ninguna de esas companias a TradingLab.
+
+Se regeneran con `node scripts/harvest-icons.mjs <ruta a node_modules>`.

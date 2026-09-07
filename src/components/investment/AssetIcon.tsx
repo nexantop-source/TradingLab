@@ -45,9 +45,15 @@ export function monogramText(symbol: string, assetClass?: AssetClass, displayTic
  *
  * Determinístico a partir del símbolo, no aleatorio: el mismo instrumento tiene
  * siempre el mismo color, en esta sesión y en la siguiente, y eso es lo que
- * permite reconocerlo de reojo en una lista larga. La saturación y la
- * luminosidad se dejan fijas para que trescientos discos distintos sigan
- * pareciendo una familia y no un bote de caramelos.
+ * permite reconocerlo de reojo en una lista larga.
+ *
+ * El color se expresa en OKLCH y no en HSL. La diferencia importa justo aquí:
+ * en HSL, dos colores con la misma luminosidad declarada -un azul y un
+ * amarillo verdoso al 40 %- se ven con un brillo completamente distinto, así
+ * que sobre trescientos discos unos cuantos salen apagados y otros deslumbran.
+ * OKLCH mide la luminosidad como la percibe el ojo, de modo que fijarla en un
+ * número deja los 360 tonos igual de intensos y la lista se lee como una
+ * familia en vez de como un bote de caramelos.
  */
 export function monogramHue(symbol: string): number {
   let hash = 0;
@@ -94,8 +100,8 @@ export function AssetIcon({ symbol, assetClass, ticker, name, size = 'md', decor
         {/* El SVG lleva su propio `viewBox`, así que el texto escala con el
             disco y no hace falta calcular un tamaño de fuente por cada uso. */}
         <svg viewBox="0 0 40 40" aria-hidden="true" focusable="false">
-          <circle cx="20" cy="20" r="20" fill={`hsl(${hue} 58% 40%)`} />
-          <circle cx="20" cy="20" r="19" fill="none" stroke={`hsl(${hue} 58% 62%)`} strokeWidth="1.4" opacity="0.55" />
+          <circle cx="20" cy="20" r="20" fill={`oklch(0.52 0.135 ${hue})`} />
+          <circle cx="20" cy="20" r="19" fill="none" stroke={`oklch(0.72 0.14 ${hue})`} strokeWidth="1.4" opacity="0.55" />
           <text
             x="20"
             y="20.5"

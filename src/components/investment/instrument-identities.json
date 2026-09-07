@@ -1,98 +1,66 @@
 {
-  "BTCUSDT": { "label": "Bitcoin / Tether USDT", "src": "/assets/instruments/btc.svg" },
-  "ETHUSDT": { "label": "Ethereum / Tether USDT", "src": "/assets/instruments/eth.svg" },
-  "SOLUSDT": { "label": "Solana / Tether USDT", "src": "/assets/instruments/sol.svg" },
+  "1INCHUSD": {
+    "src": "/assets/instruments/crypto-1inch.svg",
+    "label": "1inch"
+  },
   "AAPL": {
     "label": "Apple",
     "src": "/assets/instruments/apple.svg"
   },
-  "MSFT": {
-    "label": "Microsoft",
-    "src": "/assets/instruments/microsoft.svg"
+  "AAVEUSD": {
+    "src": "/assets/instruments/crypto-aave.svg",
+    "label": "Aave"
   },
-  "NVDA": {
-    "label": "NVIDIA",
-    "src": "/assets/instruments/nvidia.svg"
+  "ABNB": {
+    "src": "/assets/instruments/brand-airbnb.svg",
+    "label": "Airbnb, Inc."
   },
-  "TSLA": {
-    "label": "Tesla",
-    "src": "/assets/instruments/tesla.svg"
-  },
-  "AMZN": {
-    "label": "Amazon",
-    "src": "/assets/instruments/amazon.svg"
-  },
-  "BTCUSD": {
-    "label": "Bitcoin",
-    "src": "/assets/instruments/btc.svg"
-  },
-  "ETHUSD": {
-    "label": "Ethereum",
-    "src": "/assets/instruments/eth.svg"
-  },
-  "SOLUSD": {
-    "label": "Solana",
-    "src": "/assets/instruments/sol.svg"
-  },
-  "XRPUSD": {
-    "label": "XRP",
-    "src": "/assets/instruments/xrp.svg"
+  "ACN": {
+    "src": "/assets/instruments/brand-accenture.svg",
+    "label": "Accenture plc"
   },
   "ADAUSD": {
     "label": "Cardano",
     "src": "/assets/instruments/ada.svg"
   },
-  "DOGEUSD": {
-    "label": "Dogecoin",
-    "src": "/assets/instruments/doge.svg"
+  "AGG": {
+    "src": "/assets/instruments/ishares.svg",
+    "kind": "fund",
+    "label": "iShares Core U.S. Aggregate Bond ETF"
   },
-  "AVAXUSD": {
-    "label": "Avalanche",
-    "src": "/assets/instruments/avax.svg"
+  "ALGOUSD": {
+    "src": "/assets/instruments/crypto-algo.svg",
+    "label": "Algorand"
   },
-  "LINKUSD": {
-    "label": "Chainlink",
-    "src": "/assets/instruments/link.svg"
+  "AMD": {
+    "src": "/assets/instruments/brand-amd.svg",
+    "label": "Advanced Micro Devices, Inc."
   },
-  "DOTUSD": {
-    "label": "Polkadot",
-    "src": "/assets/instruments/dot.svg"
+  "AMZN": {
+    "label": "Amazon",
+    "src": "/assets/instruments/amazon.svg"
   },
-  "LTCUSD": {
-    "label": "Litecoin",
-    "src": "/assets/instruments/ltc.svg"
+  "ATOMUSD": {
+    "src": "/assets/instruments/crypto-atom.svg",
+    "label": "Cosmos"
   },
-  "BNBUSD": {
-    "label": "BNB",
-    "src": "/assets/instruments/bnb.svg"
+  "AUDCAD": {
+    "src": "/assets/instruments/flag-au.svg",
+    "secondary": "/assets/instruments/flag-ca.svg",
+    "kind": "pair",
+    "label": "AUD / CAD"
   },
-  "UNIUSD": {
-    "label": "Uniswap",
-    "src": "/assets/instruments/uni.svg"
-  },
-  "EURUSD": {
-    "label": "EUR / USD",
-    "src": "/assets/instruments/flag-eu.svg",
-    "secondary": "/assets/instruments/flag-us.svg",
-    "kind": "pair"
-  },
-  "GBPUSD": {
-    "label": "GBP / USD",
-    "src": "/assets/instruments/flag-gb.svg",
-    "secondary": "/assets/instruments/flag-us.svg",
-    "kind": "pair"
-  },
-  "USDJPY": {
-    "label": "USD / JPY",
-    "src": "/assets/instruments/flag-us.svg",
+  "AUDJPY": {
+    "src": "/assets/instruments/flag-au.svg",
     "secondary": "/assets/instruments/flag-jp.svg",
-    "kind": "pair"
+    "kind": "pair",
+    "label": "AUD / JPY"
   },
-  "USDMXN": {
-    "label": "USD / MXN",
-    "src": "/assets/instruments/flag-us.svg",
-    "secondary": "/assets/instruments/flag-mx.svg",
-    "kind": "pair"
+  "AUDNZD": {
+    "src": "/assets/instruments/flag-au.svg",
+    "secondary": "/assets/instruments/flag-nz.svg",
+    "kind": "pair",
+    "label": "AUD / NZD"
   },
   "AUDUSD": {
     "label": "AUD / USD",
@@ -100,23 +68,188 @@
     "secondary": "/assets/instruments/flag-us.svg",
     "kind": "pair"
   },
-  "USDCHF": {
-    "label": "USD / CHF",
-    "src": "/assets/instruments/flag-us.svg",
-    "secondary": "/assets/instruments/flag-ch.svg",
-    "kind": "pair"
+  "AUS200": {
+    "src": "/assets/instruments/flag-au.svg",
+    "label": "All Ordinaries"
   },
-  "USDCAD": {
-    "label": "USD / CAD",
-    "src": "/assets/instruments/flag-us.svg",
+  "AVAXUSD": {
+    "label": "Avalanche",
+    "src": "/assets/instruments/avax.svg"
+  },
+  "BA": {
+    "src": "/assets/instruments/brand-boeing.svg",
+    "label": "The Boeing Company"
+  },
+  "BABA": {
+    "src": "/assets/instruments/brand-alibabadotcom.svg",
+    "label": "Alibaba Group Holding Limited"
+  },
+  "BATUSD": {
+    "src": "/assets/instruments/crypto-bat.svg",
+    "label": "Basic Attention Token"
+  },
+  "BCHUSD": {
+    "src": "/assets/instruments/crypto-bch.svg",
+    "label": "Bitcoin Cash"
+  },
+  "BNBUSD": {
+    "label": "BNB",
+    "src": "/assets/instruments/bnb.svg"
+  },
+  "BND": {
+    "label": "Vanguard · BND",
+    "src": "/assets/instruments/vanguard.svg",
+    "kind": "fund"
+  },
+  "BRA60": {
+    "src": "/assets/instruments/flag-br.svg",
+    "label": "Ibovespa"
+  },
+  "BRENTUSD": {
+    "src": "/assets/instruments/crude-oil.svg",
+    "label": "Petróleo Brent"
+  },
+  "BTCUSD": {
+    "label": "Bitcoin",
+    "src": "/assets/instruments/btc.svg"
+  },
+  "BTCUSDT": {
+    "label": "Bitcoin / Tether USDT",
+    "src": "/assets/instruments/btc.svg"
+  },
+  "CADJPY": {
+    "src": "/assets/instruments/flag-ca.svg",
+    "secondary": "/assets/instruments/flag-jp.svg",
+    "kind": "pair",
+    "label": "CAD / JPY"
+  },
+  "CAN60": {
+    "src": "/assets/instruments/flag-ca.svg",
+    "label": "S&P/TSX Composite"
+  },
+  "CHFJPY": {
+    "src": "/assets/instruments/flag-ch.svg",
+    "secondary": "/assets/instruments/flag-jp.svg",
+    "kind": "pair",
+    "label": "CHF / JPY"
+  },
+  "CHL30": {
+    "src": "/assets/instruments/flag-cl.svg",
+    "label": "S&P IPSA"
+  },
+  "CHZUSD": {
+    "src": "/assets/instruments/crypto-chz.svg",
+    "label": "Chiliz"
+  },
+  "COIN": {
+    "src": "/assets/instruments/brand-coinbase.svg",
+    "label": "Coinbase Global, Inc."
+  },
+  "COMPUSD": {
+    "src": "/assets/instruments/crypto-comp.svg",
+    "label": "Compound"
+  },
+  "CRVUSD": {
+    "src": "/assets/instruments/crypto-crv.svg",
+    "label": "Curve DAO"
+  },
+  "CSCO": {
+    "src": "/assets/instruments/brand-cisco.svg",
+    "label": "Cisco Systems, Inc."
+  },
+  "DAL": {
+    "src": "/assets/instruments/brand-delta.svg",
+    "label": "Delta Air Lines, Inc."
+  },
+  "DASHUSD": {
+    "src": "/assets/instruments/crypto-dash.svg",
+    "label": "Dash"
+  },
+  "DBC": {
+    "src": "/assets/instruments/invesco.svg",
+    "kind": "fund",
+    "label": "Invesco DB Commodity Index Tracking Fund"
+  },
+  "DE": {
+    "src": "/assets/instruments/brand-johndeere.svg",
+    "label": "Deere & Company"
+  },
+  "DIA": {
+    "src": "/assets/instruments/spdr-sandp500-etf-tr.svg",
+    "kind": "fund",
+    "label": "State Street SPDR Dow Jones Industrial Average ETF Trust"
+  },
+  "DOGEUSD": {
+    "label": "Dogecoin",
+    "src": "/assets/instruments/doge.svg"
+  },
+  "DOTUSD": {
+    "label": "Polkadot",
+    "src": "/assets/instruments/dot.svg"
+  },
+  "EBAY": {
+    "src": "/assets/instruments/brand-ebay.svg",
+    "label": "eBay Inc."
+  },
+  "EEM": {
+    "label": "iShares · EEM",
+    "src": "/assets/instruments/ishares.svg",
+    "kind": "fund"
+  },
+  "EFA": {
+    "src": "/assets/instruments/ishares.svg",
+    "kind": "fund",
+    "label": "iShares MSCI EAFE ETF"
+  },
+  "ENJUSD": {
+    "src": "/assets/instruments/crypto-enj.svg",
+    "label": "Enjin Coin"
+  },
+  "ESP35": {
+    "src": "/assets/instruments/flag-es.svg",
+    "label": "IBEX 35"
+  },
+  "ETCUSD": {
+    "src": "/assets/instruments/crypto-etc.svg",
+    "label": "Ethereum Classic"
+  },
+  "ETHUSD": {
+    "label": "Ethereum",
+    "src": "/assets/instruments/eth.svg"
+  },
+  "ETHUSDT": {
+    "label": "Ethereum / Tether USDT",
+    "src": "/assets/instruments/eth.svg"
+  },
+  "ETSY": {
+    "src": "/assets/instruments/brand-etsy.svg",
+    "label": "Etsy, Inc."
+  },
+  "EU50": {
+    "src": "/assets/instruments/flag-eu.svg",
+    "label": "Euro Stoxx 50"
+  },
+  "EUR100": {
+    "src": "/assets/instruments/flag-eu.svg",
+    "label": "Euronext 100"
+  },
+  "EURAUD": {
+    "src": "/assets/instruments/flag-eu.svg",
+    "secondary": "/assets/instruments/flag-au.svg",
+    "kind": "pair",
+    "label": "EUR / AUD"
+  },
+  "EURCAD": {
+    "src": "/assets/instruments/flag-eu.svg",
     "secondary": "/assets/instruments/flag-ca.svg",
-    "kind": "pair"
+    "kind": "pair",
+    "label": "EUR / CAD"
   },
-  "NZDUSD": {
-    "label": "NZD / USD",
-    "src": "/assets/instruments/flag-nz.svg",
-    "secondary": "/assets/instruments/flag-us.svg",
-    "kind": "pair"
+  "EURCHF": {
+    "src": "/assets/instruments/flag-eu.svg",
+    "secondary": "/assets/instruments/flag-ch.svg",
+    "kind": "pair",
+    "label": "EUR / CHF"
   },
   "EURGBP": {
     "label": "EUR / GBP",
@@ -130,11 +263,519 @@
     "secondary": "/assets/instruments/flag-jp.svg",
     "kind": "pair"
   },
+  "EURNOK": {
+    "src": "/assets/instruments/flag-eu.svg",
+    "secondary": "/assets/instruments/flag-no.svg",
+    "kind": "pair",
+    "label": "EUR / NOK"
+  },
+  "EURNZD": {
+    "src": "/assets/instruments/flag-eu.svg",
+    "secondary": "/assets/instruments/flag-nz.svg",
+    "kind": "pair",
+    "label": "EUR / NZD"
+  },
+  "EURPLN": {
+    "src": "/assets/instruments/flag-eu.svg",
+    "secondary": "/assets/instruments/flag-pl.svg",
+    "kind": "pair",
+    "label": "EUR / PLN"
+  },
+  "EURSEK": {
+    "src": "/assets/instruments/flag-eu.svg",
+    "secondary": "/assets/instruments/flag-se.svg",
+    "kind": "pair",
+    "label": "EUR / SEK"
+  },
+  "EURTRY": {
+    "src": "/assets/instruments/flag-eu.svg",
+    "secondary": "/assets/instruments/flag-tr.svg",
+    "kind": "pair",
+    "label": "EUR / TRY"
+  },
+  "EURUSD": {
+    "label": "EUR / USD",
+    "src": "/assets/instruments/flag-eu.svg",
+    "secondary": "/assets/instruments/flag-us.svg",
+    "kind": "pair"
+  },
+  "EWG": {
+    "src": "/assets/instruments/ishares.svg",
+    "kind": "fund",
+    "label": "iShares MSCI Germany ETF"
+  },
+  "EWJ": {
+    "src": "/assets/instruments/ishares.svg",
+    "kind": "fund",
+    "label": "iShares MSCI Japan ETF"
+  },
+  "EWW": {
+    "src": "/assets/instruments/ishares.svg",
+    "kind": "fund",
+    "label": "iShares MSCI Mexico ETF"
+  },
+  "EWZ": {
+    "src": "/assets/instruments/ishares.svg",
+    "kind": "fund",
+    "label": "iShares MSCI Brazil ETF"
+  },
+  "F": {
+    "src": "/assets/instruments/brand-ford.svg",
+    "label": "Ford Motor Company"
+  },
+  "FDX": {
+    "src": "/assets/instruments/brand-fedex.svg",
+    "label": "FedEx Corporation"
+  },
+  "FILUSD": {
+    "src": "/assets/instruments/crypto-fil.svg",
+    "label": "Filecoin"
+  },
+  "FRA40": {
+    "src": "/assets/instruments/flag-fr.svg",
+    "label": "CAC 40"
+  },
+  "GBPAUD": {
+    "src": "/assets/instruments/flag-gb.svg",
+    "secondary": "/assets/instruments/flag-au.svg",
+    "kind": "pair",
+    "label": "GBP / AUD"
+  },
+  "GBPCAD": {
+    "src": "/assets/instruments/flag-gb.svg",
+    "secondary": "/assets/instruments/flag-ca.svg",
+    "kind": "pair",
+    "label": "GBP / CAD"
+  },
+  "GBPCHF": {
+    "src": "/assets/instruments/flag-gb.svg",
+    "secondary": "/assets/instruments/flag-ch.svg",
+    "kind": "pair",
+    "label": "GBP / CHF"
+  },
   "GBPJPY": {
     "label": "GBP / JPY",
     "src": "/assets/instruments/flag-gb.svg",
     "secondary": "/assets/instruments/flag-jp.svg",
     "kind": "pair"
+  },
+  "GBPUSD": {
+    "label": "GBP / USD",
+    "src": "/assets/instruments/flag-gb.svg",
+    "secondary": "/assets/instruments/flag-us.svg",
+    "kind": "pair"
+  },
+  "GE": {
+    "src": "/assets/instruments/brand-generalelectric.svg",
+    "label": "GE Aerospace"
+  },
+  "GER40": {
+    "label": "DAX",
+    "src": "/assets/instruments/indices-dax.svg"
+  },
+  "GLD": {
+    "label": "SPDR · GLD",
+    "src": "/assets/instruments/spdr-sandp500-etf-tr.svg",
+    "kind": "fund"
+  },
+  "GM": {
+    "src": "/assets/instruments/brand-generalmotors.svg",
+    "label": "General Motors Company"
+  },
+  "GOOGL": {
+    "src": "/assets/instruments/brand-google.svg",
+    "label": "Alphabet Inc."
+  },
+  "GRTUSD": {
+    "src": "/assets/instruments/crypto-grt.svg",
+    "label": "The Graph"
+  },
+  "HK50": {
+    "src": "/assets/instruments/flag-hk.svg",
+    "label": "Hang Seng"
+  },
+  "HSBC": {
+    "src": "/assets/instruments/brand-hsbc.svg",
+    "label": "HSBC Holdings plc"
+  },
+  "HYG": {
+    "src": "/assets/instruments/ishares.svg",
+    "kind": "fund",
+    "label": "iShares iBoxx $ High Yield Corporate Bond ETF"
+  },
+  "IBIT": {
+    "src": "/assets/instruments/ishares.svg",
+    "kind": "fund",
+    "label": "iShares Bitcoin Trust ETF"
+  },
+  "ICLN": {
+    "src": "/assets/instruments/ishares.svg",
+    "kind": "fund",
+    "label": "iShares Global Clean Energy ETF"
+  },
+  "ICPUSD": {
+    "src": "/assets/instruments/crypto-icp.svg",
+    "label": "Internet Computer"
+  },
+  "IEF": {
+    "src": "/assets/instruments/ishares.svg",
+    "kind": "fund",
+    "label": "iShares 7-10 Year Treasury Bond ETF"
+  },
+  "IEFA": {
+    "src": "/assets/instruments/ishares.svg",
+    "kind": "fund",
+    "label": "iShares Core MSCI EAFE ETF"
+  },
+  "IJH": {
+    "src": "/assets/instruments/ishares.svg",
+    "kind": "fund",
+    "label": "iShares Core S&P Mid-Cap ETF"
+  },
+  "IJR": {
+    "src": "/assets/instruments/ishares.svg",
+    "kind": "fund",
+    "label": "iShares Core S&P Small-Cap ETF"
+  },
+  "IND30": {
+    "src": "/assets/instruments/flag-in.svg",
+    "label": "BSE Sensex"
+  },
+  "INDA": {
+    "src": "/assets/instruments/ishares.svg",
+    "kind": "fund",
+    "label": "iShares MSCI India ETF"
+  },
+  "INTC": {
+    "src": "/assets/instruments/brand-intel.svg",
+    "label": "Intel Corporation"
+  },
+  "IVV": {
+    "src": "/assets/instruments/ishares.svg",
+    "kind": "fund",
+    "label": "iShares Core S&P 500 ETF"
+  },
+  "IWM": {
+    "label": "iShares · IWM",
+    "src": "/assets/instruments/ishares.svg",
+    "kind": "fund"
+  },
+  "JP225": {
+    "src": "/assets/instruments/flag-jp.svg",
+    "label": "Nikkei 225"
+  },
+  "KO": {
+    "src": "/assets/instruments/brand-cocacola.svg",
+    "label": "The Coca-Cola Company"
+  },
+  "KOR200": {
+    "src": "/assets/instruments/flag-kr.svg",
+    "label": "KOSPI"
+  },
+  "KSMUSD": {
+    "src": "/assets/instruments/crypto-ksm.svg",
+    "label": "Kusama"
+  },
+  "LINKUSD": {
+    "label": "Chainlink",
+    "src": "/assets/instruments/link.svg"
+  },
+  "LQD": {
+    "src": "/assets/instruments/ishares.svg",
+    "kind": "fund",
+    "label": "iShares iBoxx $ Investment Grade Corporate Bond ETF"
+  },
+  "LTCUSD": {
+    "label": "Litecoin",
+    "src": "/assets/instruments/ltc.svg"
+  },
+  "MA": {
+    "src": "/assets/instruments/brand-mastercard.svg",
+    "label": "Mastercard Incorporated"
+  },
+  "MANAUSD": {
+    "src": "/assets/instruments/crypto-mana.svg",
+    "label": "Decentraland"
+  },
+  "MAR": {
+    "src": "/assets/instruments/brand-marriott.svg",
+    "label": "Marriott International, Inc."
+  },
+  "MCHI": {
+    "src": "/assets/instruments/ishares.svg",
+    "kind": "fund",
+    "label": "iShares MSCI China ETF"
+  },
+  "MELI": {
+    "src": "/assets/instruments/brand-mercadopago.svg",
+    "label": "MercadoLibre, Inc."
+  },
+  "META": {
+    "src": "/assets/instruments/brand-meta.svg",
+    "label": "Meta Platforms, Inc."
+  },
+  "MEX35": {
+    "src": "/assets/instruments/flag-mx.svg",
+    "label": "S&P/BMV IPC"
+  },
+  "MKRUSD": {
+    "src": "/assets/instruments/crypto-mkr.svg",
+    "label": "Maker"
+  },
+  "MSFT": {
+    "label": "Microsoft",
+    "src": "/assets/instruments/microsoft.svg"
+  },
+  "MTUM": {
+    "src": "/assets/instruments/ishares.svg",
+    "kind": "fund",
+    "label": "iShares MSCI USA Momentum Factor ETF"
+  },
+  "NAS100": {
+    "label": "Nasdaq 100",
+    "src": "/assets/instruments/indices-nasdaq-100.svg"
+  },
+  "NEOUSD": {
+    "src": "/assets/instruments/crypto-neo.svg",
+    "label": "Neo"
+  },
+  "NFLX": {
+    "src": "/assets/instruments/brand-netflix.svg",
+    "label": "Netflix, Inc."
+  },
+  "NKE": {
+    "src": "/assets/instruments/brand-nike.svg",
+    "label": "NIKE, Inc."
+  },
+  "NVDA": {
+    "label": "NVIDIA",
+    "src": "/assets/instruments/nvidia.svg"
+  },
+  "NZDJPY": {
+    "src": "/assets/instruments/flag-nz.svg",
+    "secondary": "/assets/instruments/flag-jp.svg",
+    "kind": "pair",
+    "label": "NZD / JPY"
+  },
+  "NZDUSD": {
+    "label": "NZD / USD",
+    "src": "/assets/instruments/flag-nz.svg",
+    "secondary": "/assets/instruments/flag-us.svg",
+    "kind": "pair"
+  },
+  "PLTR": {
+    "src": "/assets/instruments/brand-palantir.svg",
+    "label": "Palantir Technologies Inc."
+  },
+  "PYPL": {
+    "src": "/assets/instruments/brand-paypal.svg",
+    "label": "PayPal Holdings, Inc."
+  },
+  "QCOM": {
+    "src": "/assets/instruments/brand-qualcomm.svg",
+    "label": "QUALCOMM Incorporated"
+  },
+  "QNTUSD": {
+    "src": "/assets/instruments/crypto-qnt.svg",
+    "label": "Quant"
+  },
+  "QQQ": {
+    "label": "Invesco · QQQ",
+    "src": "/assets/instruments/invesco.svg",
+    "kind": "fund"
+  },
+  "QUAL": {
+    "src": "/assets/instruments/ishares.svg",
+    "kind": "fund",
+    "label": "iShares MSCI USA Quality Factor ETF"
+  },
+  "ROKU": {
+    "src": "/assets/instruments/brand-roku.svg",
+    "label": "Roku, Inc."
+  },
+  "RSP": {
+    "src": "/assets/instruments/invesco.svg",
+    "kind": "fund",
+    "label": "Invesco S&P 500 Equal Weight ETF"
+  },
+  "SANDUSD": {
+    "src": "/assets/instruments/crypto-sand.svg",
+    "label": "The Sandbox"
+  },
+  "SAP": {
+    "src": "/assets/instruments/brand-sap.svg",
+    "label": "SAP SE"
+  },
+  "SBUX": {
+    "src": "/assets/instruments/brand-starbucks.svg",
+    "label": "Starbucks Corporation"
+  },
+  "SCHD": {
+    "label": "Schwab · SCHD",
+    "src": "/assets/instruments/schwab.svg",
+    "kind": "fund"
+  },
+  "SHEL": {
+    "src": "/assets/instruments/brand-shell.svg",
+    "label": "Shell plc"
+  },
+  "SHOP": {
+    "src": "/assets/instruments/brand-shopify.svg",
+    "label": "Shopify Inc."
+  },
+  "SHY": {
+    "src": "/assets/instruments/ishares.svg",
+    "kind": "fund",
+    "label": "iShares 1-3 Year Treasury Bond ETF"
+  },
+  "SLV": {
+    "src": "/assets/instruments/ishares.svg",
+    "kind": "fund",
+    "label": "iShares Silver Trust"
+  },
+  "SNOW": {
+    "src": "/assets/instruments/brand-snowflake.svg",
+    "label": "Snowflake Inc."
+  },
+  "SNXUSD": {
+    "src": "/assets/instruments/crypto-snx.svg",
+    "label": "Synthetix"
+  },
+  "SOLUSD": {
+    "label": "Solana",
+    "src": "/assets/instruments/sol.svg"
+  },
+  "SOLUSDT": {
+    "label": "Solana / Tether USDT",
+    "src": "/assets/instruments/sol.svg"
+  },
+  "SONY": {
+    "src": "/assets/instruments/brand-sony.svg",
+    "label": "Sony Group Corporation"
+  },
+  "SOXX": {
+    "src": "/assets/instruments/ishares.svg",
+    "kind": "fund",
+    "label": "iShares Semiconductor ETF"
+  },
+  "SPOT": {
+    "src": "/assets/instruments/brand-spotify.svg",
+    "label": "Spotify Technology S.A."
+  },
+  "SPX500": {
+    "label": "S&P 500",
+    "src": "/assets/instruments/indices-s-and-p-500.svg"
+  },
+  "SPY": {
+    "label": "SPDR · SPY",
+    "src": "/assets/instruments/spdr-sandp500-etf-tr.svg",
+    "kind": "fund"
+  },
+  "STXUSD": {
+    "src": "/assets/instruments/crypto-stx.svg",
+    "label": "Stacks"
+  },
+  "SUI20": {
+    "src": "/assets/instruments/flag-ch.svg",
+    "label": "SMI"
+  },
+  "SWE30": {
+    "src": "/assets/instruments/flag-se.svg",
+    "label": "OMX Stockholm 30"
+  },
+  "TGT": {
+    "src": "/assets/instruments/brand-target.svg",
+    "label": "Target Corporation"
+  },
+  "THETAUSD": {
+    "src": "/assets/instruments/crypto-theta.svg",
+    "label": "Theta Network"
+  },
+  "TIP": {
+    "src": "/assets/instruments/ishares.svg",
+    "kind": "fund",
+    "label": "iShares TIPS Bond ETF"
+  },
+  "TLT": {
+    "label": "iShares · TLT",
+    "src": "/assets/instruments/ishares.svg",
+    "kind": "fund"
+  },
+  "TM": {
+    "src": "/assets/instruments/brand-toyota.svg",
+    "label": "Toyota Motor Corporation"
+  },
+  "TRXUSD": {
+    "src": "/assets/instruments/crypto-trx.svg",
+    "label": "TRON"
+  },
+  "TSLA": {
+    "label": "Tesla",
+    "src": "/assets/instruments/tesla.svg"
+  },
+  "TWN50": {
+    "src": "/assets/instruments/flag-tw.svg",
+    "label": "TAIEX"
+  },
+  "UBER": {
+    "src": "/assets/instruments/brand-uber.svg",
+    "label": "Uber Technologies, Inc."
+  },
+  "UK100": {
+    "src": "/assets/instruments/flag-gb.svg",
+    "label": "FTSE 100"
+  },
+  "UNIUSD": {
+    "label": "Uniswap",
+    "src": "/assets/instruments/uni.svg"
+  },
+  "UPS": {
+    "src": "/assets/instruments/brand-ups.svg",
+    "label": "United Parcel Service, Inc."
+  },
+  "US2000": {
+    "src": "/assets/instruments/flag-us.svg",
+    "label": "Russell 2000"
+  },
+  "US30": {
+    "src": "/assets/instruments/flag-us.svg",
+    "label": "Dow Jones Industrial Average"
+  },
+  "USDARS": {
+    "src": "/assets/instruments/flag-us.svg",
+    "secondary": "/assets/instruments/flag-ar.svg",
+    "kind": "pair",
+    "label": "USD / ARS"
+  },
+  "USDBRL": {
+    "src": "/assets/instruments/flag-us.svg",
+    "secondary": "/assets/instruments/flag-br.svg",
+    "kind": "pair",
+    "label": "USD / BRL"
+  },
+  "USDCAD": {
+    "label": "USD / CAD",
+    "src": "/assets/instruments/flag-us.svg",
+    "secondary": "/assets/instruments/flag-ca.svg",
+    "kind": "pair"
+  },
+  "USDCHF": {
+    "label": "USD / CHF",
+    "src": "/assets/instruments/flag-us.svg",
+    "secondary": "/assets/instruments/flag-ch.svg",
+    "kind": "pair"
+  },
+  "USDCLP": {
+    "src": "/assets/instruments/flag-us.svg",
+    "secondary": "/assets/instruments/flag-cl.svg",
+    "kind": "pair",
+    "label": "USD / CLP"
+  },
+  "USDCNY": {
+    "src": "/assets/instruments/flag-us.svg",
+    "secondary": "/assets/instruments/flag-cn.svg",
+    "kind": "pair",
+    "label": "USD / CNY"
   },
   "USDCOP": {
     "label": "USD / COP",
@@ -142,13 +783,154 @@
     "secondary": "/assets/instruments/flag-co.svg",
     "kind": "pair"
   },
-  "VOO": {
-    "label": "Vanguard · VOO",
+  "USDCZK": {
+    "src": "/assets/instruments/flag-us.svg",
+    "secondary": "/assets/instruments/flag-cz.svg",
+    "kind": "pair",
+    "label": "USD / CZK"
+  },
+  "USDDKK": {
+    "src": "/assets/instruments/flag-us.svg",
+    "secondary": "/assets/instruments/flag-dk.svg",
+    "kind": "pair",
+    "label": "USD / DKK"
+  },
+  "USDHKD": {
+    "src": "/assets/instruments/flag-us.svg",
+    "secondary": "/assets/instruments/flag-hk.svg",
+    "kind": "pair",
+    "label": "USD / HKD"
+  },
+  "USDHUF": {
+    "src": "/assets/instruments/flag-us.svg",
+    "secondary": "/assets/instruments/flag-hu.svg",
+    "kind": "pair",
+    "label": "USD / HUF"
+  },
+  "USDILS": {
+    "src": "/assets/instruments/flag-us.svg",
+    "secondary": "/assets/instruments/flag-il.svg",
+    "kind": "pair",
+    "label": "USD / ILS"
+  },
+  "USDINR": {
+    "src": "/assets/instruments/flag-us.svg",
+    "secondary": "/assets/instruments/flag-in.svg",
+    "kind": "pair",
+    "label": "USD / INR"
+  },
+  "USDJPY": {
+    "label": "USD / JPY",
+    "src": "/assets/instruments/flag-us.svg",
+    "secondary": "/assets/instruments/flag-jp.svg",
+    "kind": "pair"
+  },
+  "USDKRW": {
+    "src": "/assets/instruments/flag-us.svg",
+    "secondary": "/assets/instruments/flag-kr.svg",
+    "kind": "pair",
+    "label": "USD / KRW"
+  },
+  "USDMXN": {
+    "label": "USD / MXN",
+    "src": "/assets/instruments/flag-us.svg",
+    "secondary": "/assets/instruments/flag-mx.svg",
+    "kind": "pair"
+  },
+  "USDNOK": {
+    "src": "/assets/instruments/flag-us.svg",
+    "secondary": "/assets/instruments/flag-no.svg",
+    "kind": "pair",
+    "label": "USD / NOK"
+  },
+  "USDPEN": {
+    "src": "/assets/instruments/flag-us.svg",
+    "secondary": "/assets/instruments/flag-pe.svg",
+    "kind": "pair",
+    "label": "USD / PEN"
+  },
+  "USDPHP": {
+    "src": "/assets/instruments/flag-us.svg",
+    "secondary": "/assets/instruments/flag-ph.svg",
+    "kind": "pair",
+    "label": "USD / PHP"
+  },
+  "USDPLN": {
+    "src": "/assets/instruments/flag-us.svg",
+    "secondary": "/assets/instruments/flag-pl.svg",
+    "kind": "pair",
+    "label": "USD / PLN"
+  },
+  "USDSEK": {
+    "src": "/assets/instruments/flag-us.svg",
+    "secondary": "/assets/instruments/flag-se.svg",
+    "kind": "pair",
+    "label": "USD / SEK"
+  },
+  "USDSGD": {
+    "src": "/assets/instruments/flag-us.svg",
+    "secondary": "/assets/instruments/flag-sg.svg",
+    "kind": "pair",
+    "label": "USD / SGD"
+  },
+  "USDTHB": {
+    "src": "/assets/instruments/flag-us.svg",
+    "secondary": "/assets/instruments/flag-th.svg",
+    "kind": "pair",
+    "label": "USD / THB"
+  },
+  "USDTRY": {
+    "src": "/assets/instruments/flag-us.svg",
+    "secondary": "/assets/instruments/flag-tr.svg",
+    "kind": "pair",
+    "label": "USD / TRY"
+  },
+  "USDUYU": {
+    "src": "/assets/instruments/flag-us.svg",
+    "secondary": "/assets/instruments/flag-uy.svg",
+    "kind": "pair",
+    "label": "USD / UYU"
+  },
+  "USDZAR": {
+    "src": "/assets/instruments/flag-us.svg",
+    "secondary": "/assets/instruments/flag-za.svg",
+    "kind": "pair",
+    "label": "USD / ZAR"
+  },
+  "V": {
+    "src": "/assets/instruments/brand-visa.svg",
+    "label": "Visa Inc."
+  },
+  "VEA": {
+    "src": "/assets/instruments/vanguard.svg",
+    "kind": "fund",
+    "label": "Vanguard FTSE Developed Markets Index Fund ETF Shares"
+  },
+  "VETUSD": {
+    "src": "/assets/instruments/crypto-vet.svg",
+    "label": "VeChain"
+  },
+  "VGT": {
+    "src": "/assets/instruments/vanguard.svg",
+    "kind": "fund",
+    "label": "Vanguard Information Technology Index Fund ETF Shares"
+  },
+  "VIG": {
+    "src": "/assets/instruments/vanguard.svg",
+    "kind": "fund",
+    "label": "Vanguard Dividend Appreciation Index Fund ETF Shares"
+  },
+  "VIX": {
+    "src": "/assets/instruments/flag-us.svg",
+    "label": "Índice de volatilidad VIX"
+  },
+  "VNQ": {
+    "label": "Vanguard · VNQ",
     "src": "/assets/instruments/vanguard.svg",
     "kind": "fund"
   },
-  "VTI": {
-    "label": "Vanguard · VTI",
+  "VOO": {
+    "label": "Vanguard · VOO",
     "src": "/assets/instruments/vanguard.svg",
     "kind": "fund"
   },
@@ -157,88 +939,121 @@
     "src": "/assets/instruments/vanguard.svg",
     "kind": "fund"
   },
+  "VTI": {
+    "label": "Vanguard · VTI",
+    "src": "/assets/instruments/vanguard.svg",
+    "kind": "fund"
+  },
+  "VTV": {
+    "src": "/assets/instruments/vanguard.svg",
+    "kind": "fund",
+    "label": "Vanguard Morningstar Value ETF"
+  },
+  "VUG": {
+    "src": "/assets/instruments/vanguard.svg",
+    "kind": "fund",
+    "label": "Vanguard Morningstar Growth ETF"
+  },
+  "VWO": {
+    "src": "/assets/instruments/vanguard.svg",
+    "kind": "fund",
+    "label": "Vanguard FTSE Emerging Markets Index Fund ETF Shares"
+  },
   "VXUS": {
     "label": "Vanguard · VXUS",
     "src": "/assets/instruments/vanguard.svg",
     "kind": "fund"
   },
-  "BND": {
-    "label": "Vanguard · BND",
+  "VYM": {
     "src": "/assets/instruments/vanguard.svg",
-    "kind": "fund"
+    "kind": "fund",
+    "label": "Vanguard High Dividend Yield Index Fund ETF Shares"
   },
-  "VNQ": {
-    "label": "Vanguard · VNQ",
-    "src": "/assets/instruments/vanguard.svg",
-    "kind": "fund"
+  "VZ": {
+    "src": "/assets/instruments/brand-verizon.svg",
+    "label": "Verizon Communications Inc."
   },
-  "SPY": {
-    "label": "SPDR · SPY",
+  "WTIUSD": {
+    "label": "Petróleo WTI",
+    "src": "/assets/instruments/crude-oil.svg"
+  },
+  "XAGUSD": {
+    "label": "Plata",
+    "src": "/assets/instruments/metal-silver.svg"
+  },
+  "XAUUSD": {
+    "label": "Oro",
+    "src": "/assets/instruments/metal-gold.svg"
+  },
+  "XLB": {
     "src": "/assets/instruments/spdr-sandp500-etf-tr.svg",
-    "kind": "fund"
+    "kind": "fund",
+    "label": "State Street Materials Select Sector SPDR ETF"
   },
-  "GLD": {
-    "label": "SPDR · GLD",
+  "XLC": {
     "src": "/assets/instruments/spdr-sandp500-etf-tr.svg",
-    "kind": "fund"
-  },
-  "XLK": {
-    "label": "SPDR · XLK",
-    "src": "/assets/instruments/spdr-sandp500-etf-tr.svg",
-    "kind": "fund"
+    "kind": "fund",
+    "label": "State Street Communication Services Select Sector SPDR ETF"
   },
   "XLE": {
     "label": "SPDR · XLE",
     "src": "/assets/instruments/spdr-sandp500-etf-tr.svg",
     "kind": "fund"
   },
-  "QQQ": {
-    "label": "Invesco · QQQ",
-    "src": "/assets/instruments/invesco.svg",
+  "XLF": {
+    "src": "/assets/instruments/spdr-sandp500-etf-tr.svg",
+    "kind": "fund",
+    "label": "State Street Financial Select Sector SPDR ETF"
+  },
+  "XLI": {
+    "src": "/assets/instruments/spdr-sandp500-etf-tr.svg",
+    "kind": "fund",
+    "label": "State Street Industrial Select Sector SPDR ETF"
+  },
+  "XLK": {
+    "label": "SPDR · XLK",
+    "src": "/assets/instruments/spdr-sandp500-etf-tr.svg",
     "kind": "fund"
   },
-  "IWM": {
-    "label": "iShares · IWM",
-    "src": "/assets/instruments/ishares.svg",
-    "kind": "fund"
+  "XLMUSD": {
+    "src": "/assets/instruments/crypto-xlm.svg",
+    "label": "Stellar"
   },
-  "TLT": {
-    "label": "iShares · TLT",
-    "src": "/assets/instruments/ishares.svg",
-    "kind": "fund"
+  "XLP": {
+    "src": "/assets/instruments/spdr-sandp500-etf-tr.svg",
+    "kind": "fund",
+    "label": "State Street Consumer Staples Select Sector SPDR ETF"
   },
-  "EEM": {
-    "label": "iShares · EEM",
-    "src": "/assets/instruments/ishares.svg",
-    "kind": "fund"
+  "XLRE": {
+    "src": "/assets/instruments/spdr-sandp500-etf-tr.svg",
+    "kind": "fund",
+    "label": "State Street Real Estate Select Sector SPDR ETF"
   },
-  "SCHD": {
-    "label": "Schwab · SCHD",
-    "src": "/assets/instruments/schwab.svg",
-    "kind": "fund"
+  "XLU": {
+    "src": "/assets/instruments/spdr-sandp500-etf-tr.svg",
+    "kind": "fund",
+    "label": "State Street Utilities Select Sector SPDR ETF"
   },
-  "SPX500": {
-    "label": "S&P 500",
-    "src": "/assets/instruments/indices-s-and-p-500.svg"
+  "XLV": {
+    "src": "/assets/instruments/spdr-sandp500-etf-tr.svg",
+    "kind": "fund",
+    "label": "State Street Health Care Select Sector SPDR ETF"
   },
-  "NAS100": {
-    "label": "Nasdaq 100",
-    "src": "/assets/instruments/indices-nasdaq-100.svg"
+  "XLY": {
+    "src": "/assets/instruments/spdr-sandp500-etf-tr.svg",
+    "kind": "fund",
+    "label": "State Street Consumer Discretionary Select Sector SPDR ETF"
   },
-  "GER40": {
-    "label": "DAX",
-    "src": "/assets/instruments/indices-dax.svg"
+  "XRPUSD": {
+    "label": "XRP",
+    "src": "/assets/instruments/xrp.svg"
   },
-  "XAUUSD": {
-    "label": "Oro",
-    "src": "/assets/instruments/metal-gold.svg"
+  "ZECUSD": {
+    "src": "/assets/instruments/crypto-zec.svg",
+    "label": "Zcash"
   },
-  "XAGUSD": {
-    "label": "Plata",
-    "src": "/assets/instruments/metal-silver.svg"
-  },
-  "WTIUSD": {
-    "label": "Petróleo WTI",
-    "src": "/assets/instruments/crude-oil.svg"
+  "ZILUSD": {
+    "src": "/assets/instruments/crypto-zil.svg",
+    "label": "Zilliqa"
   }
 }
