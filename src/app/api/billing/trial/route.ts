@@ -25,6 +25,11 @@ const startSchema = z
     cardToken: z.string().trim().min(10).max(200).regex(/^tok_/, 'Token de tarjeta no válido.'),
     acceptanceToken: z.string().trim().min(20).max(4000),
     personalDataToken: z.string().trim().min(20).max(4000),
+    // Solo para mostrar la tarjeta en Facturación y avisar antes de que
+    // caduque. No interviene en ningún cobro: quien cobra es Wompi con su
+    // fuente de pago, así que un valor manipulado no puede mover dinero.
+    expMonth: z.string().trim().regex(/^\d{2}$/).optional(),
+    expYear: z.string().trim().regex(/^\d{2}$/).optional(),
     /** Confirmación explícita del mandato. No puede venir preseleccionada. */
     acceptMandate: z.literal(true),
     consentVersion: z.string().trim().max(40),
@@ -109,6 +114,8 @@ export async function POST(req: NextRequest) {
       cardToken: input.cardToken,
       acceptanceToken: input.acceptanceToken,
       personalDataToken: input.personalDataToken,
+      expMonth: input.expMonth ?? null,
+      expYear: input.expYear ?? null,
       ipHash: hashIp(clientIp(req)),
       userAgent: req.headers.get('user-agent'),
     });

@@ -196,6 +196,11 @@ export async function startTrial(params: {
   cardToken: string;
   acceptanceToken: string;
   personalDataToken: string;
+  /** Vencimiento, solo para que la persona reconozca su tarjeta en
+   *  Facturación y podamos avisarle antes de que caduque. No participa en
+   *  ningún cobro: quien cobra es Wompi con su fuente de pago. */
+  expMonth?: string | null;
+  expYear?: string | null;
   ipHash?: string | null;
   userAgent?: string | null;
   now?: Date;
@@ -244,8 +249,8 @@ export async function startTrial(params: {
         environment: source.environment,
         brand: source.brand,
         lastFour: source.lastFour,
-        expMonth: source.expMonth,
-        expYear: source.expYear,
+        expMonth: params.expMonth ?? null,
+        expYear: params.expYear ?? null,
       },
       update: { userId: params.userId, status: 'ACTIVE' },
     });

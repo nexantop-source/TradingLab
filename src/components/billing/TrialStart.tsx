@@ -123,7 +123,11 @@ export function TrialStart({
       return setError('La fecha de vencimiento no es válida. Usa MM/AA.');
     }
     if (digits(cvc).length < 3) return setError('El código de seguridad no es válido.');
-    if (!holder.trim()) return setError('Escribe el nombre que aparece en la tarjeta.');
+    // Wompi exige al menos cinco caracteres; sin esta comprobación el fallo
+    // llega como un rechazo genérico de tarjeta y despista.
+    if (holder.trim().length < 5) {
+      return setError('Escribe el nombre completo tal como aparece en la tarjeta.');
+    }
     if (!accepted) return setError('Necesitamos tu autorización explícita para el cobro posterior.');
 
     setSubmitting(true);
@@ -159,6 +163,8 @@ export function TrialStart({
           cardToken: tokenResult.data.id,
           acceptanceToken: offer.acceptanceToken,
           personalDataToken: offer.personalDataToken,
+          expMonth: expMonth.padStart(2, '0'),
+          expYear: expYear.slice(-2),
           acceptMandate: true,
           consentVersion: offer.consentVersion,
         }),

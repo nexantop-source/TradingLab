@@ -137,25 +137,45 @@ const paymentSourceSchema = z.object({
   data: z.object({
     id: z.number().int().positive(),
     status: z.string(),
+    // Wompi devuelve el BIN y los cuatro últimos, pero no la marca ni el
+    // vencimiento: eso solo viaja en la respuesta de tokenización, que ocurre
+    // en el navegador. La marca se deduce del BIN aquí para que no dependa de
+    // un dato que envíe el cliente.
     public_data: z
       .object({
-        brand: z.string().optional(),
+        bin: z.string().optional(),
         last_four: z.string().optional(),
-        exp_month: z.string().optional(),
-        exp_year: z.string().optional(),
+        card_holder: z.string().optional(),
       })
       .partial()
       .optional(),
   }),
 });
 
+/**
+ * Marca de la tarjeta a partir del BIN. Es información pública del rango de
+ * numeración, no un dato de la tarjeta concreta, y se calcula en el servidor
+ * para que la etiqueta que ve la persona no dependa de lo que diga el cliente.
+ */
+export function brandFromBin(bin: string | null | undefined): string | null {
+  if (!bin) return null;
+  const digits = bin.replace(/\D/g, '');
+  if (!digits) return null;
+  const two = Number(digits.slice(0, 2));
+  const four = Number(digits.slice(0, 4));
+  if (digits.startsWith('4')) return 'Visa';
+  if ((two >= 51 && two <= 55) || (four >= 2221 && four <= 2720)) return 'Mastercard';
+  if (two === 34 || two === 37) return 'American Express';
+  if (digits.startsWith('6011') || two === 65) return 'Discover';
+  if (two === 36 || two === 38 || (two >= 30 && two <= 35)) return 'Diners Club';
+  return null;
+}
+
 export interface CreatedPaymentSource {
   wompiId: number;
   environment: 'sandbox' | 'production';
   brand: string | null;
   lastFour: string | null;
-  expMonth: string | null;
-  expYear: string | null;
 }
 
 /**
@@ -200,10 +220,8 @@ export async function createPaymentSource(params: {
   return {
     wompiId: parsed.data.data.id,
     environment: config.environment,
-    brand: info.brand ?? null,
+    brand: brandFromBin(info.bin),
     lastFour: info.last_four ?? null,
-    expMonth: info.exp_month ?? null,
-    expYear: info.exp_year ?? null,
   };
 }
 
