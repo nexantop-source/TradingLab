@@ -4,6 +4,7 @@ import { useCallback, useEffect, useId, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CreditCard, Lock, ShieldCheck } from 'lucide-react';
 import { Button, Callout, Field, Input } from '@tl/ui';
+import { TrialSuccess, type TrialStarted } from './TrialSuccess';
 
 /**
  * Alta de la prueba gratuita con tarjeta.
@@ -80,6 +81,8 @@ export function TrialStart({
     accept: useId(),
   };
 
+  const [step, setStep] = useState<'oferta' | 'tarjeta'>('oferta');
+  const [started, setStarted] = useState<TrialStarted | null>(null);
   const [offer, setOffer] = useState<TrialOffer | Ineligible | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [number, setNumber] = useState('');
@@ -179,7 +182,14 @@ export function TrialStart({
       setNumber('');
       setCvc('');
       setExp('');
-      router.push('/billing');
+      setHolder('');
+      setStarted({
+        planName,
+        trialDays: offer.trialDays,
+        firstChargeAt: result.data.firstChargeAt,
+        usdCents: offer.usdCents,
+        card: result.data.card,
+      });
       router.refresh();
     } catch {
       setError('No pudimos completar la operación. No se ha realizado ningún cobro.');
@@ -188,6 +198,8 @@ export function TrialStart({
     }
   }
 
+  if (started) return <TrialSuccess started={started} />;
+
   if (loadError) return <Callout tone="danger" title="Prueba no disponible">{loadError}</Callout>;
   if (!offer) return <p className="text-[length:var(--text-xs)] text-[var(--color-muted)]">Preparando…</p>;
 
@@ -195,7 +207,7 @@ export function TrialStart({
     return (
       <Callout tone="info" title="Esta cuenta no puede iniciar una prueba">
         {offer.detail ?? 'Ya has usado tu prueba gratuita.'}{' '}
-        <a href="/precios">Ver los planes →</a>
+        <a href="/planes">Ver los planes →</a>
       </Callout>
     );
   }
@@ -207,13 +219,76 @@ export function TrialStart({
     year: 'numeric',
   });
 
+  // Paso 1. Se explica el trato completo y se decide. Pedir la tarjeta nada más
+  // llegar convierte una decisión en un trámite, y una decisión que no se
+  // entendió se cancela al día siguiente.
+  if (step === 'oferta') {
+    return (
+      <div className="space-y-4">
+        {offer.environment === 'sandbox' && (
+          <Callout tone="warning" title="Entorno de pruebas">
+            Estás en el sandbox de Wompi. No se mueve dinero real y solo funcionan sus tarjetas de prueba.
+          </Callout>
+        )}
+
+        <div>
+          <p className="text-[length:var(--text-lg)] font-semibold tracking-[var(--tracking-tight)]">
+            {offer.trialDays} días de {planName}, sin coste
+          </p>
+          <p className="mt-1.5 text-[length:var(--text-xs)] leading-relaxed text-[var(--color-muted)]">
+            Pedimos una tarjeta para poder continuar automáticamente si decides quedarte. Hoy no se cobra nada.
+          </p>
+        </div>
+
+        <ol className="trial-timeline">
+          <li>
+            <span className="trial-timeline-dot" aria-hidden="true" />
+            <div>
+              <strong>Hoy</strong>
+              <span>Empiezas a usar {planName} completo. Cargo de USD 0,00.</span>
+            </div>
+          </li>
+          <li>
+            <span className="trial-timeline-dot" aria-hidden="true" />
+            <div>
+              <strong>Día {offer.trialDays - 2}</strong>
+              <span>Te avisamos de que la prueba está por terminar, con tiempo para decidir.</span>
+            </div>
+          </li>
+          <li data-charge="true">
+            <span className="trial-timeline-dot" aria-hidden="true" />
+            <div>
+              <strong>{firstCharge}</strong>
+              <span>
+                Primer cobro de USD {(offer.usdCents / 100).toFixed(2)}
+                {offer.pricingMode === 'usd_trm' ? ', en pesos con la TRM de ese día' : ''}, salvo que canceles antes.
+              </span>
+            </div>
+          </li>
+        </ol>
+
+        <Button size="lg" fullWidth onClick={() => setStep('tarjeta')}>
+          Continuar
+        </Button>
+        <p className="flex items-start gap-1.5 text-[length:var(--text-2xs)] leading-relaxed text-[var(--color-subtle)]">
+          <ShieldCheck size={13} className="mt-0.5 shrink-0" aria-hidden="true" />
+          Cancelar lleva un clic desde Facturación y no tiene penalización. Si cancelas antes del cobro, no pagas nada
+          y conservas el acceso hasta que termine la prueba.
+        </p>
+      </div>
+    );
+  }
+
+  // Paso 2. Los datos de la tarjeta, ya con el trato aceptado.
   return (
     <form onSubmit={submit} noValidate className="space-y-4">
-      {offer.environment === 'sandbox' && (
-        <Callout tone="warning" title="Entorno de pruebas">
-          Estás en el sandbox de Wompi. No se mueve dinero real y solo funcionan sus tarjetas de prueba.
-        </Callout>
-      )}
+      <button
+        type="button"
+        onClick={() => setStep('oferta')}
+        className="text-[length:var(--text-2xs)] text-[var(--color-muted)] hover:text-[var(--color-text)]"
+      >
+        ← Volver a las condiciones
+      </button>
 
       <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] p-4">
         <p className="text-[length:var(--text-md)] font-semibold">

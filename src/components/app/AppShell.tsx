@@ -38,7 +38,7 @@ import { Logo } from '@/components/Logo';
 import { Badge, Button, cn } from '@tl/ui';
 import { DemoBadge } from '@tl/ui/compliance';
 import type { SessionUser } from '@tl/types';
-import { ADMIN_ROLES } from '@tl/types';
+import { ADMIN_ROLES, INITIAL_DEMO_BALANCE_CENTS } from '@tl/types';
 import { apiFetch } from '@/lib/client-api';
 
 interface NotificationItem {
@@ -76,7 +76,7 @@ const MOBILE_TABS = [
 ];
 
 const NAV_FOOTER = [
-  { href: '/precios', label: 'Planes y beneficios', icon: Sparkles },
+  { href: '/planes', label: 'Planes y beneficios', icon: Sparkles },
   { href: '/billing', label: 'Facturación y pagos', icon: WalletCards },
   { href: '/perfil', label: 'Perfil y ajustes', icon: Settings },
   { href: '/ayuda', label: 'Centro de ayuda', icon: LifeBuoy },
@@ -171,7 +171,7 @@ export function AppShell({
             </span>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-[13px] font-medium">{user.name}</span>
-              <Link href="/precios" className="block text-[11px] text-[var(--color-blue)]">TradingLab {PLAN_ENTITLEMENTS[user.plan].name} ↗</Link>
+              <Link href="/planes" className="block text-[11px] text-[var(--color-blue)]">TradingLab {PLAN_ENTITLEMENTS[user.plan].name} ↗</Link>
             </span>
           </div>
           <button
@@ -240,7 +240,7 @@ export function AppShell({
               <kbd className="app-keycap"><Command className="size-3" aria-hidden="true" />K</kbd>
             </button>
             {user.plan === 'FREE' && (
-              <Link href="/precios">
+              <Link href="/planes">
                 <Button size="sm" variant="outline">
                   Ver planes
                 </Button>
@@ -331,21 +331,69 @@ export function AppShell({
   );
 }
 
+/**
+ * Capital de práctica.
+ *
+ * La cifra se compone en monoespaciada con `tabular-nums` y los centavos en
+ * menor jerarquía, que es como se presenta el dinero en una plataforma
+ * financiera y no como un contador de puntos. Importa: una persona cuida un
+ * saldo que parece dinero y quema uno que parece una ficha de juego, y el
+ * producto entero depende de que se practique con criterio.
+ *
+ * Se muestra siempre la asignación inicial al lado, para que la cifra tenga
+ * una referencia y se lea cuánto queda del capital con el que se empezó.
+ */
 function BalanceCard({ cents }: { cents: number }) {
+  const units = Math.trunc(cents / 100);
+  const decimals = String(Math.abs(cents % 100)).padStart(2, '0');
+  const spent = INITIAL_DEMO_BALANCE_CENTS - cents;
+  const usedPercent = Math.min(100, Math.max(0, (spent / INITIAL_DEMO_BALANCE_CENTS) * 100));
+  const down = cents < INITIAL_DEMO_BALANCE_CENTS;
+
   return (
-    <div className="app-balance-card mx-4 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg)] p-4 shadow-[var(--shadow-soft)]">
+    <div className="app-balance-card mx-4 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[10px] font-medium uppercase tracking-wider text-[var(--color-subtle)]">
-          Saldo virtual
+        <span className="text-[length:var(--text-2xs)] font-medium uppercase tracking-[var(--tracking-label)] text-[var(--color-subtle)]">
+          Capital de práctica
         </span>
         <DemoBadge />
       </div>
-          <p className="num mt-2 text-xl font-semibold tracking-tight">
-        <span className="text-[var(--color-muted)]">USD </span>
-        {(cents / 100).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+
+      <p className="num mt-2.5 flex items-baseline gap-1 tracking-[var(--tracking-tight)]">
+        <span className="text-[length:var(--text-2xs)] font-medium text-[var(--color-subtle)]">USD</span>
+        <span className="text-[length:var(--text-xl)] font-semibold tabular-nums">
+          {units.toLocaleString('es-CO')}
+        </span>
+        <span className="text-[length:var(--text-xs)] font-medium tabular-nums text-[var(--color-muted)]">
+          ,{decimals}
+        </span>
       </p>
-      <p className="mt-1 text-[10px] leading-snug text-[var(--color-subtle)]">
-        No es dinero real y no puede retirarse.
+
+      {/* Cuánto queda de la asignación inicial. Una cifra sola no dice nada;
+          comparada con su punto de partida, sí. */}
+      <div
+        className="mt-3 h-1 overflow-hidden rounded-[var(--radius-full)] bg-[var(--color-overlay)]"
+        role="img"
+        aria-label={`Has usado el ${Math.round(usedPercent)} % de tu capital inicial`}
+      >
+        <span
+          className="block h-full rounded-[var(--radius-full)] transition-[width] duration-500 ease-[var(--ease-out-soft)]"
+          style={{
+            width: `${100 - usedPercent}%`,
+            background: down ? 'var(--color-negative)' : 'var(--color-positive)',
+          }}
+        />
+      </div>
+      <p className="mt-2 flex items-center justify-between gap-2 text-[length:var(--text-2xs)] text-[var(--color-subtle)]">
+        <span>
+          de USD <span className="num tabular-nums">{(INITIAL_DEMO_BALANCE_CENTS / 100).toLocaleString('es-CO')}</span> iniciales
+        </span>
+        <span className={down ? 'text-[var(--color-negative)]' : 'text-[var(--color-positive)]'}>
+          {down ? '−' : '+'}
+          <span className="num tabular-nums">
+            {Math.abs(spent / 100).toLocaleString('es-CO', { maximumFractionDigits: 0 })}
+          </span>
+        </span>
       </p>
     </div>
   );

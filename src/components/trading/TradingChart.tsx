@@ -1,6 +1,9 @@
 'use client';
-// TradingView Lightweight Charts™ — Copyright (c) 2025 TradingView, Inc.
-// https://www.tradingview.com/ — Apache-2.0; visible attribution below the chart.
+// Lightweight Charts™ — Copyright (c) TradingView, Inc. — Apache-2.0.
+// La licencia exige nombrar al creador y enlazar su sitio en una página
+// accesible para las personas usuarias: eso vive en /legal/creditos-de-software.
+// Aquí no se pone, porque junto al gráfico lo que importa es de dónde sale el
+// precio, y mezclar ambas cosas hacía creer que los datos eran de TradingView.
 import { useEffect, useRef } from 'react';
 import { createChart, LineSeries, AreaSeries, CandlestickSeries, ColorType, type IChartApi, type ISeriesApi, type UTCTimestamp } from 'lightweight-charts';
 import type { MarketTick } from './marketPulse';
@@ -41,5 +44,5 @@ export function TradingChart({ticks,precision,type,windowSeconds,indicator,level
     hasData.current=true;
   },[ticks,type,indicator,windowSeconds,synthetic]);
   useEffect(()=>{const s=series.current;if(!s)return;for(const l of levelLines.current)s.removePriceLine(l);levelLines.current=levels.map(l=>s.createPriceLine({price:l.price,title:l.label,color:l.tone==='negative'?'#f45d75':l.tone==='positive'?'#34d39e':'#94a7b8',lineWidth:1,lineStyle:2,axisLabelVisible:true}));},[levels,type]);
-  return <div className="trading-chart" data-gesture-exclude data-stale={stale} data-chart-type={type} data-window={windowSeconds}><div ref={host} className="trading-chart-canvas" aria-label="Gráfico interactivo de precios"/><p className="simple-market-source">{synthetic?'Fuente: simulación local':`Fuente: ${sourceLabel}`} · <a href="https://www.tradingview.com/" target="_blank" rel="noopener noreferrer">Gráficos por TradingView</a></p><span className="sr-only">Último precio {ticks.at(-1)?.price.toFixed(precision)??'pendiente'}. {stale?'Datos desactualizados.':''} Las velas agrupan observaciones de cinco segundos.</span></div>;
+  return <div className="trading-chart" data-gesture-exclude data-stale={stale} data-chart-type={type} data-window={windowSeconds}><div ref={host} className="trading-chart-canvas" aria-label="Gráfico interactivo de precios"/><p className="simple-market-source">{synthetic?'Fuente: simulación local':`Fuente: ${sourceLabel}`}</p><span className="sr-only">Último precio {ticks.at(-1)?.price.toFixed(precision)??'pendiente'}. {stale?'Datos desactualizados.':''} Las velas agrupan observaciones de cinco segundos.</span></div>;
 }

@@ -220,7 +220,7 @@ export function CoachView({
         {limitReached && (
           <p className="mt-2 text-[12px] leading-relaxed text-[var(--color-gold)]">
             Has agotado tus análisis {usage.period}s.{' '}
-            <Link href="/precios" className="underline">
+            <Link href="/planes" className="underline">
               Comparar planes
             </Link>
             .

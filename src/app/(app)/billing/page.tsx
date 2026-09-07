@@ -8,6 +8,7 @@ import { PLAN_ENTITLEMENTS } from '@tl/types/plans';
 import { parseWompiPaymentDescription } from '@/lib/wompi';
 import { billingOverview } from '@/lib/trials';
 import { CancelTrial } from './CancelTrial';
+import { CardBrand } from '@/components/billing/CardBrand';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Facturación' };
@@ -106,7 +107,7 @@ export default async function BillingPage() {
             acceso.
           </p>
         )}
-        <Link href="/precios">Ver planes y beneficios →</Link>
+        <Link href="/planes">Ver planes y beneficios →</Link>
         <br />
         <Link href="/perfil">Gestionar mi cuenta →</Link>
       </section>
@@ -118,13 +119,14 @@ export default async function BillingPage() {
         </h2>
         {overview.card ? (
           <>
-            <p>
+            <p className="billing-card-row">
+              <CardBrand brand={overview.card.brand} />
               <strong>
                 {overview.card.brand ?? 'Tarjeta'} ···· {overview.card.lastFour ?? '····'}
               </strong>
-              {overview.card.expMonth && overview.card.expYear
-                ? ` · vence ${overview.card.expMonth}/${overview.card.expYear}`
-                : ''}
+              {overview.card.expMonth && overview.card.expYear && (
+                <span className="billing-card-exp">vence {overview.card.expMonth}/{overview.card.expYear}</span>
+              )}
             </p>
             <p>
               La tarjeta se tokenizó en Wompi desde tu navegador. TradingLab no guarda su número ni su código de

@@ -490,7 +490,7 @@ export function SimulationPanel({
         <p className="mt-3 text-[11px] leading-relaxed text-[var(--color-gold)]">
           Has usado las {entitlements.simulationsPerDay} simulaciones diarias del plan {entitlements.planName}. El
           contador se reinicia a las 00:00 UTC.{' '}
-          <Link href="/precios" className="underline">
+          <Link href="/planes" className="underline">
             Comparar planes
           </Link>
           .

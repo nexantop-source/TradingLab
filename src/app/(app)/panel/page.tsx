@@ -495,7 +495,7 @@ export default async function DashboardPage() {
               <UsageRow label="Reinicios de saldo" used={usage.balanceResetsThisMonth} limit={plan.balanceResetsPerMonth} />
             </dl>
             {user.plan !== 'PREMIUM' && (
-              <Link href="/precios" className="mt-4 block">
+              <Link href="/planes" className="mt-4 block">
                 <Button size="sm" variant="outline" fullWidth>
                   Comparar planes
                 </Button>

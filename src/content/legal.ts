@@ -240,6 +240,33 @@ export const LEGAL_DOCS: LegalDocContent[] = [
       { heading: '6. Revisión', body: REVIEW_NOTE },
     ],
   },
+  {
+    slug: 'creditos-de-software',
+    title: 'Créditos de software',
+    version: '1.0.0',
+    effectiveAt: '2026-09-06',
+    summary:
+      'Componentes de terceros que hacen funcionar TradingLab y las atribuciones que sus licencias exigen.',
+    sections: [
+      {
+        heading: '1. Por qué existe esta página',
+        body: 'Varias licencias de software libre obligan a nombrar a quien creó el componente y a enlazar su sitio en una página accesible para las personas usuarias. Reunirlas aquí cumple ese requisito sin llenar la interfaz de avisos que estorban la lectura de un gráfico.',
+      },
+      {
+        heading: '2. Gráficos: Lightweight Charts™',
+        body: 'Los gráficos de precio se dibujan con Lightweight Charts™, creado por TradingView, Inc. y distribuido bajo licencia Apache 2.0. Copyright © TradingView, Inc. Su sitio es https://www.tradingview.com/ y la documentación del componente, https://tradingview.github.io/lightweight-charts/. La licencia exige nombrar a TradingView como creador del producto y enlazar su sitio; TradingLab no está asociada, patrocinada ni respaldada por TradingView, y los datos de mercado no proceden de TradingView.',
+      },
+      {
+        heading: '3. Origen de los datos de mercado',
+        body: 'Los precios no provienen del componente de gráficos. Cada pantalla indica su fuente junto al gráfico y en la ficha de procedencia del dato, con su marca temporal y su latencia declarada.',
+      },
+      {
+        heading: '4. Otros componentes',
+        body: 'La aplicación se construye sobre Next.js y React (licencia MIT, Vercel y Meta), Prisma (Apache 2.0), Tailwind CSS (MIT), Lucide (ISC) y otras bibliotecas de código abierto cuyas licencias se conservan íntegras en el paquete distribuido.',
+      },
+      { heading: '5. Revisión', body: REVIEW_NOTE },
+    ],
+  },
 ];
 
 export function getLegalDoc(slug: string): LegalDocContent | undefined {

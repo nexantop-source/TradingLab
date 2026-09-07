@@ -142,7 +142,7 @@ export function CheckoutView({
 
   return (
     <div className="checkout-page app-content-page mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:py-12">
-      <Link href="/precios" className="checkout-back inline-flex items-center gap-2 text-[12px] font-medium text-[var(--color-muted)] hover:text-[var(--color-text)]">
+      <Link href="/planes" className="checkout-back inline-flex items-center gap-2 text-[12px] font-medium text-[var(--color-muted)] hover:text-[var(--color-text)]">
         <ArrowLeft className="size-3.5" aria-hidden="true" /> Volver a planes
       </Link>
 

@@ -317,14 +317,14 @@ export function ProfileView({
               {paidPeriodActive ? (
                 <Callout tone="info" className="mt-4" title="Sin compras superpuestas">
                   Para evitar un doble cobro, podrás elegir el siguiente plan cuando termine el periodo vigente.{' '}
-                  <Link href="/precios" className="underline">
+                  <Link href="/planes" className="underline">
                     Comparar planes
                   </Link>
                   .
                 </Callout>
               ) : (
                 <>
-                  <Link href="/precios" className="native-profile-upgrade native-primary-button">Conocer Plus y Pro<ChevronRight size={18} /></Link>
+                  <Link href="/planes" className="native-profile-upgrade native-primary-button">Conocer Plus y Pro<ChevronRight size={18} /></Link>
                   <div className="browser-profile-upgrade mt-4 grid gap-3 sm:grid-cols-2">
                     {(['STANDARD', 'PREMIUM'] as const)
                       .filter((p) => p !== user.plan)
@@ -353,7 +353,7 @@ export function ProfileView({
                   <p className="mt-3 text-[11px] text-[var(--color-subtle)]">
                     {PAYMENT_REGION_NOTICE} Ningún retorno del
                     navegador activa el plan por sí solo.{' '}
-                    <Link href="/precios" className="underline">
+                    <Link href="/planes" className="underline">
                       Ver comparación completa
                     </Link>
                   </p>

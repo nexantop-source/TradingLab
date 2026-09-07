@@ -233,7 +233,7 @@ export default async function StatsPage() {
           <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--color-muted)]">
             El desglose avanzado por etiquetas de estrategia está disponible a partir del plan Standard.
           </p>
-          <Link href="/precios" className="mt-3 inline-block">
+          <Link href="/planes" className="mt-3 inline-block">
             <Button size="sm" variant="outline">
               Ver planes
             </Button>
