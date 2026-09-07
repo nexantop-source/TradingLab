@@ -54,8 +54,12 @@ env:
   # Datos públicos de Binance Spot para BTC/ETH/SOL cotizados en USDT.
   # Nuevas operaciones exigen fuente real vigente; no hay fallback sintético.
   # El motor anterior solo conserva la liquidación de posiciones heredadas.
+  # "real" es el enrutador: cripto a Binance, y divisas, indices, materias
+  # primas, acciones y fondos a Yahoo Finance. Con "binance" -lo que habia- todo
+  # lo que no fuera cripto caia al motor deterministico y se publicaba un precio
+  # inventado: el dolar aparecia a 3.343 pesos.
   - variable: MARKET_DATA_PROVIDER
-    value: binance
+    value: real
     availability:
       - RUNTIME
 

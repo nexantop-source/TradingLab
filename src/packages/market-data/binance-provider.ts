@@ -23,6 +23,28 @@ export function binancePair(symbol:string):string|null{
   return pair&&pair.endsWith('USDT')?pair:null;
 }
 type Bar = [number,string,string,string,string,string,number,...unknown[]];
+
+/**
+ * Este proveedor cubre cripto y solo cripto. Lo que no tiene par en Binance se
+ * delega a un motor deterministico, y esa puerta de atras costo cara: con
+ * `MARKET_DATA_PROVIDER=binance` en produccion, cada accion, divisa, indice y
+ * materia prima del catalogo salia con un precio inventado -el dolar a 3.343
+ * pesos- bajo una etiqueta que nadie lee. El principio de este paquete es el
+ * contrario: lo que no tiene fuente real falla y lo dice.
+ *
+ * Con `REQUIRE_REAL_MARKET_DATA=true` la puerta se cierra. La delegacion sigue
+ * existiendo para desarrollo y para las lecciones, que es para lo que se
+ * escribio, pero deja de poder ocurrir donde hay gente mirando.
+ */
+function refuseSynthetic(symbol: string, providerId: string): void {
+  if (process.env.REQUIRE_REAL_MARKET_DATA !== 'true') return;
+  throw new MarketDataError(
+    `Binance no cotiza ${symbol} y no se sustituye por una serie simulada. ` +
+      'Configura MARKET_DATA_PROVIDER=real para que cada instrumento vaya a su fuente.',
+    'UNKNOWN_SYMBOL',
+    providerId,
+  );
+}
 /** Public market data only: no exchange credentials or order endpoints. Old
  * USD demo instruments retain their exact original synthetic provider. */
 export class BinanceMarketDataProvider implements MarketDataProvider {
@@ -51,7 +73,7 @@ export class BinanceMarketDataProvider implements MarketDataProvider {
   }
   async getPriceAt(symbol:string,timestampMs:number){
     const pair=binancePair(symbol);
-    if(!pair)return this.demo.getPriceAt(symbol,timestampMs);
+    if(!pair){refuseSynthetic(symbol,this.id);return this.demo.getPriceAt(symbol,timestampMs);}
     if(!Number.isFinite(timestampMs)||timestampMs>this.clock()+1000)throw new MarketDataError('Instante de mercado inválido.','UPSTREAM',this.id);
     const boundary=Math.floor(Math.min(timestampMs,this.clock())/1000)*1000;
     const minute=Math.floor((boundary-1)/60000)*60000;
@@ -63,7 +85,7 @@ export class BinanceMarketDataProvider implements MarketDataProvider {
   }
   async getQuote(symbol:string,at=this.clock()):Promise<Quote>{
     const pair=binancePair(symbol);
-    if(!pair)return this.demo.getQuote(symbol,at);
+    if(!pair){refuseSynthetic(symbol,this.id);return this.demo.getQuote(symbol,at);}
     const [point,raw]=await Promise.all([this.getPriceAt(symbol,at),this.json('ticker/24hr',{symbol:pair},5000)]);
     const day=raw as Record<string,string>;
     if(!day||Number(day.openPrice)<=0||Number(day.highPrice)<=0||Number(day.lowPrice)<=0||Number(day.volume)<0)throw new MarketDataError('Resumen de mercado inválido.','UPSTREAM',this.id);
@@ -117,7 +139,7 @@ export class BinanceMarketDataProvider implements MarketDataProvider {
   }
   async getCandles(params:{symbol:string;timeframe:Timeframe;limit:number;to?:number}):Promise<CandleSeries>{
     const pair=binancePair(params.symbol);
-    if(!pair)return this.demo.getCandles(params);
+    if(!pair){refuseSynthetic(params.symbol,this.id);return this.demo.getCandles(params);}
     const to=Math.min(params.to??this.clock(),this.clock());
     const rows=await this.bars(pair,params.timeframe,to,Math.min(1000,Math.max(1,params.limit)));
     // Do not include an unfinished OHLC bar: it may include observations
