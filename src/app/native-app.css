@@ -8,6 +8,9 @@ html[data-app-mode='standalone'] .browser-marketing-footer { display: none; }
 html[data-app-mode='standalone'] .native-public-header { display: flex; position: sticky; top: 0; z-index: 40; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: calc(60px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) max(var(--space-4), env(safe-area-inset-right)) 0 max(var(--space-4), env(safe-area-inset-left)); background: color-mix(in srgb, var(--color-bg) 94%, transparent); backdrop-filter: blur(20px); font-size: var(--text-sm); font-weight: 600; }
 .native-public-header a { display: flex; align-items: center; min-height: 44px; min-width: 44px; gap: var(--space-px); color: var(--color-blue); }
 html[data-app-mode='standalone'] .marketing-page > main { padding-top: var(--space-5); }
+/* Instalada como aplicacion no hay cabecera fija que descontar: el hero se
+   queda solo con su propio aire, o abriria con un hueco vacio de cien pixeles. */
+html[data-app-mode='standalone'] .invest-hero { padding-top: var(--space-6); }
 html[data-app-mode='standalone'] .native-public-footer { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-4); padding: var(--space-6) var(--space-5) calc(var(--space-6) + env(safe-area-inset-bottom)); font-size: var(--text-xs); color: var(--color-muted); }
 .native-public-footer a { display: grid; place-items: center; min-height: 44px; }
 .native-public-footer p { flex-basis: 100%; text-align: center; }

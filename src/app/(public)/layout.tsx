@@ -21,7 +21,7 @@ export default async function PublicLayout({ children }: { children: React.React
     <div className="marketing-page">
       <div className="browser-marketing-header"><MarketingHeader authenticated={Boolean(auth)} /></div>
       <PublicAppChrome authenticated={Boolean(auth)} />
-      <main id="contenido" className="pt-24">
+      <main id="contenido" className="marketing-main">
         {children}
       </main>
       <div className="browser-marketing-footer"><MarketingFooter /></div>
