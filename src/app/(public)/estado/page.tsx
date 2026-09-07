@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { marketData, listProviders } from '@tl/market-data';
 import { isAIConfigured } from '@tl/ai';
 import { Badge, Card } from '@tl/ui';
-import { readWompiConfig, wompiAmountInCents } from '@/lib/wompi';
+import { billingReadiness } from '@/lib/billing-readiness';
 
 export const metadata: Metadata = {
   title: 'Estado del servicio',
@@ -19,21 +19,8 @@ export default async function StatusPage() {
     message: 'No se ha podido comprobar el proveedor.',
   }));
 
-  const billingProvider = (process.env.BILLING_PROVIDER ?? 'disabled').trim().toLowerCase();
-  let billingOperational = false;
-  if (billingProvider === 'wompi') {
-    try {
-      readWompiConfig(process.env, { requireIntegrity: true, requireEvents: true });
-      wompiAmountInCents('STANDARD', 'MONTHLY');
-      wompiAmountInCents('STANDARD', 'YEARLY');
-      wompiAmountInCents('PREMIUM', 'MONTHLY');
-      wompiAmountInCents('PREMIUM', 'YEARLY');
-      const appUrl = new URL(process.env.NEXT_PUBLIC_APP_URL ?? '');
-      billingOperational = appUrl.protocol === 'https:';
-    } catch {
-      billingOperational = false;
-    }
-  }
+  const billing = await billingReadiness();
+
   const components = [
     {
       name: 'Aplicación web',
@@ -59,15 +46,13 @@ export default async function StatusPage() {
     },
     {
       name: 'Suscripciones',
-      status: billingOperational ? ('ok' as const) : ('degraded' as const),
-      detail:
-        billingProvider === 'mock'
-          ? 'Pasarela simulada de desarrollo: no se procesan cargos reales.'
-          : billingOperational
-            ? 'Wompi seleccionado y configuración local completa. La disponibilidad externa se confirma al pagar.'
-            : billingProvider === 'wompi'
-              ? 'Wompi está seleccionado, pero faltan credenciales, precios o una URL HTTPS válida.'
-            : 'Pagos deshabilitados de forma segura hasta completar la configuración de Wompi.',
+      status: billing.ready ? ('ok' as const) : ('degraded' as const),
+      // Una sola frase para tres causas distintas no dejaba saber cuál fallaba,
+      // y el despliegue estuvo días en amarillo sin que nadie pudiera decir por
+      // qué. Ahora se enumera pieza por pieza, con el nombre de la variable.
+      detail: billing.ready
+        ? `${billing.provider}: credenciales, precio, dirección pública y cobro al vencer, todo en su sitio. La disponibilidad externa se confirma al pagar.`
+        : billing.checks.filter((check) => !check.ok).map((check) => `${check.name}: ${check.detail}`).join(' '),
     },
   ];
 
