@@ -12,7 +12,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   // `native` cubre el desarrollo local (Windows, macOS, Linux).
   // `debian-openssl-3.0.x` es el motor que necesita el contenedor de Cloud Run
   // sobre el que corre Firebase App Hosting. Sin él, Prisma falla en tiempo de
@@ -32,59 +32,61 @@ datasource db {
 // ── Identidad ───────────────────────────────────────────────────────────────
 
 model User {
-  id                 String    @id @default(cuid())
-  email              String    @unique
-  emailVerifiedAt    DateTime?
-  passwordHash       String
-  name               String
-  role               String    @default("STUDENT")
-  status             String    @default("ACTIVE") // ACTIVE | SUSPENDED | DELETED
-  locale             String    @default("es")
-  timezone           String    @default("UTC")
-  countryCode        String?
+  id                  String    @id @default(cuid())
+  email               String    @unique
+  emailVerifiedAt     DateTime?
+  passwordHash        String
+  name                String
+  role                String    @default("STUDENT")
+  status              String    @default("ACTIVE") // ACTIVE | SUSPENDED | DELETED
+  locale              String    @default("es")
+  timezone            String    @default("UTC")
+  countryCode         String?
   /// Fecha de nacimiento declarada. Solo se guarda el año y mes de referencia
   /// para verificar mayoría de edad; ver docs/SECURITY.md.
-  birthYear          Int?
-  mfaEnabled         Boolean   @default(false)
-  mfaSecret          String?
-  onboardingCompleted Boolean  @default(false)
+  birthYear           Int?
+  mfaEnabled          Boolean   @default(false)
+  mfaSecret           String?
+  onboardingCompleted Boolean   @default(false)
   /// Marca temporal del último acceso. Alimenta métricas de retención.
-  lastSeenAt         DateTime?
+  lastSeenAt          DateTime?
   /// Racha de días consecutivos con actividad educativa.
-  streakDays         Int       @default(0)
-  streakUpdatedAt    DateTime?
-  xp                 Int       @default(0)
-  level              Int       @default(1)
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  deletedAt          DateTime?
+  streakDays          Int       @default(0)
+  streakUpdatedAt     DateTime?
+  xp                  Int       @default(0)
+  level               Int       @default(1)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  deletedAt           DateTime?
 
-  profile        Profile?
-  sessions       Session[]
-  subscription   Subscription?
-  payments       Payment[]
-  demoAccounts   DemoAccount[]
-  simulations    Simulation[]
-  journalEntries JournalEntry[]
-  watchlists     WatchlistItem[]
-  alerts         Alert[]
-  progress       UserProgress[]
-  quizAttempts   QuizAttempt[]
-  certificates   Certificate[]
-  aiAnalyses     AIAnalysis[]
-  aiUsage        AIUsage[]
-  consents       Consent[]
-  notifications  Notification[]
-  tickets        SupportTicket[]
-  auditLogs      AuditLog[]      @relation("AuditActor")
-  grantedSubs    Subscription[]  @relation("SubscriptionGrantor")
+  profile           Profile?
+  sessions          Session[]
+  subscription      Subscription?
+  payments          Payment[]
+  demoAccounts      DemoAccount[]
+  simulations       Simulation[]
+  journalEntries    JournalEntry[]
+  watchlists        WatchlistItem[]
+  alerts            Alert[]
+  progress          UserProgress[]
+  quizAttempts      QuizAttempt[]
+  certificates      Certificate[]
+  aiAnalyses        AIAnalysis[]
+  aiUsage           AIUsage[]
+  consents          Consent[]
+  notifications     Notification[]
+  tickets           SupportTicket[]
+  auditLogs         AuditLog[]         @relation("AuditActor")
+  grantedSubs       Subscription[]     @relation("SubscriptionGrantor")
   pushSubscriptions PushSubscription[]
-  badges         UserBadge[]
-  challenges     ChallengeEntry[]
-  portfolios     Portfolio[]
-  adImpressions  AdImpression[]
-  adClicks       AdClick[]
-  strategies     Strategy[]
+  paymentSources    PaymentSource[]
+  mandates          BillingMandate[]
+  badges            UserBadge[]
+  challenges        ChallengeEntry[]
+  portfolios        Portfolio[]
+  adImpressions     AdImpression[]
+  adClicks          AdClick[]
+  strategies        Strategy[]
 
   @@index([status])
   @@index([createdAt])
@@ -121,6 +123,72 @@ model Profile {
 /// otro. Las claves son las del propio navegador para cifrar el mensaje; no
 /// son credenciales de la cuenta y no dan acceso a nada. Una suscripción que
 /// el servicio rechaza de forma definitiva se borra en lugar de reintentarse.
+/// Tarjeta tokenizada en Wompi, lista para cobros posteriores.
+///
+/// Aquí NO vive ningún dato de tarjeta: el PAN y el CVC se tokenizan en el
+/// navegador contra Wompi con la llave pública y nunca tocan este servidor,
+/// que es lo que mantiene la instalación fuera del alcance completo de
+/// PCI-DSS. Lo que se guarda es el identificador de la fuente de pago y los
+/// cuatro últimos dígitos, solo para que la persona reconozca su tarjeta.
+model PaymentSource {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Identificador numérico de la fuente de pago en Wompi.
+  wompiId     Int
+  /// sandbox | production. Una fuente creada en un ambiente no sirve en el otro.
+  environment String
+  brand       String?
+  lastFour    String?
+  expMonth    String?
+  expYear     String?
+  status      String    @default("ACTIVE") // ACTIVE | REMOVED
+  createdAt   DateTime  @default(now())
+  lastUsedAt  DateTime?
+
+  mandates      BillingMandate[]
+  subscriptions Subscription[]
+
+  @@unique([wompiId, environment])
+  @@index([userId, status])
+}
+
+/// Mandato explícito de débito.
+///
+/// Es el registro de que una persona autorizó un cobro futuro concreto: qué
+/// producto, a qué precio, con qué frecuencia, desde cuándo y bajo qué versión
+/// del texto que leyó. Sin esto, un cobro tras la prueba sería un cargo no
+/// autorizado. Nunca se preselecciona y nunca se aplica de forma retroactiva a
+/// una compra anterior.
+model BillingMandate {
+  id              String        @id @default(cuid())
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  paymentSourceId String
+  paymentSource   PaymentSource @relation(fields: [paymentSourceId], references: [id], onDelete: Cascade)
+  planId          String
+  interval        String // MONTHLY | YEARLY
+  /// Precio comercial en USD, en centavos, congelado al aceptar el mandato.
+  priceUsdCents   Int
+  /// Regla de conversión declarada al aceptar: fixed_cop | usd_trm.
+  pricingMode     String
+  trialDays       Int
+  /// Fecha del primer cobro anunciada a la persona.
+  firstChargeAt   DateTime
+  /// Versión del texto de autorización que se mostró.
+  consentVersion  String
+  /// Texto íntegro aceptado. Se guarda para poder demostrar qué se autorizó.
+  consentText     String
+  acceptedAt      DateTime      @default(now())
+  ipHash          String?
+  userAgent       String?
+  revokedAt       DateTime?
+  revokedReason   String?
+
+  @@index([userId])
+  @@index([revokedAt])
+}
+
 model PushSubscription {
   id            String    @id @default(cuid())
   userId        String
@@ -137,16 +205,16 @@ model PushSubscription {
 }
 
 model Session {
-  id           String   @id @default(cuid())
-  userId       String
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   /// Hash del token de sesión. El token en claro solo existe en la cookie.
-  tokenHash    String   @unique
-  userAgent    String?
-  ipHash       String?
-  expiresAt    DateTime
-  revokedAt    DateTime?
-  createdAt    DateTime @default(now())
+  tokenHash String    @unique
+  userAgent String?
+  ipHash    String?
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
 
   @@index([userId])
   @@index([expiresAt])
@@ -155,29 +223,29 @@ model Session {
 // ── Suscripciones ───────────────────────────────────────────────────────────
 
 model Plan {
-  id               String   @id
-  name             String
+  id                String   @id
+  name              String
   priceMonthlyCents Int
   priceYearlyCents  Int
-  active           Boolean  @default(true)
+  active            Boolean  @default(true)
   /// JSON con la matriz de derechos. Espejo de packages/types/plans.ts.
-  entitlements     String   @default("{}")
-  updatedAt        DateTime @updatedAt
+  entitlements      String   @default("{}")
+  updatedAt         DateTime @updatedAt
 
   subscriptions Subscription[]
 }
 
 model Subscription {
-  id                 String    @id @default(cuid())
-  userId             String    @unique
-  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                 String         @id @default(cuid())
+  userId             String         @unique
+  user               User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   planId             String
-  plan               Plan      @relation(fields: [planId], references: [id])
-  status             String    @default("ACTIVE") // ACTIVE | TRIALING | PAST_DUE | CANCELED | EXPIRED
-  interval           String    @default("MONTHLY") // MONTHLY | YEARLY
-  currentPeriodStart DateTime  @default(now())
+  plan               Plan           @relation(fields: [planId], references: [id])
+  status             String         @default("ACTIVE") // ACTIVE | TRIALING | PAST_DUE | CANCELED | EXPIRED
+  interval           String         @default("MONTHLY") // MONTHLY | YEARLY
+  currentPeriodStart DateTime       @default(now())
   currentPeriodEnd   DateTime
-  cancelAtPeriodEnd  Boolean   @default(false)
+  cancelAtPeriodEnd  Boolean        @default(false)
   canceledAt         DateTime?
   trialEndsAt        DateTime?
   couponCode         String?
@@ -186,81 +254,92 @@ model Subscription {
   /// Origen de la suscripción: CHECKOUT (pagada) o GRANT (cortesía otorgada
   /// desde el panel administrativo). Una cortesía nunca genera un `Payment`,
   /// no computa en el valor mensualizado y no se renueva sola al vencer.
-  source             String    @default("CHECKOUT")
+  /// Origen: CHECKOUT (pago único), GRANT (cortesía) o TRIAL (prueba con
+  /// mandato de débito, que se cobra sola al vencer).
+  source             String         @default("CHECKOUT")
+  /// Fuente de pago con la que se cobrará al terminar la prueba.
+  paymentSourceId    String?
+  paymentSource      PaymentSource? @relation(fields: [paymentSourceId], references: [id], onDelete: SetNull)
+  /// Momento del próximo cobro automático. Nulo si no hay mandato vigente.
+  nextChargeAt       DateTime?
+  /// Intentos de cobro fallidos consecutivos del periodo actual.
+  chargeAttempts     Int            @default(0)
+  lastChargeError    String?
   /// Quién concedió la cortesía. Se conserva aunque la cuenta se elimine.
   grantedById        String?
-  grantedBy          User?     @relation("SubscriptionGrantor", fields: [grantedById], references: [id], onDelete: SetNull)
+  grantedBy          User?          @relation("SubscriptionGrantor", fields: [grantedById], references: [id], onDelete: SetNull)
   grantedAt          DateTime?
   /// Motivo declarado por quien la concede. Obligatorio en el panel.
   grantedReason      String?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
 
   @@index([status])
   @@index([source])
+  @@index([nextChargeAt])
 }
 
 model Payment {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   userId         String
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   amountCents    Int
-  currency       String   @default("USD")
-    status         String   @default("PENDING") // PENDING | SUCCEEDED | FAILED | REFUNDED | SUPERSEDED | REVIEW_REQUIRED
+  currency       String    @default("USD")
+  status         String    @default("PENDING") // PENDING | SUCCEEDED | FAILED | REFUNDED | SUPERSEDED | REVIEW_REQUIRED
   description    String
   /// Clave de idempotencia del webhook. Impide procesar dos veces el mismo evento.
-  idempotencyKey String   @unique
+  idempotencyKey String    @unique
   externalId     String?
   invoiceUrl     String?
   processedAt    DateTime?
-  createdAt      DateTime @default(now())
+  createdAt      DateTime  @default(now())
 
   @@index([userId])
   @@index([status])
 }
 
 model WebhookEvent {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   provider    String
   externalId  String
   type        String
   payload     String
   processedAt DateTime?
   error       String?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
 
   @@unique([provider, externalId])
 }
 
 model Coupon {
-  id               String    @id @default(cuid())
-  code             String    @unique
-  description      String
-  percentOff       Int?
-  amountOffCents   Int?
-  appliesToPlanId  String?
-  maxRedemptions   Int?
-  timesRedeemed    Int       @default(0)
-  expiresAt        DateTime?
-  active           Boolean   @default(true)
-  createdAt        DateTime  @default(now())
+  id              String    @id @default(cuid())
+  code            String    @unique
+  description     String
+  percentOff      Int?
+  amountOffCents  Int?
+  appliesToPlanId String?
+  maxRedemptions  Int?
+  timesRedeemed   Int       @default(0)
+  expiresAt       DateTime?
+  active          Boolean   @default(true)
+  createdAt       DateTime  @default(now())
 }
 
 // ── Cuenta DEMO y libro mayor ───────────────────────────────────────────────
 
 model DemoAccount {
-  id             String   @id @default(cuid())
-  userId         String
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  label          String   @default("Cuenta DEMO principal")
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label           String    @default("Cuenta DEMO principal")
   /// Saldo virtual en centavos. Es un valor derivado: siempre debe coincidir
   /// con la suma de los asientos del libro mayor. `verifyLedger` lo comprueba.
-  balanceCents   Int      @default(1000000)
-  currency       String   @default("VUSD")
-  resetsThisMonth Int     @default(0)
-  lastResetAt    DateTime?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  balanceCents    Int       @default(1000000)
+  currency        String    @default("VUSD")
+  resetsThisMonth Int       @default(0)
+  lastResetAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   ledger      DemoBalanceLedger[]
   simulations Simulation[]
@@ -286,7 +365,7 @@ model DemoBalanceLedger {
 // ── Instrumentos y mercado ──────────────────────────────────────────────────
 
 model Asset {
-  symbol          String @id
+  symbol          String  @id
   name            String
   assetClass      String
   quoteCurrency   String
@@ -295,7 +374,7 @@ model Asset {
   spreadBps       Float
   educationalRisk Int
   description     String
-  minPlan         String @default("FREE")
+  minPlan         String  @default("FREE")
   sessionLabel    String
   active          Boolean @default(true)
 
@@ -304,20 +383,20 @@ model Asset {
 }
 
 model DataProviderRecord {
-  id               String   @id
+  id               String    @id
   label            String
-  synthetic        Boolean  @default(false)
-  active           Boolean  @default(false)
-  declaredDelaySec Int      @default(0)
+  synthetic        Boolean   @default(false)
+  active           Boolean   @default(false)
+  declaredDelaySec Int       @default(0)
   attributionText  String?
   attributionUrl   String?
   lastHealthCheck  DateTime?
   lastLatencyMs    Int?
   lastStatus       String?
-  errorsToday      Int      @default(0)
-  requestsToday    Int      @default(0)
-  estimatedCostUsd Float    @default(0)
-  updatedAt        DateTime @updatedAt
+  errorsToday      Int       @default(0)
+  requestsToday    Int       @default(0)
+  estimatedCostUsd Float     @default(0)
+  updatedAt        DateTime  @updatedAt
 }
 
 model WatchlistItem {
@@ -337,24 +416,24 @@ model WatchlistItem {
 // ── Simulación ──────────────────────────────────────────────────────────────
 
 model Simulation {
-  id                   String      @id @default(cuid())
-  userId               String
-  user                 User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  demoAccountId        String
-  demoAccount          DemoAccount @relation(fields: [demoAccountId], references: [id], onDelete: Cascade)
-  portfolioId          String?
-  portfolio            Portfolio?  @relation(fields: [portfolioId], references: [id])
+  id            String      @id @default(cuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  demoAccountId String
+  demoAccount   DemoAccount @relation(fields: [demoAccountId], references: [id], onDelete: Cascade)
+  portfolioId   String?
+  portfolio     Portfolio?  @relation(fields: [portfolioId], references: [id])
 
-  mode                 String
-  symbol               String
-  assetClass           String
-  direction            String?
-  status               String      @default("OPEN")
-  outcome              String      @default("PENDING")
-  orderType            String      @default("MARKET")
+  mode       String
+  symbol     String
+  assetClass String
+  direction  String?
+  status     String  @default("OPEN")
+  outcome    String  @default("PENDING")
+  orderType  String  @default("MARKET")
 
   stakeCents           Int
-  leverage             Int         @default(1)
+  leverage             Int    @default(1)
   quantity             Float
   entryPrice           Float
   exitPrice            Float?
@@ -362,18 +441,18 @@ model Simulation {
   stopLoss             Float?
   takeProfit           Float?
   trailingStopDistance Float?
-  feeCents             Int         @default(0)
+  feeCents             Int    @default(0)
   pnlCents             Int?
 
-  openedAt             DateTime    @default(now())
-  expiresAt            DateTime?
-  closedAt             DateTime?
-  closeReason          String?
+  openedAt    DateTime  @default(now())
+  expiresAt   DateTime?
+  closedAt    DateTime?
+  closeReason String?
 
-  rationale            String
-  confidence           String      @default("MEDIUM")
-  perceivedRisk        Int         @default(3)
-  strategyTag          String?
+  rationale     String
+  confidence    String  @default("MEDIUM")
+  perceivedRisk Int     @default(3)
+  strategyTag   String?
 
   // ── Auditoría ─────────────────────────────────────────────────────────────
   engineVersion        String
@@ -381,11 +460,11 @@ model Simulation {
   priceSourceProvider  String
   /// Marca temporal del precio de apertura según el proveedor.
   priceSourceTimestamp DateTime
-  entryLatencyMs       Int         @default(0)
+  entryLatencyMs       Int       @default(0)
   exitSourceProvider   String?
   exitSourceTimestamp  DateTime?
   exitLatencyMs        Int?
-  userTimezone         String      @default("UTC")
+  userTimezone         String    @default("UTC")
   /// JSON con `SimulationContextSnapshot`: indicadores visibles, sus valores,
   /// procedencia del dato y últimas velas. Congelado en la apertura.
   contextSnapshot      String
@@ -431,18 +510,18 @@ model PortfolioHolding {
 }
 
 model Alert {
-  id           String    @id @default(cuid())
-  userId       String
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  symbol       String
-  asset        Asset     @relation(fields: [symbol], references: [symbol])
-  kind         String    @default("PRICE") // PRICE | INDICATOR | EVENT
-  condition    String    // ABOVE | BELOW | CROSSES
-  threshold    Float
-  note         String?
-  active       Boolean   @default(true)
-  triggeredAt  DateTime?
-  createdAt    DateTime  @default(now())
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  symbol      String
+  asset       Asset     @relation(fields: [symbol], references: [symbol])
+  kind        String    @default("PRICE") // PRICE | INDICATOR | EVENT
+  condition   String // ABOVE | BELOW | CROSSES
+  threshold   Float
+  note        String?
+  active      Boolean   @default(true)
+  triggeredAt DateTime?
+  createdAt   DateTime  @default(now())
 
   @@index([userId, active])
 }
@@ -493,34 +572,34 @@ model JournalEntry {
 // ── Academia ────────────────────────────────────────────────────────────────
 
 model Track {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  title       String
-  summary     String
-  level       String   @default("BASICO")
-  topic       String
-  position    Int      @default(0)
-  minPlan     String   @default("FREE")
-  icon        String   @default("book")
-  published   Boolean  @default(true)
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  title     String
+  summary   String
+  level     String   @default("BASICO")
+  topic     String
+  position  Int      @default(0)
+  minPlan   String   @default("FREE")
+  icon      String   @default("book")
+  published Boolean  @default(true)
   /// Patrocinio institucional, sin injerencia en el contenido.
-  sponsorId   String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  sponsorId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   courses Course[]
 }
 
 model Course {
-  id        String   @id @default(cuid())
+  id        String  @id @default(cuid())
   trackId   String
-  track     Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
-  slug      String   @unique
+  track     Track   @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  slug      String  @unique
   title     String
   summary   String
-  position  Int      @default(0)
-  minPlan   String   @default("FREE")
-  published Boolean  @default(true)
+  position  Int     @default(0)
+  minPlan   String  @default("FREE")
+  published Boolean @default(true)
 
   modules Module[]
 }
@@ -537,21 +616,21 @@ model Module {
 }
 
 model Lesson {
-  id                  String  @id @default(cuid())
-  moduleId            String
-  module              Module  @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  slug                String  @unique
-  title               String
-  summary             String
+  id                 String  @id @default(cuid())
+  moduleId           String
+  module             Module  @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  slug               String  @unique
+  title              String
+  summary            String
   /// JSON con `LessonBlock[]`.
-  blocks              String
-  estimatedMinutes    Int     @default(8)
-  position            Int     @default(0)
-  minPlan             String  @default("FREE")
+  blocks             String
+  estimatedMinutes   Int     @default(8)
+  position           Int     @default(0)
+  minPlan            String  @default("FREE")
   /// Exige completar una simulación antes de dar la lección por superada.
-  requiresSimulation  Boolean @default(false)
-  published           Boolean @default(true)
-  topic               String  @default("general")
+  requiresSimulation Boolean @default(false)
+  published          Boolean @default(true)
+  topic              String  @default("general")
 
   quiz     Quiz?
   progress UserProgress[]
@@ -598,15 +677,15 @@ model UserProgress {
 }
 
 model Certificate {
-  id             String   @id @default(cuid())
-  userId         String
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  trackSlug      String
-  trackTitle     String
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trackSlug        String
+  trackTitle       String
   /// Código público de verificación. No contiene datos personales.
-  verificationCode String @unique
-  verified       Boolean  @default(false)
-  issuedAt       DateTime @default(now())
+  verificationCode String   @unique
+  verified         Boolean  @default(false)
+  issuedAt         DateTime @default(now())
 
   @@index([userId])
 }
@@ -736,19 +815,19 @@ model PromptVersionRecord {
 // ── Contenido y noticias ────────────────────────────────────────────────────
 
 model NewsArticleRecord {
-  id              String   @id @default(cuid())
-  slug            String   @unique
-  kind            String   @default("EDUCATIONAL")
-  title           String
-  summary         String
-  body            String
-  source          String
-  sourceUrl       String?
-  tags            String   @default("[]")
-  relatedSymbols  String   @default("[]")
-  readingMinutes  Int      @default(3)
-  published       Boolean  @default(true)
-  publishedAt     DateTime @default(now())
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  kind           String   @default("EDUCATIONAL")
+  title          String
+  summary        String
+  body           String
+  source         String
+  sourceUrl      String?
+  tags           String   @default("[]")
+  relatedSymbols String   @default("[]")
+  readingMinutes Int      @default(3)
+  published      Boolean  @default(true)
+  publishedAt    DateTime @default(now())
 }
 
 model EconomicEventRecord {
@@ -781,47 +860,47 @@ model Advertiser {
 }
 
 model AdUnit {
-  id              String @id
-  label           String
-  format          String
-  reservedHeight  Int
-  surface         String
-  description     String
-  active          Boolean @default(true)
+  id             String  @id
+  label          String
+  format         String
+  reservedHeight Int
+  surface        String
+  description    String
+  active         Boolean @default(true)
 
   placements Placement[]
 }
 
 model Placement {
-  id        String @id @default(cuid())
-  adUnitId  String
-  adUnit    AdUnit @relation(fields: [adUnitId], references: [id], onDelete: Cascade)
-  page      String
-  active    Boolean @default(true)
+  id       String  @id @default(cuid())
+  adUnitId String
+  adUnit   AdUnit  @relation(fields: [adUnitId], references: [id], onDelete: Cascade)
+  page     String
+  active   Boolean @default(true)
 
   creatives Creative[]
 }
 
 model AdCampaign {
-  id                  String     @id @default(cuid())
-  advertiserId        String
-  advertiser          Advertiser @relation(fields: [advertiserId], references: [id], onDelete: Cascade)
-  name                String
-  status              String     @default("DRAFT")
-  pricingModel        String     @default("CPM")
+  id                 String     @id @default(cuid())
+  advertiserId       String
+  advertiser         Advertiser @relation(fields: [advertiserId], references: [id], onDelete: Cascade)
+  name               String
+  status             String     @default("DRAFT")
+  pricingModel       String     @default("CPM")
   /// Precio unitario en centavos: CPM, CPC o importe fijo según el modelo.
-  unitPriceCents      Int        @default(0)
-  budgetCents         Int        @default(0)
-  spentCents          Int        @default(0)
-  startsAt            DateTime
-  endsAt              DateTime?
-  frequencyCapPerDay  Int        @default(3)
-  priority            Int        @default(1)
+  unitPriceCents     Int        @default(0)
+  budgetCents        Int        @default(0)
+  spentCents         Int        @default(0)
+  startsAt           DateTime
+  endsAt             DateTime?
+  frequencyCapPerDay Int        @default(3)
+  priority           Int        @default(1)
   /// JSON con la segmentación permitida (país, idioma, dispositivo, tema...).
-  targeting           String     @default("{}")
-  packageCode         String?
-  createdAt           DateTime   @default(now())
-  updatedAt           DateTime   @updatedAt
+  targeting          String     @default("{}")
+  packageCode        String?
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
 
   creatives   Creative[]
   impressions AdImpression[]
@@ -854,22 +933,22 @@ model Creative {
 }
 
 model AdImpression {
-  id         String     @id @default(cuid())
-  creativeId String
-  creative   Creative   @relation(fields: [creativeId], references: [id], onDelete: Cascade)
-  campaignId String
-  campaign   AdCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  userId     String?
-  user       User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
-  slotCode   String
-  page       String
+  id          String     @id @default(cuid())
+  creativeId  String
+  creative    Creative   @relation(fields: [creativeId], references: [id], onDelete: Cascade)
+  campaignId  String
+  campaign    AdCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  slotCode    String
+  page        String
   countryCode String?
-  device     String     @default("desktop")
+  device      String     @default("desktop")
   /// `true` cuando el anuncio estuvo visible al menos un segundo en pantalla.
-  viewable   Boolean    @default(false)
+  viewable    Boolean    @default(false)
   /// Día YYYY-MM-DD para el cálculo de frequency capping.
-  day        String
-  createdAt  DateTime   @default(now())
+  day         String
+  createdAt   DateTime   @default(now())
 
   @@index([campaignId, day])
   @@index([userId, day])
@@ -906,17 +985,17 @@ model LegalDocument {
 }
 
 model Consent {
-  id          String        @id @default(cuid())
-  userId      String
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  documentId  String
-  document    LegalDocument @relation(fields: [documentId], references: [id])
+  id         String        @id @default(cuid())
+  userId     String
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documentId String
+  document   LegalDocument @relation(fields: [documentId], references: [id])
   /// TERMS | PRIVACY | RISK | MARKETING | COOKIES | AI
-  kind        String
-  granted     Boolean       @default(true)
-  ipHash      String?
-  userAgent   String?
-  createdAt   DateTime      @default(now())
+  kind       String
+  granted    Boolean       @default(true)
+  ipHash     String?
+  userAgent  String?
+  createdAt  DateTime      @default(now())
 
   @@index([userId, kind])
 }
@@ -928,17 +1007,17 @@ model RestrictedCountry {
 }
 
 model AuditLog {
-  id         String   @id @default(cuid())
-  actorId    String?
-  actor      User?    @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
-  actorRole  String?
-  action     String
-  entity     String
-  entityId   String?
+  id        String   @id @default(cuid())
+  actorId   String?
+  actor     User?    @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+  actorRole String?
+  action    String
+  entity    String
+  entityId  String?
   /// JSON con el estado anterior y posterior, sin datos sensibles.
-  diff       String   @default("{}")
-  ipHash     String?
-  createdAt  DateTime @default(now())
+  diff      String   @default("{}")
+  ipHash    String?
+  createdAt DateTime @default(now())
 
   @@index([entity, entityId])
   @@index([createdAt])
@@ -975,13 +1054,13 @@ model SupportTicket {
 }
 
 model AnalyticsEvent {
-  id         String   @id @default(cuid())
-  userId     String?
+  id          String   @id @default(cuid())
+  userId      String?
   anonymousId String?
-  name       String
+  name        String
   /// JSON con las propiedades del evento. Sin datos personales.
-  properties String   @default("{}")
-  createdAt  DateTime @default(now())
+  properties  String   @default("{}")
+  createdAt   DateTime @default(now())
 
   @@index([name, createdAt])
 }

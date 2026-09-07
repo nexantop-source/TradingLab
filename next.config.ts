@@ -24,13 +24,19 @@ const googleFrameSources = googleAdsEnabled
   ? 'https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com https://fundingchoicesmessages.google.com'
   : "'none'";
 
+// La tarjeta se tokeniza en el navegador contra Wompi: es lo que impide que el
+// PAN pase por este servidor. Requiere permitir ese único origen en connect-src.
+const wompiApi = process.env.WOMPI_ENVIRONMENT === 'sandbox'
+  ? ' https://sandbox.wompi.co'
+  : ' https://production.wompi.co';
+
 const csp = [
   `default-src 'self'`,
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}${googleScriptSources}`,
   `style-src 'self' 'unsafe-inline'`,
   `font-src 'self' data:`,
   `img-src 'self' data: blob: https:`,
-  `connect-src 'self'${isDev ? ' ws: wss:' : ''}${googleConnectSources}`,
+  `connect-src 'self'${wompiApi}${isDev ? ' ws: wss:' : ''}${googleConnectSources}`,
   `frame-src ${googleFrameSources}`,
   `frame-ancestors 'none'`,
   `base-uri 'self'`,

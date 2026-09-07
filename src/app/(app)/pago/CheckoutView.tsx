@@ -9,6 +9,7 @@ import { apiFetch, ApiRequestError } from '@/lib/client-api';
 import type { CheckoutIntent } from '@/lib/checkout-intent';
 import { safeWompiCheckoutUrl } from '@/lib/checkout-url';
 import { PLAN_ENTITLEMENTS } from '@tl/types/plans';
+import { TrialStart } from '@/components/billing/TrialStart';
 import { PAYMENT_REGION_NOTICE } from '@/lib/payment-copy';
 
 interface PreparedCheckout {
@@ -31,6 +32,7 @@ export function CheckoutView({
   intent,
   plan,
   existingSubscription,
+  trial,
 }: {
   intent: CheckoutIntent;
   plan: { name: string; tagline: string; referencePriceUsd: number; highlights: string[] };
@@ -41,6 +43,8 @@ export function CheckoutView({
     currentPeriodEnd: string;
     cancelAtPeriodEnd: boolean;
   } | null;
+  /** Presente solo si el servidor confirmó que la cuenta puede probar. */
+  trial: { days: number } | null;
 }) {
   const router = useRouter();
   const [loading, setLoading] = React.useState(false);
@@ -173,6 +177,19 @@ export function CheckoutView({
         </Card>
 
         <div className="space-y-4">
+          {trial && (
+            <Card className="p-6 sm:p-8">
+              <TrialStart
+                planId={intent.plan as 'STANDARD' | 'PREMIUM'}
+                planName={plan.name}
+                interval={intent.interval}
+              />
+              <p className="mt-5 border-t border-[var(--color-border)] pt-5 text-center text-[11px] text-[var(--color-muted)]">
+                ¿Prefieres pagar un periodo suelto, sin dejar tarjeta guardada? Usa el pago único de abajo.
+              </p>
+            </Card>
+          )}
+
           <div className="checkout-currency"><ShieldCheck size={20} aria-hidden="true" /><p>TradingLab es de Colombia. Al continuar calculamos y validamos el importe en COP. Verás el total exacto en Wompi antes de autorizar el pago.</p></div>
           <Card className="checkout-payment p-6">
             <div className="flex items-start gap-3">

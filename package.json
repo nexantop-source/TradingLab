@@ -18,7 +18,9 @@
     "db:studio": "prisma studio",
     "db:migrate": "npm run db:provider && prisma migrate deploy",
     "db:reset": "node scripts/reset-dev-db.mjs && npm run db:push && npm run db:seed",
-    "setup": "npm run db:provider && prisma generate && prisma db push && npm run db:seed"
+    "setup": "npm run db:provider && prisma generate && prisma db push && npm run db:seed",
+    "test:trial:sandbox": "node --conditions=react-server --import tsx scripts/qa-trial-sandbox.mts",
+    "test:wompi:sandbox": "node --conditions=react-server --import tsx scripts/qa-wompi-recurring.mts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

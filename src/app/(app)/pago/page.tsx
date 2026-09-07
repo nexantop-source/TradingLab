@@ -4,6 +4,7 @@ import { getAuth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { parseCheckoutIntent } from '@/lib/checkout-intent';
 import { PLAN_ENTITLEMENTS } from '@tl/types/plans';
+import { trialEligibility, TRIAL_DAYS, TRIAL_PLANS } from '@/lib/trials';
 import { CheckoutView } from './CheckoutView';
 
 export const metadata: Metadata = { title: 'Revisar pago' };
@@ -35,6 +36,9 @@ export default async function CheckoutPage({
   });
 
   const plan = PLAN_ENTITLEMENTS[intent.plan];
+  const eligibility = await trialEligibility(auth.user.id);
+  const trialAvailable =
+    eligibility.eligible && TRIAL_PLANS.includes(intent.plan as (typeof TRIAL_PLANS)[number]);
   const liveSubscription =
     subscription &&
     ['ACTIVE', 'TRIALING'].includes(subscription.status) &&
@@ -45,6 +49,7 @@ export default async function CheckoutPage({
   return (
     <CheckoutView
       intent={intent}
+      trial={trialAvailable ? { days: TRIAL_DAYS } : null}
       plan={{
         name: plan.name,
         tagline: plan.tagline,
