@@ -10,7 +10,10 @@ import { TIMEFRAMES, type IndicatorId } from '@tl/types';
 const querySchema = z.object({
   symbol: z.string().min(1).max(20),
   timeframe: z.enum(TIMEFRAMES).default('1h'),
-  limit: z.coerce.number().int().min(20).max(1000).default(300),
+  // El techo alto es deliberado: una serie semanal completa de una accion con
+  // cuarenta anos de historia son mas de dos mil velas, y recortarlas seria
+  // volver a ensenar un trozo del pasado en lugar del pasado.
+  limit: z.coerce.number().int().min(20).max(5000).default(300),
   indicators: z.string().optional(),
 });
 

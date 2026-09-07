@@ -7,6 +7,8 @@ import { ArrowDownRight, ArrowUpRight, ChevronDown, SlidersHorizontal, WalletCar
 import { AssetIcon } from '@/components/investment/AssetIcon';
 import { useMarketPulse } from '@/components/trading/useMarketPulse';
 import { TradingChart } from '@/components/trading/TradingChart';
+import { HistoryChart } from '@/components/trading/HistoryChart';
+import { DEFAULT_HISTORY_RANGE, HISTORY_RANGES, historyRange } from '@/components/trading/historyRanges';
 import { OperationLive } from '@/components/trading/OperationLive';
 import { apiFetch, ApiRequestError } from '@/lib/client-api';
 import type { OpenPositionDto } from '@/lib/simulation-service';
@@ -18,7 +20,10 @@ interface PositionsSnapshot { open: OpenPositionDto[]; balanceCents: number; sim
 export function SimpleTerminal(props: TerminalProps & { onAdvanced: () => void }) {
   const router = useRouter();
   const pulse = useMarketPulse(props.symbol.symbol, props.quote, props.provenance);
-  const [range, setRange] = useState<60 | 120>(120);
+  // El rango por defecto es un año, no dos minutos. Quien abre un instrumento
+  // por primera vez quiere saber de dónde viene, no verlo temblar.
+  const [range, setRange] = useState<string>(DEFAULT_HISTORY_RANGE);
+  const [periodChange, setPeriodChange] = useState<number | null>(null);
   const [chartType, setChartType] = useState<'line' | 'area' | 'candles'>('candles');
   const [toolsOpen,setToolsOpen] = useState(false);
   const [indicator,setIndicator] = useState<'SMA20'|'EMA12'|null>(null);
@@ -81,8 +86,17 @@ export function SimpleTerminal(props: TerminalProps & { onAdvanced: () => void }
   }
 
   const marketClosed = pulse.provenance.marketStatus !== 'OPEN';
-  const chartTicks = useMemo(() => pulse.ticks.slice(-(range + 1)), [pulse.ticks, range]);
-  const statusLabel = marketClosed ? 'Sesión cerrada' : pulse.status === 'live' ? (pulse.provenance.synthetic ? 'Simulación · cada segundo' : 'Datos reales · cada segundo') : pulse.status === 'connecting' ? 'Conectando…' : pulse.status === 'offline' ? 'Sin conexión' : pulse.status === 'paused' ? 'En pausa' : 'Datos desactualizados';
+  const live = range === 'LIVE';
+  // El pulso por segundo solo existe donde la fuente lo entrega de verdad.
+  // En una acción la serie en vivo sería una línea plana con el mismo precio
+  // repetido sesenta veces, que aparenta un detalle que no tenemos.
+  const liveAvailable = props.symbol.assetClass === 'CRYPTO';
+  const chartTicks = useMemo(() => pulse.ticks.slice(-121), [pulse.ticks]);
+  const onSummary = useCallback((summary: { changePercent: number } | null) => setPeriodChange(summary?.changePercent ?? null), []);
+  // El rótulo dice de dónde viene el precio y con qué frecuencia se renueva.
+  // "Cada segundo" solo es cierto donde la fuente lo entrega así; en una acción
+  // el dato llega cada veinte segundos y a veces con minutos de retraso.
+  const statusLabel = marketClosed ? 'Sesión cerrada' : pulse.status === 'live' ? (pulse.provenance.synthetic ? 'Simulación · cada segundo' : pulse.provenance.freshness === 'REALTIME' ? 'Datos reales · en directo' : 'Datos reales · con retraso') : pulse.status === 'connecting' ? 'Conectando…' : pulse.status === 'offline' ? 'Sin conexión' : pulse.status === 'paused' ? 'En pausa' : 'Datos desactualizados';
   const thisPosition = positions.find(position => position.symbol === props.symbol.symbol);
   const levels = thisPosition ? [
     { price: thisPosition.entryPrice, label: 'Entrada', tone: 'neutral' as const },
@@ -91,11 +105,11 @@ export function SimpleTerminal(props: TerminalProps & { onAdvanced: () => void }
   ] : [];
   return <div className="simple-terminal" data-terminal="simple" data-has-position={Boolean(thisPosition)}>
     <header className="simple-terminal-top"><Link href="/explorar" className="simple-instrument" aria-label={`Cambiar instrumento: ${props.symbol.name}`}><AssetIcon symbol={props.symbol.symbol} /><span><strong>{props.symbol.symbol}</strong><small>{props.symbol.name}</small></span><ChevronDown size={17} /></Link><button type="button" onClick={()=>setToolsOpen(!toolsOpen)} aria-expanded={toolsOpen} className="simple-advanced-button"><SlidersHorizontal size={16} />Herramientas</button></header>
-    {toolsOpen && <section className="chart-tools" aria-label="Herramientas del gráfico"><div><button aria-pressed={chartType==='candles'} onClick={()=>setChartType('candles')}>Velas · 5 s</button><button aria-pressed={indicator==='SMA20'} onClick={()=>setIndicator(indicator==='SMA20'?null:'SMA20')}>Media SMA20</button>{props.availableIndicators.includes('EMA12')?<button aria-pressed={indicator==='EMA12'} onClick={()=>setIndicator(indicator==='EMA12'?null:'EMA12')}>Media EMA12</button>:<Link href="/planes">EMA12 · Mejorar a Plus</Link>}<button onClick={()=>setIndicator(null)}>Quitar indicador</button></div><p>Arrastra para explorar. Pellizca para ampliar. Las medias usan observaciones de un segundo; las velas agrupan cinco segundos. Entrada, SL y TP aparecen sobre la gráfica cuando están en el rango visible.</p></section>}
+    {toolsOpen && <section className="chart-tools" aria-label="Herramientas del gráfico"><div><button aria-pressed={chartType==='candles'} onClick={()=>setChartType('candles')}>Velas · 5 s</button><button aria-pressed={indicator==='SMA20'} onClick={()=>setIndicator(indicator==='SMA20'?null:'SMA20')}>Media SMA20</button>{props.availableIndicators.includes('EMA12')?<button aria-pressed={indicator==='EMA12'} onClick={()=>setIndicator(indicator==='EMA12'?null:'EMA12')}>Media EMA12</button>:<Link href="/planes">EMA12 · Mejorar a Plus</Link>}<button onClick={()=>setIndicator(null)}>Quitar indicador</button></div><p>Arrastra para explorar. Pellizca para ampliar. Cada periodo trae su propia serie: cinco minutos dentro de un día, una semana cuando miras todo el historial. Entrada, SL y TP aparecen sobre la gráfica cuando están en el rango visible.</p></section>}
     <div className="simple-terminal-grid"><section className="simple-market-panel" aria-label="Precio y gráfico de práctica">
-      <div className="simple-price-heading"><div><span className="simple-demo-pill">MERCADO DEMO</span><p className="simple-live-price" data-testid="simple-live-price">{pulse.quote.price.toLocaleString('en-US', { minimumFractionDigits: props.symbol.precision, maximumFractionDigits: props.symbol.precision })}</p><p className={pulse.quote.changePercent < 0 ? 'simple-negative' : 'simple-positive'}>{pulse.quote.changePercent >= 0 ? '+' : ''}{pulse.quote.changePercent.toFixed(2)} % <span>· variación de referencia 24 h</span></p></div><div className="simple-status-stack"><span className="simple-pulse-state" data-stale={pulse.stale || marketClosed}><i />{statusLabel}</span>{thisPosition && <OperationLive position={thisPosition} price={pulse.quote.price} stale={pulse.stale} serverTime={pulse.provenance.receivedTimestamp}/>}</div></div>
-      <div className="simple-chart-controls" data-gesture-exclude><div role="group" aria-label="Ventana del gráfico">{([60, 120] as const).map(n => <button key={n} type="button" aria-pressed={range === n} onClick={() => setRange(n)}>{n / 60} min</button>)}</div><div role="group" aria-label="Estilo del gráfico"><button type="button" aria-pressed={chartType === 'candles'} onClick={() => setChartType('candles')}>Velas</button><button type="button" aria-pressed={chartType === 'line'} onClick={() => setChartType('line')}>Línea</button><button type="button" aria-pressed={chartType === 'area'} onClick={() => setChartType('area')}>Área</button></div></div>
-      <TradingChart
+      <div className="simple-price-heading"><div><span className="simple-demo-pill">MERCADO DEMO</span><p className="simple-live-price" data-testid="simple-live-price">{pulse.quote.price.toLocaleString('en-US', { minimumFractionDigits: props.symbol.precision, maximumFractionDigits: props.symbol.precision })}</p><p className={(live || periodChange === null ? pulse.quote.changePercent : periodChange) < 0 ? 'simple-negative' : 'simple-positive'}>{(() => { const value = live || periodChange === null ? pulse.quote.changePercent : periodChange; return `${value >= 0 ? '+' : ''}${value.toFixed(2)} %`; })()} <span>· {live || periodChange === null ? 'variación de la sesión' : `en ${historyRange(range).title}`}</span></p></div><div className="simple-status-stack"><span className="simple-pulse-state" data-stale={pulse.stale || marketClosed}><i />{statusLabel}</span>{thisPosition && <OperationLive position={thisPosition} price={pulse.quote.price} stale={pulse.stale} serverTime={pulse.provenance.receivedTimestamp}/>}</div></div>
+      <div className="simple-chart-controls" data-gesture-exclude><div className="simple-range-group" role="group" aria-label="Periodo del gráfico">{liveAvailable && <button type="button" aria-pressed={live} onClick={() => setRange('LIVE')} title="Observación por segundo">En vivo</button>}{HISTORY_RANGES.map(item => <button key={item.id} type="button" aria-pressed={range === item.id} onClick={() => setRange(item.id)} aria-label={`Ver ${item.title}`}>{item.label}</button>)}</div><div role="group" aria-label="Estilo del gráfico"><button type="button" aria-pressed={chartType === 'candles'} onClick={() => setChartType('candles')}>Velas</button><button type="button" aria-pressed={chartType === 'line'} onClick={() => setChartType('line')}>Línea</button><button type="button" aria-pressed={chartType === 'area'} onClick={() => setChartType('area')}>Área</button></div></div>
+      {live ? <TradingChart
         ticks={chartTicks}
         precision={props.symbol.precision}
         stale={pulse.stale || marketClosed}
@@ -104,8 +118,15 @@ export function SimpleTerminal(props: TerminalProps & { onAdvanced: () => void }
         type={chartType}
         indicator={indicator}
         levels={levels}
-        windowSeconds={range}
-      />
+        windowSeconds={120}
+      /> : <HistoryChart
+        symbol={props.symbol.symbol}
+        precision={props.symbol.precision}
+        rangeId={range}
+        type={chartType}
+        levels={levels}
+        onSummary={onSummary}
+      />}
       {pulse.stale && pulse.error && <p className="simple-feed-error" role="status">{pulse.error}</p>}
     </section>
     <div className="simple-trade-panel"><div className="simple-wallet"><WalletCards size={19} aria-hidden="true" /><div><small>Saldo virtual disponible</small><strong>USD {money(balance)}</strong></div><Link href="/perfil" aria-label="Gestionar mi cuenta demo">DEMO<ChevronDown size={13} /></Link></div>

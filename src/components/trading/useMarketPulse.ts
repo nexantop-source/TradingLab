@@ -86,10 +86,17 @@ export function useMarketPulse(symbol: string, initialQuote: InitialPulseQuote, 
         }
         const data = result.data as MarketPulse;
         if (!validPulse(data, symbol)) throw new Error('No pudimos validar la serie recibida.');
-        if (!data.provenance.synthetic && (data.provenance.freshness !== 'REALTIME'
-          || !Number.isFinite(data.provenance.sourceTimestamp)
-          || data.serverTime - data.provenance.sourceTimestamp > 5000
-          || data.provenance.sourceTimestamp > data.serverTime)) {
+        // La marca de la fuente tiene que ser creíble: ni del futuro, ni tan
+        // vieja que el precio ya no describa el mercado de ahora. El umbral
+        // depende de lo que la fuente promete, no de un número único: Binance
+        // entrega cada segundo, pero una acción llega con minutos de retraso y
+        // exigirle cinco segundos dejaba fuera todo lo que no fuera cripto.
+        const maxAge = data.provenance.freshness === 'MARKET_CLOSED'
+          ? Number.POSITIVE_INFINITY
+          : data.provenance.freshness === 'REALTIME' ? 60_000 : 20 * 60_000;
+        if (!data.provenance.synthetic && (!Number.isFinite(data.provenance.sourceTimestamp)
+          || data.serverTime - data.provenance.sourceTimestamp > maxAge
+          || data.provenance.sourceTimestamp > data.serverTime + 2000)) {
           throw new Error('La fuente real no tiene una cotización vigente. Espera antes de operar.');
         }
         if (disposed || run !== generation) return;

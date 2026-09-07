@@ -24,3 +24,27 @@
 .simple-live-chart__empty { min-height: 200px; display: grid; place-content: center; gap: var(--space-4); color: var(--color-muted); text-align: center; font-size: .75rem; }
 .simple-live-chart__empty-line { width: 110px; height: 1px; justify-self: center; background: linear-gradient(90deg, transparent, var(--chart-accent), transparent); }
 @media (prefers-contrast: more) { .simple-live-chart__line { stroke-width: 3; } .simple-live-chart__grid line { stroke-dasharray: none; } }
+
+/* ── Historial real ───────────────────────────────────────────────────────
+   El selector de periodo es la pieza que convierte la terminal en algo que
+   sirve para entender un activo y no solo para verlo temblar. Se desplaza en
+   horizontal en pantallas estrechas -siete periodos no caben en un movil- sin
+   partirse en dos filas, que rompia la lectura de izquierda a derecha. */
+.history-chart { color: var(--color-text); position: relative; min-width: 0; }
+.history-chart-canvas { height: 360px; }
+.history-chart-status { padding: var(--space-3) 0; font-size: var(--text-2xs); line-height: 1.6; color: var(--color-muted); }
+.history-chart-status.is-error { color: var(--color-gold); }
+/* Mientras llega otra serie el lienzo se atenua: sigue en pantalla, pero deja
+   de leerse como el dato definitivo del periodo recien pedido. */
+.history-chart[data-state='loading'] .history-chart-canvas { opacity: .45; transition: opacity 160ms var(--ease-out-soft, ease); }
+
+.simple-range-group { display: flex; gap: var(--space-1); overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.simple-range-group::-webkit-scrollbar { display: none; }
+.simple-range-group button { flex-shrink: 0; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 1023px) {
+  .history-chart-canvas { height: clamp(180px, calc(100svh - 620px - env(safe-area-inset-top) - env(safe-area-inset-bottom)), 260px); }
+  .simple-terminal[data-has-position='true'] .history-chart-canvas { height: clamp(170px, calc(100svh - 665px - env(safe-area-inset-top) - env(safe-area-inset-bottom)), 220px); }
+  .simple-chart-controls { flex-direction: column; align-items: stretch; gap: var(--space-1); }
+  .simple-chart-controls > div:last-child { justify-content: flex-end; }
+}
