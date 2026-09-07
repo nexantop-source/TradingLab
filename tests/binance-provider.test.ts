@@ -50,12 +50,26 @@ describe('real Binance data, no synthetic substitution', () => {
     expect(result.candles.at(-1)?.v).toBe(18 * 5);
     expect(result.provenance.sourceTimestamp).toBe(now - 12001);
   });
-  it('keeps legacy USD simulations deterministic without a network request', async () => {
+  it('cotiza los identificadores heredados contra el par real de Binance', async () => {
+    // `BTCUSD` es el identificador del catalogo; el par que existe de verdad es
+    // `BTCUSDT`. Antes estos simbolos se servian con el motor deterministico
+    // para que las simulaciones antiguas fueran reproducibles, pero eso
+    // significaba que el instrumento mas visible del producto ensenaba un
+    // precio inventado. La traduccion vive en el proveedor y lo que se devuelve
+    // conserva el identificador del catalogo.
     const { provider, request } = fixture();
-    const first = await provider.getPriceAt('BTCUSD', now);
-    expect(first).toEqual(await provider.getPriceAt('BTCUSD', now));
-    expect(first.provenance.synthetic).toBe(true);
-    expect(request).not.toHaveBeenCalled();
+    const point = await provider.getPriceAt('BTCUSD', now);
+    expect(point.provenance.synthetic).toBe(false);
+    expect(request).toHaveBeenCalled();
+    expect(request.mock.calls[0][0]).toContain('symbol=BTCUSDT');
+  });
+
+  it('no inventa un precio para un instrumento que Binance no cotiza', async () => {
+    // Sin par real cae al motor deterministico, y lo declara: el peligro no es
+    // simular, es simular sin decirlo junto a precios verdaderos.
+    const { provider } = fixture();
+    const point = await provider.getPriceAt('AAPL', now);
+    expect(point.provenance.synthetic).toBe(true);
   });
   it.each([403, 451, 500])('blocks when the exchange returns HTTP %s', async status => {
     const provider = new BinanceMarketDataProvider(async () => new Response('', { status }), () => now);

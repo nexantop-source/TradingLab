@@ -7,7 +7,7 @@ import type {
   Timeframe,
 } from '@tl/types';
 import { MarketDataError, type MarketDataProvider } from './provider';
-import { BinanceMarketDataProvider, isLivePair } from './binance-provider';
+import { BinanceMarketDataProvider, binancePair } from './binance-provider';
 import { FinnhubMarketDataProvider } from './finnhub-provider';
 import { getSymbol, listSymbols } from './symbols';
 
@@ -43,22 +43,11 @@ export class CompositeMarketDataProvider implements MarketDataProvider {
    * `BTCUSDT` y esa traduccion la hace `upstreamSymbol`.
    */
   private route(symbol: string): MarketDataProvider | null {
-    const meta = getSymbol(symbol);
-    if (isLivePair(symbol)) return this.binance;
-    if (!meta?.upstreamSymbol) return null;
-    return meta.assetClass === 'CRYPTO' ? this.binance : this.finnhub;
-  }
-
-  /**
-   * Ticker con el que hay que pedirlo a su fuente.
-   *
-   * Binance solo entiende su propio par, asi que el identificador del catalogo
-   * se traduce antes de salir y el resultado se devuelve con el identificador
-   * interno: el resto de la aplicacion nunca ve el ticker del proveedor.
-   */
-  private upstream(symbol: string): string {
-    const meta = getSymbol(symbol);
-    return meta?.assetClass === 'CRYPTO' ? (meta.upstreamSymbol ?? symbol) : symbol;
+    // Se comprueba que Binance tenga par de verdad, no solo que el catalogo
+    // diga que es cripto: sin esa comprobacion el proveedor caeria a su motor
+    // sintetico en silencio, que es justo lo que este enrutador debe impedir.
+    if (binancePair(symbol)) return this.binance;
+    return getSymbol(symbol)?.upstreamSymbol ? this.finnhub : null;
   }
 
   private require(symbol: string): MarketDataProvider {
@@ -79,8 +68,7 @@ export class CompositeMarketDataProvider implements MarketDataProvider {
   }
 
   async getQuote(symbol: string, at?: number): Promise<Quote> {
-    const quote = await this.require(symbol).getQuote(this.upstream(symbol), at);
-    return quote.symbol === symbol ? quote : { ...quote, symbol };
+    return this.require(symbol).getQuote(symbol, at);
   }
 
   async getQuotes(symbols: string[], at?: number): Promise<Quote[]> {
@@ -89,15 +77,11 @@ export class CompositeMarketDataProvider implements MarketDataProvider {
   }
 
   async getCandles(params: { symbol: string; timeframe: Timeframe; limit: number; to?: number }): Promise<CandleSeries> {
-    const series = await this.require(params.symbol).getCandles({
-      ...params,
-      symbol: this.upstream(params.symbol),
-    });
-    return series.symbol === params.symbol ? series : { ...series, symbol: params.symbol };
+    return this.require(params.symbol).getCandles(params);
   }
 
   async getPriceAt(symbol: string, timestampMs: number): Promise<{ price: number; provenance: DataProvenance }> {
-    return this.require(symbol).getPriceAt(this.upstream(symbol), timestampMs);
+    return this.require(symbol).getPriceAt(symbol, timestampMs);
   }
 
   getMarketStatus(symbol: string, at = Date.now()): MarketStatus {

@@ -4,6 +4,7 @@ import { InvestmentArtwork } from '@/components/investment/InvestmentArtwork';
 import { ArrowRight, ArrowUpRight, Layers3, Globe2, Compass, ShieldCheck, Sparkles, BookOpen, ChevronRight } from 'lucide-react';
 import { MarketingHeader } from '@/components/marketing/MarketingHeader';
 import { MarketingFooter } from '@/components/marketing/MarketingFooter';
+import { InstallSection } from '@/components/marketing/InstallSection';
 import { PricingPlans } from '@/components/investment/PricingPlans';
 import { PlatformPreview } from '@/components/investment/PlatformPreview';
 import { getAuth } from '@/lib/auth';
@@ -41,6 +42,7 @@ export default async function LandingPage() {
       <section className="invest-learning visual-home-learning" id="metodo"><div className="invest-section"><div className="home-learning-intro"><div><span className="invest-eyebrow">EL CONOCIMIENTO SE CONSTRUYE</span><h2>Empieza donde estás.<br /><span>Llega más preparado.</span></h2><p>Una ruta que acompaña tu experiencia. Aprende un concepto, pruébalo en demo y revisa tus decisiones.</p><Link href="/recursos" className="invest-button secondary">Encuentra tu punto de partida <ArrowRight size={16} /></Link></div><div className="home-learning-art"><InvestmentArtwork scene="learning" sizes="(max-width: 760px) 100vw, 50vw" /></div></div><div className="home-learning-steps">{[[BookOpen,'01','Entiende','Conceptos claros, ejemplos y lecciones cortas.'],[Globe2,'02','Explora','Compara mercados y encuentra tu enfoque.'],[Compass,'03','Practica','Define entrada, salida y riesgo en tu cuenta demo.'],[Sparkles,'04','Evoluciona','Revisa el proceso en tu diario y estadísticas.']].map(([Icon,n,title,body])=>{const I=Icon as typeof BookOpen;return <div key={String(n)}><span className="home-step-top"><I size={22} /><small>{String(n)}</small></span><h3>{String(title)}</h3><p>{String(body)}</p></div>;})}</div></div></section>
       <PricingPlans />
       <section className="invest-closing invest-closing-visual"><InvestmentArtwork scene="possibilities" sizes="(max-width: 760px) 100vw, 1200px" /><div className="invest-closing-copy"><span className="invest-eyebrow">EL PRIMER PASO ES TUYO</span><h2>Abre<br />posibilidades.</h2><p>Tu cuenta demo te está esperando.<br />Dale espacio a lo que puedes aprender.</p><Link href={destination} className="invest-button">Crear mi espacio <ArrowRight size={17} /></Link><small>USD 10.000 virtuales · Sin tarjeta</small></div></section>
+    <InstallSection />
     </main><MarketingFooter />
   </div>;
 }

@@ -2,7 +2,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ArrowDownUp, ArrowUpRight, Search, Star, ChevronRight } from 'lucide-react';
-import { ASSET_CLASS_LABEL, type AssetClass, type PlanId } from '@tl/types';
+import { ASSET_CLASS_LABEL, type AssetClass, type MarketStatus, type PlanId } from '@tl/types';
 import { PLAN_ENTITLEMENTS, planAtLeast } from '@tl/types/plans';
 import { Modal } from '@tl/ui';
 import { apiFetch } from '@/lib/client-api';
@@ -14,6 +14,9 @@ export interface ExplorerAsset {
   symbol: string; name: string; assetClass: AssetClass; precision: number; currency: string;
   description: string; risk: number; minPlan: PlanId; session: string; price: number | null;
   change: number | null; synthetic: boolean; source: string; timestamp: number;
+  /** Ticker que ve la persona. Difiere del interno cuando se cotiza por un fondo. */
+  ticker?: string;
+  marketStatus?: MarketStatus;
 }
 export function MarketExplorer({ assets, authenticated = false, initialWatchlist = [], plan = 'FREE' }: {
   assets: ExplorerAsset[]; authenticated?: boolean; initialWatchlist?: string[]; plan?: PlanId;
@@ -26,7 +29,7 @@ export function MarketExplorer({ assets, authenticated = false, initialWatchlist
   const [busy, setBusy] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const [limit, setLimit] = useState(20);
-  const filtered = useMemo(() => assets.filter(a => (category === 'ALL' || category === 'SAVED' ? category !== 'SAVED' || watchlist.includes(a.symbol) : a.assetClass === category) && `${a.symbol} ${a.name}`.toLowerCase().includes(query.toLowerCase())).sort((a, b) => sort === 'change' ? (b.change ?? -Infinity) - (a.change ?? -Infinity) : a.symbol.localeCompare(b.symbol)), [assets, category, query, sort, watchlist]);
+  const filtered = useMemo(() => assets.filter(a => (category === 'ALL' || category === 'SAVED' ? category !== 'SAVED' || watchlist.includes(a.symbol) : a.assetClass === category) && `${a.ticker ?? a.symbol} ${a.symbol} ${a.name}`.toLowerCase().includes(query.toLowerCase())).sort((a, b) => sort === 'change' ? (b.change ?? -Infinity) - (a.change ?? -Infinity) : a.symbol.localeCompare(b.symbol)), [assets, category, query, sort, watchlist]);
   async function toggleWatch(asset: ExplorerAsset) {
     if (!authenticated) { setMessage('Inicia sesión para guardar tu lista y verla en todos tus dispositivos.'); return; }
     setBusy(asset.symbol);

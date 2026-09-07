@@ -2,10 +2,26 @@ import type { Candle, CandleSeries, DataProvenance, Quote, Timeframe } from '@tl
 import { TIMEFRAME_SECONDS } from '@tl/types';
 import { MarketDataError, type MarketDataProvider } from './provider';
 import { SyntheticMarketDataProvider } from './synthetic-provider';
-import { requireSymbol } from './symbols';
+import { getSymbol, requireSymbol } from './symbols';
 
 export const LIVE_PAIRS = ['BTCUSDT','ETHUSDT','SOLUSDT'] as const;
 export const isLivePair = (symbol:string) => (LIVE_PAIRS as readonly string[]).includes(symbol);
+
+/**
+ * Par de Binance con el que se cotiza un instrumento del catalogo, o `null` si
+ * Binance no lo cubre.
+ *
+ * El catalogo usa identificadores propios -`XRPUSD`- y Binance cotiza contra
+ * Tether -`XRPUSDT`-. La traduccion vive aqui, en el unico sitio que conoce
+ * ambos vocabularios, y no en quien llama.
+ */
+export function binancePair(symbol:string):string|null{
+  if(isLivePair(symbol))return symbol;
+  const meta=getSymbol(symbol);
+  if(!meta||meta.assetClass!=='CRYPTO')return null;
+  const pair=meta.upstreamSymbol;
+  return pair&&pair.endsWith('USDT')?pair:null;
+}
 type Bar = [number,string,string,string,string,string,number,...unknown[]];
 /** Public market data only: no exchange credentials or order endpoints. Old
  * USD demo instruments retain their exact original synthetic provider. */
@@ -34,19 +50,21 @@ export class BinanceMarketDataProvider implements MarketDataProvider {
     return rows;
   }
   async getPriceAt(symbol:string,timestampMs:number){
-    if(!isLivePair(symbol))return this.demo.getPriceAt(symbol,timestampMs);
+    const pair=binancePair(symbol);
+    if(!pair)return this.demo.getPriceAt(symbol,timestampMs);
     if(!Number.isFinite(timestampMs)||timestampMs>this.clock()+1000)throw new MarketDataError('Instante de mercado inválido.','UPSTREAM',this.id);
     const boundary=Math.floor(Math.min(timestampMs,this.clock())/1000)*1000;
     const minute=Math.floor((boundary-1)/60000)*60000;
     const end=Math.min(minute+59999,Math.floor(this.clock()/1000)*1000-1);
-    const rows=await this.bars(symbol,'1s',end,60,minute);
+    const rows=await this.bars(pair,'1s',end,60,minute);
     const row=rows.filter(b=>b[6]<boundary).at(-1);
     if(!row||boundary-row[6]>2500)throw new MarketDataError('No hay una observación válida en el instante solicitado.','UPSTREAM',this.id);
     return {price:Number(row[4]),provenance:this.provenance(row[6]),candle:{t:row[0],o:Number(row[1]),h:Number(row[2]),l:Number(row[3]),c:Number(row[4]),v:Number(row[5])}};
   }
   async getQuote(symbol:string,at=this.clock()):Promise<Quote>{
-    if(!isLivePair(symbol))return this.demo.getQuote(symbol,at);
-    const [point,raw]=await Promise.all([this.getPriceAt(symbol,at),this.json('ticker/24hr',{symbol},5000)]);
+    const pair=binancePair(symbol);
+    if(!pair)return this.demo.getQuote(symbol,at);
+    const [point,raw]=await Promise.all([this.getPriceAt(symbol,at),this.json('ticker/24hr',{symbol:pair},5000)]);
     const day=raw as Record<string,string>;
     if(!day||Number(day.openPrice)<=0||Number(day.highPrice)<=0||Number(day.lowPrice)<=0||Number(day.volume)<0)throw new MarketDataError('Resumen de mercado inválido.','UPSTREAM',this.id);
     if(!['openPrice','highPrice','lowPrice','volume'].every(k=>Number.isFinite(Number(day[k]))))throw new MarketDataError('Resumen de mercado inválido.','UPSTREAM',this.id);
@@ -55,9 +73,10 @@ export class BinanceMarketDataProvider implements MarketDataProvider {
   }
   async getQuotes(symbols:string[],at?:number){return Promise.all(symbols.map(symbol=>this.getQuote(symbol,at)));}
   async getCandles(params:{symbol:string;timeframe:Timeframe;limit:number;to?:number}):Promise<CandleSeries>{
-    if(!isLivePair(params.symbol))return this.demo.getCandles(params);
+    const pair=binancePair(params.symbol);
+    if(!pair)return this.demo.getCandles(params);
     const to=Math.min(params.to??this.clock(),this.clock());
-    const rows=await this.bars(params.symbol,params.timeframe,to,Math.min(1000,Math.max(1,params.limit)));
+    const rows=await this.bars(pair,params.timeframe,to,Math.min(1000,Math.max(1,params.limit)));
     // Do not include an unfinished OHLC bar: it may include observations
     // after a requested historical cutoff. Construct its partial data below.
     const complete=rows.filter(b=>b[6]<to);

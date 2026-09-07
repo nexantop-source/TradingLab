@@ -220,3 +220,64 @@
   .invest-closing-visual::before { background: #060d1ae8; }
   .learn-track, .learn-article, .learn-featured-track, .visual-pricing .invest-plan { border: 2px solid #24445b; }
 }
+
+/* ── Instalación en móvil ────────────────────────────────────────────────── */
+/* Toda la sección existe solo para el teléfono: en un portátil «añádelo a tu
+   pantalla de inicio» no significa nada y ocuparía el sitio de un argumento
+   que sí importa. El componente además no se pinta si ya está instalada. */
+.install-section { display: none; }
+@media (max-width: 900px) {
+  .install-section {
+    display: block;
+    margin: var(--space-12) auto;
+    max-width: 34rem;
+    padding: var(--space-6);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-soft);
+  }
+}
+.install-badge {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border-strong); border-radius: var(--radius-full);
+  font-size: var(--text-2xs); letter-spacing: var(--tracking-label);
+  text-transform: uppercase; color: var(--color-muted);
+}
+.install-section h2 {
+  margin: var(--space-4) 0 0;
+  font-size: var(--text-lg); font-weight: 600;
+  letter-spacing: var(--tracking-tight); line-height: var(--leading-snug);
+}
+.install-lede { margin: var(--space-2) 0 0; font-size: var(--text-xs); line-height: var(--leading-relaxed); color: var(--color-muted); }
+
+.install-reasons { list-style: none; margin: var(--space-5) 0 0; padding: 0; display: grid; gap: var(--space-4); }
+.install-reasons li { display: flex; gap: var(--space-3); }
+.install-reasons svg { flex-shrink: 0; margin-top: 2px; color: var(--color-blue); }
+.install-reasons strong { display: block; font-size: var(--text-xs); font-weight: 600; }
+.install-reasons span { display: block; margin-top: 2px; font-size: var(--text-2xs); line-height: 1.6; color: var(--color-muted); }
+
+.install-cta {
+  display: flex; align-items: center; justify-content: center; gap: var(--space-2);
+  width: 100%; min-height: 52px; margin-top: var(--space-6);
+  border: 0; border-radius: var(--radius-full);
+  background: var(--color-text); color: var(--color-bg);
+  font: 600 var(--text-sm)/1 inherit; font-family: inherit; cursor: pointer;
+}
+.install-cta:active { transform: scale(0.985); }
+
+/* En iPhone no existe diálogo de instalación: hay que describir el gesto. */
+.install-steps { list-style: none; margin: var(--space-6) 0 0; padding: 0; display: grid; gap: var(--space-3); }
+.install-steps li { display: flex; align-items: flex-start; gap: var(--space-3); font-size: var(--text-xs); line-height: 1.6; color: var(--color-muted); }
+.install-steps li > span {
+  flex-shrink: 0; display: grid; place-items: center;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--color-overlay); color: var(--color-text);
+  font-size: var(--text-2xs); font-weight: 600; font-variant-numeric: tabular-nums;
+}
+.install-steps strong { color: var(--color-text); font-weight: 600; }
+.install-steps svg { display: inline; vertical-align: -2px; }
+
+.install-message { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-3); font-size: var(--text-2xs); color: var(--color-positive); }
+.install-foot { margin: var(--space-5) 0 0; font-size: var(--text-2xs); line-height: 1.6; color: var(--color-subtle); }
