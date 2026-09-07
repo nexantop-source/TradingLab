@@ -9,6 +9,7 @@ import { useMarketPulse } from '@/components/trading/useMarketPulse';
 import { TradingChart } from '@/components/trading/TradingChart';
 import { HistoryChart } from '@/components/trading/HistoryChart';
 import { DEFAULT_HISTORY_RANGE, HISTORY_RANGES, historyRange } from '@/components/trading/historyRanges';
+import { InstrumentSwitcher } from '@/components/trading/InstrumentSwitcher';
 import { OperationLive } from '@/components/trading/OperationLive';
 import { apiFetch, ApiRequestError } from '@/lib/client-api';
 import type { OpenPositionDto } from '@/lib/simulation-service';
@@ -26,6 +27,7 @@ export function SimpleTerminal(props: TerminalProps & { onAdvanced: () => void }
   const [periodChange, setPeriodChange] = useState<number | null>(null);
   const [chartType, setChartType] = useState<'line' | 'area' | 'candles'>('candles');
   const [toolsOpen,setToolsOpen] = useState(false);
+  const [switcherOpen,setSwitcherOpen] = useState(false);
   const [indicator,setIndicator] = useState<'SMA20'|'EMA12'|null>(null);
   const [balance, setBalance] = useState(props.balanceCents);
   const [positions, setPositions] = useState(props.openPositions);
@@ -104,7 +106,10 @@ export function SimpleTerminal(props: TerminalProps & { onAdvanced: () => void }
     ...(thisPosition.takeProfit !== null ? [{ price: thisPosition.takeProfit, label: 'TP', tone: 'positive' as const }] : []),
   ] : [];
   return <div className="simple-terminal" data-terminal="simple" data-has-position={Boolean(thisPosition)}>
-    <header className="simple-terminal-top"><Link href="/explorar" className="simple-instrument" aria-label={`Cambiar instrumento: ${props.symbol.name}`}><AssetIcon symbol={props.symbol.symbol} /><span><strong>{props.symbol.symbol}</strong><small>{props.symbol.name}</small></span><ChevronDown size={17} /></Link><button type="button" onClick={()=>setToolsOpen(!toolsOpen)} aria-expanded={toolsOpen} className="simple-advanced-button"><SlidersHorizontal size={16} />Herramientas</button></header>
+    <InstrumentSwitcher open={switcherOpen} onClose={() => setSwitcherOpen(false)} current={props.symbol.symbol} plan={props.user.plan}
+      watchlist={props.watchlist.map(w => ({ symbol: w.symbol, name: w.name, assetClass: w.assetClass as never, minPlan: (props.catalog.find(c => c.symbol === w.symbol)?.minPlan ?? 'FREE') as never, ticker: props.catalog.find(c => c.symbol === w.symbol)?.ticker, price: w.price, changePercent: w.changePercent, precision: w.precision, favorite: w.favorite }))}
+      catalog={props.catalog.map(c => ({ symbol: c.symbol, name: c.name, assetClass: c.assetClass as never, minPlan: c.minPlan as never, ticker: c.ticker }))} />
+    <header className="simple-terminal-top"><button type="button" className="simple-instrument" onClick={() => setSwitcherOpen(true)} aria-haspopup="dialog" aria-expanded={switcherOpen} aria-label={`Cambiar instrumento. Ahora: ${props.symbol.name}`}><AssetIcon symbol={props.symbol.symbol} assetClass={props.symbol.assetClass as never} name={props.symbol.name} /><span><strong>{props.symbol.symbol}</strong><small>{props.symbol.name}</small></span><ChevronDown size={17} /></button><button type="button" onClick={()=>setToolsOpen(!toolsOpen)} aria-expanded={toolsOpen} className="simple-advanced-button"><SlidersHorizontal size={16} />Herramientas</button></header>
     {toolsOpen && <section className="chart-tools" aria-label="Herramientas del gráfico"><div><button aria-pressed={chartType==='candles'} onClick={()=>setChartType('candles')}>Velas · 5 s</button><button aria-pressed={indicator==='SMA20'} onClick={()=>setIndicator(indicator==='SMA20'?null:'SMA20')}>Media SMA20</button>{props.availableIndicators.includes('EMA12')?<button aria-pressed={indicator==='EMA12'} onClick={()=>setIndicator(indicator==='EMA12'?null:'EMA12')}>Media EMA12</button>:<Link href="/planes">EMA12 · Mejorar a Plus</Link>}<button onClick={()=>setIndicator(null)}>Quitar indicador</button></div><p>Arrastra para explorar. Pellizca para ampliar. Cada periodo trae su propia serie: cinco minutos dentro de un día, una semana cuando miras todo el historial. Entrada, SL y TP aparecen sobre la gráfica cuando están en el rango visible.</p></section>}
     <div className="simple-terminal-grid"><section className="simple-market-panel" aria-label="Precio y gráfico de práctica">
       <div className="simple-price-heading"><div><span className="simple-demo-pill">MERCADO DEMO</span><p className="simple-live-price" data-testid="simple-live-price">{pulse.quote.price.toLocaleString('en-US', { minimumFractionDigits: props.symbol.precision, maximumFractionDigits: props.symbol.precision })}</p><p className={(live || periodChange === null ? pulse.quote.changePercent : periodChange) < 0 ? 'simple-negative' : 'simple-positive'}>{(() => { const value = live || periodChange === null ? pulse.quote.changePercent : periodChange; return `${value >= 0 ? '+' : ''}${value.toFixed(2)} %`; })()} <span>· {live || periodChange === null ? 'variación de la sesión' : `en ${historyRange(range).title}`}</span></p></div><div className="simple-status-stack"><span className="simple-pulse-state" data-stale={pulse.stale || marketClosed}><i />{statusLabel}</span>{thisPosition && <OperationLive position={thisPosition} price={pulse.quote.price} stale={pulse.stale} serverTime={pulse.provenance.receivedTimestamp}/>}</div></div>

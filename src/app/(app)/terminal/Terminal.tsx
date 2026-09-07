@@ -80,7 +80,7 @@ export interface TerminalProps {
   provenance: DataProvenance;
   quote: { price: number; bid: number; ask: number; changePercent: number; dayHigh: number; dayLow: number };
   watchlist: WatchItem[];
-  catalog: Array<{ symbol: string; name: string; assetClass: string; minPlan: string }>;
+  catalog: Array<{ symbol: string; name: string; assetClass: string; minPlan: string; ticker?: string }>;
   openPositions: OpenPositionDto[];
   closedRecent: ClosedItem[];
   markers: TradeMarker[];
