@@ -266,6 +266,15 @@ export const CLOSE_REASONS = [
   'PARTIAL',
   'TRAILING_STOP',
   'MARKET_CLOSED',
+  /**
+   * El instrumento paso a cotizarse por su subyacente y cambio de escala.
+   *
+   * No es un cierre de mercado ni una decision de nadie: la referencia contra
+   * la que se planteo el ejercicio dejo de existir a mitad de camino, asi que
+   * comparar la entrada con el precio de ahora no significa nada. Se cierra sin
+   * resultado y se devuelve el importe.
+   */
+  'INSTRUMENT_RESCALED',
 ] as const;
 export type CloseReason = (typeof CLOSE_REASONS)[number];
 
