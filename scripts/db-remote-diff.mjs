@@ -11,7 +11,7 @@
  *
  * Requiere haber iniciado sesión con `firebase login`, igual que db-remote.mjs.
  */
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -48,12 +48,42 @@ if (!databaseUrl.startsWith('postgresql://')) {
   process.exit(1);
 }
 
-spawnSync(process.execPath, ['scripts/set-db-provider.mjs'], {
-  stdio: 'inherit',
-  env: { ...process.env, DATABASE_PROVIDER: 'postgresql' },
-});
+// El esquema local se restaura pase lo que pase. Encadenar la salida de este
+// script con `head` o `tail` lo mata por SIGPIPE antes de llegar al final, y
+// dejarlo en postgresql rompe el desarrollo local con un error de validación de
+// datasource que no parece tener ninguna relación con haber consultado la base
+// remota.
+//
+// Se reescribe el fichero directamente en lugar de delegar en
+// `set-db-provider.mjs`: dentro de `process.on('exit')` Node ya no permite
+// crear subprocesos.
+const DATASOURCE = /(datasource\s+db\s*\{[^}]*?provider\s*=\s*")([^"]+)("[^}]*?\})/s;
 
-console.error(`▸ Comparando la base de ${PROJECT} con prisma/schema.prisma…\n`);
+function setLocalProvider(provider) {
+  const schema = readFileSync('prisma/schema.prisma', 'utf8');
+  if (DATASOURCE.exec(schema)?.[2] === provider) return;
+  writeFileSync('prisma/schema.prisma', schema.replace(DATASOURCE, `$1${provider}$3`), 'utf8');
+}
+
+function restoreLocalSchema() {
+  try {
+    setLocalProvider('sqlite');
+  } catch {
+    // Restaurar es una conveniencia: si falla, no debe enmascarar el error real.
+  }
+}
+
+process.on('exit', restoreLocalSchema);
+for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
+  process.on(signal, () => {
+    restoreLocalSchema();
+    process.exit(1);
+  });
+}
+
+setLocalProvider('postgresql');
+
+console.error(`\u25b8 Comparando la base de ${PROJECT} con prisma/schema.prisma\u2026\n`);
 
 const result = spawnSync(
   'npx',
@@ -70,9 +100,5 @@ const result = spawnSync(
   { stdio: 'inherit', shell: process.platform === 'win32', env: { ...process.env, DATABASE_PROVIDER: 'postgresql' } },
 );
 
-spawnSync(process.execPath, ['scripts/set-db-provider.mjs'], {
-  stdio: 'inherit',
-  env: { ...process.env, DATABASE_PROVIDER: 'sqlite' },
-});
-
+restoreLocalSchema();
 process.exit(result.status ?? 1);

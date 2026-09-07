@@ -21,8 +21,13 @@ import { spawnSync } from 'node:child_process';
 const PROJECT = process.env.GCP_PROJECT ?? 'nexant-87204';
 const SECRET = process.env.DB_SECRET ?? 'DATABASE_URL';
 
+// `--skip-generate`: el cliente se regenera al final contra el esquema local.
+// Sin esto, `prisma db push` regeneraba el cliente mientras el esquema estaba
+// en postgresql y dejaba el desarrollo local apuntando al proveedor
+// equivocado, con un error de validación de datasource difícil de relacionar
+// con haber tocado la base remota.
 const COMMANDS = {
-  push: ['npx', ['prisma', 'db', 'push']],
+  push: ['npx', ['prisma', 'db', 'push', '--skip-generate']],
   migrate: ['npx', ['prisma', 'migrate', 'deploy']],
   seed: ['npx', ['tsx', 'prisma/seed.ts']],
   studio: ['npx', ['prisma', 'studio']],
@@ -80,9 +85,16 @@ const result = spawnSync(bin, args, {
 });
 
 // Se devuelve el esquema a sqlite para no dejar el repositorio en un estado
-// distinto del que espera el desarrollo local.
+// distinto del que espera el desarrollo local, y se regenera el cliente contra
+// él: el esquema y el cliente tienen que volver juntos, o el siguiente `npm run
+// dev` falla al validar el datasource.
 spawnSync(process.execPath, ['scripts/set-db-provider.mjs'], {
   stdio: 'inherit',
+  env: { ...process.env, DATABASE_PROVIDER: 'sqlite' },
+});
+spawnSync('npx', ['prisma', 'generate'], {
+  stdio: 'inherit',
+  shell: process.platform === 'win32',
   env: { ...process.env, DATABASE_PROVIDER: 'sqlite' },
 });
 
