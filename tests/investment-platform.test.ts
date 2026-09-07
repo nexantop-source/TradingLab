@@ -8,7 +8,9 @@ describe('investment catalog and subscription boundaries', () => {
   it('makes every new ETF discoverable and supplies deterministic demo candles', async () => {
     const provider = new SyntheticMarketDataProvider();
     const etfs = SYMBOLS.filter(s => s.assetClass === 'ETF');
-    expect(etfs).toHaveLength(15);
+    // El catalogo crece; lo que no puede es encoger hasta dejar de ofrecer una
+    // gama de fondos, ni repetir un identificador.
+    expect(etfs.length).toBeGreaterThanOrEqual(15);
     expect(new Set(SYMBOLS.map(s => s.symbol)).size).toBe(SYMBOLS.length);
     for (const s of etfs) {
       expect(getSymbol(s.symbol)).toBe(s);

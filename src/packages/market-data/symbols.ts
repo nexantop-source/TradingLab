@@ -1,42 +1,27 @@
 import type { AssetMeta, MarketSession } from '@tl/types';
+import { COMMODITY_SEEDS, CRYPTO_SEEDS, ETF_SEEDS, FOREX_SEEDS, INDEX_SEEDS, STOCK_SEEDS } from './symbol-seeds';
 
-/** Sesiones de referencia, expresadas en UTC. Son informativas y educativas. */
+/**
+ * Sesiones de referencia, expresadas en UTC. Son informativas y educativas: se
+ * usan para decir si un mercado está abierto y para explicar por qué un precio
+ * lleva horas quieto, no para decidir una ejecución.
+ */
 const SESSIONS: Record<string, MarketSession> = {
-  CRYPTO: {
-    alwaysOpen: true,
-    days: [0, 1, 2, 3, 4, 5, 6],
-    openMinuteUtc: 0,
-    closeMinuteUtc: 1440,
-    label: '24 h, todos los días',
-  },
-  FOREX: {
-    alwaysOpen: false,
-    days: [1, 2, 3, 4, 5],
-    openMinuteUtc: 0,
-    closeMinuteUtc: 1440,
-    label: 'Domingo 22:00 a viernes 22:00 UTC',
-  },
-  US_EQUITY: {
-    alwaysOpen: false,
-    days: [1, 2, 3, 4, 5],
-    openMinuteUtc: 13 * 60 + 30, // 09:30 ET
-    closeMinuteUtc: 20 * 60, // 16:00 ET
-    label: 'Lunes a viernes, 13:30 a 20:00 UTC',
-  },
-  METALS: {
-    alwaysOpen: false,
-    days: [1, 2, 3, 4, 5],
-    openMinuteUtc: 0,
-    closeMinuteUtc: 1440,
-    label: 'Casi continuo de lunes a viernes',
-  },
-  ENERGY: {
-    alwaysOpen: false,
-    days: [1, 2, 3, 4, 5],
-    openMinuteUtc: 0,
-    closeMinuteUtc: 1380,
-    label: 'Lunes a viernes, con pausa diaria',
-  },
+  CRYPTO: { alwaysOpen: true, days: [0, 1, 2, 3, 4, 5, 6], openMinuteUtc: 0, closeMinuteUtc: 1440, label: '24 h, todos los días' },
+  FOREX: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 0, closeMinuteUtc: 1440, label: 'Domingo 22:00 a viernes 22:00 UTC' },
+  US_EQUITY: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 13 * 60 + 30, closeMinuteUtc: 20 * 60, label: 'Lunes a viernes, 13:30 a 20:00 UTC' },
+  EU_EQUITY: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 7 * 60, closeMinuteUtc: 15 * 60 + 30, label: 'Lunes a viernes, 07:00 a 15:30 UTC' },
+  UK_EQUITY: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 8 * 60, closeMinuteUtc: 16 * 60 + 30, label: 'Lunes a viernes, 08:00 a 16:30 UTC' },
+  JP_EQUITY: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 0, closeMinuteUtc: 6 * 60, label: 'Lunes a viernes, 00:00 a 06:00 UTC' },
+  HK_EQUITY: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 60, closeMinuteUtc: 8 * 60, label: 'Lunes a viernes, 01:00 a 08:00 UTC' },
+  KR_EQUITY: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 0, closeMinuteUtc: 6 * 60 + 30, label: 'Lunes a viernes, 00:00 a 06:30 UTC' },
+  TW_EQUITY: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 60, closeMinuteUtc: 5 * 60 + 30, label: 'Lunes a viernes, 01:00 a 05:30 UTC' },
+  IN_EQUITY: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 3 * 60 + 45, closeMinuteUtc: 10 * 60, label: 'Lunes a viernes, 03:45 a 10:00 UTC' },
+  AU_EQUITY: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 0, closeMinuteUtc: 6 * 60, label: 'Lunes a viernes, 00:00 a 06:00 UTC' },
+  LATAM_EQUITY: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 13 * 60, closeMinuteUtc: 21 * 60, label: 'Lunes a viernes, 13:00 a 21:00 UTC' },
+  METALS: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 0, closeMinuteUtc: 1440, label: 'Casi continuo de lunes a viernes' },
+  ENERGY: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 0, closeMinuteUtc: 1380, label: 'Lunes a viernes, con pausa diaria' },
+  AGRI: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 13 * 60, closeMinuteUtc: 18 * 60 + 20, label: 'Lunes a viernes, 13:00 a 18:20 UTC' },
 };
 
 /**
@@ -53,433 +38,211 @@ export interface SymbolSeed extends AssetMeta {
   annualDrift: number;
 }
 
-export const SYMBOLS: SymbolSeed[] = [
-  // ── Forex ──────────────────────────────────────────────────────────────────
-  {
-    symbol: 'EURUSD',
-    name: 'Euro / Dólar estadounidense',
-    assetClass: 'FOREX',
-    quoteCurrency: 'USD',
-    precision: 5,
-    tickSize: 0.00001,
-    spreadBps: 1.2,
-    session: SESSIONS.FOREX,
-    educationalRisk: 3,
-    description:
-      'El par de divisas más negociado del mundo. Cuánto vale un euro en dólares: sube cuando el euro se fortalece y baja cuando lo hace el dólar.',
-    minPlan: 'FREE',
-    basePrice: 1.0865,
-    annualVolatility: 0.07,
-    annualDrift: 0.0,
-  },
-  {
-    symbol: 'GBPUSD',
-    name: 'Libra esterlina / Dólar estadounidense',
-    assetClass: 'FOREX',
-    quoteCurrency: 'USD',
-    precision: 5,
-    tickSize: 0.00001,
-    spreadBps: 1.6,
-    session: SESSIONS.FOREX,
-    educationalRisk: 3,
-    description:
-      'La libra frente al dólar. Reacciona con fuerza a las decisiones del Banco de Inglaterra y a los datos de inflación británicos.',
-    minPlan: 'FREE',
-    basePrice: 1.2712,
-    annualVolatility: 0.085,
-    annualDrift: 0.0,
-  },
-  {
-    symbol: 'USDJPY',
-    name: 'Dólar estadounidense / Yen japonés',
-    assetClass: 'FOREX',
-    quoteCurrency: 'JPY',
-    precision: 3,
-    tickSize: 0.001,
-    spreadBps: 1.4,
-    session: SESSIONS.FOREX,
-    educationalRisk: 3,
-    description:
-      'Cuántos yenes cuesta un dólar. Es el termómetro clásico de la diferencia de tipos de interés entre Estados Unidos y Japón.',
-    minPlan: 'FREE',
-    basePrice: 151.42,
-    annualVolatility: 0.09,
-    annualDrift: 0.0,
-  },
-  {
-    symbol: 'USDMXN',
-    name: 'Dólar estadounidense / Peso mexicano',
-    assetClass: 'FOREX',
-    quoteCurrency: 'MXN',
-    precision: 4,
-    tickSize: 0.0001,
-    spreadBps: 6,
-    session: SESSIONS.FOREX,
-    educationalRisk: 4,
-    description: 'Par de mercado emergente. Mayor volatilidad y spreads más amplios.',
-    minPlan: 'STANDARD',
-    basePrice: 17.24,
-    annualVolatility: 0.12,
-    annualDrift: 0.0,
-  },
-  {
-    symbol: 'AUDUSD',
-    name: 'Dólar australiano / Dólar estadounidense',
-    assetClass: 'FOREX',
-    quoteCurrency: 'USD',
-    precision: 5,
-    tickSize: 0.00001,
-    spreadBps: 1.8,
-    session: SESSIONS.FOREX,
-    educationalRisk: 3,
-    description:
-      'Una divisa muy ligada a las materias primas: sigue de cerca la demanda industrial de China y el precio del hierro y el carbón.',
-    minPlan: 'STANDARD',
-    basePrice: 0.6588,
-    annualVolatility: 0.088,
-    annualDrift: 0.0,
-  },
-
-  // ── Criptomonedas ─────────────────────────────────────────────────────────
-  {
-    symbol: 'BTCUSD',
-    name: 'Bitcoin / Dólar estadounidense',
-    assetClass: 'CRYPTO',
-    upstreamSymbol: 'BTCUSDT',
-    quoteCurrency: 'USD',
-    precision: 2,
-    tickSize: 0.01,
-    spreadBps: 4,
-    session: SESSIONS.CRYPTO,
-    educationalRisk: 5,
-    description: 'El activo digital de mayor capitalización. Alta volatilidad y mercado abierto todos los días.',
-    minPlan: 'FREE',
-    basePrice: 67420,
-    annualVolatility: 0.55,
-    annualDrift: 0.0,
-  },
-  {
-    symbol: 'ETHUSD',
-    name: 'Ethereum / Dólar estadounidense',
-    assetClass: 'CRYPTO',
-    upstreamSymbol: 'ETHUSDT',
-    quoteCurrency: 'USD',
-    precision: 2,
-    tickSize: 0.01,
-    spreadBps: 5,
-    session: SESSIONS.CRYPTO,
-    educationalRisk: 5,
-    description: 'Red de contratos inteligentes. Su precio suele amplificar los movimientos de Bitcoin.',
-    minPlan: 'FREE',
-    basePrice: 3285,
-    annualVolatility: 0.65,
-    annualDrift: 0.0,
-  },
-  {
-    symbol: 'SOLUSD',
-    name: 'Solana / Dólar estadounidense',
-    assetClass: 'CRYPTO',
-    upstreamSymbol: 'SOLUSDT',
-    quoteCurrency: 'USD',
-    precision: 3,
-    tickSize: 0.001,
-    spreadBps: 8,
-    session: SESSIONS.CRYPTO,
-    educationalRisk: 5,
-    description: 'Criptoactivo de alta beta. Ejemplo útil para estudiar el riesgo de concentración.',
-    minPlan: 'STANDARD',
-    basePrice: 148.6,
-    annualVolatility: 0.85,
-    annualDrift: 0.0,
-  },
-  {
-    symbol: 'XRPUSD',
-    name: 'XRP / Dólar estadounidense',
-    assetClass: 'CRYPTO',
-    upstreamSymbol: 'XRPUSDT',
-    quoteCurrency: 'USD',
-    precision: 4,
-    tickSize: 0.0001,
-    spreadBps: 9,
-    session: SESSIONS.CRYPTO,
-    educationalRisk: 5,
-    description: 'Muy sensible a noticias regulatorias. Buen caso para estudiar riesgo de titular.',
-    minPlan: 'STANDARD',
-    basePrice: 0.5182,
-    annualVolatility: 0.78,
-    annualDrift: 0.0,
-  },
-
-  // ── Acciones ──────────────────────────────────────────────────────────────
-  {
-    symbol: 'AAPL',
-    name: 'Apple Inc.',
-    assetClass: 'STOCK',
-    quoteCurrency: 'USD',
-    precision: 2,
-    tickSize: 0.01,
-    spreadBps: 2,
-    session: SESSIONS.US_EQUITY,
-    educationalRisk: 3,
-    description: 'Compañía tecnológica de gran capitalización. Reacciona a resultados trimestrales.',
-    minPlan: 'FREE',
-    basePrice: 224.31,
-    annualVolatility: 0.24,
-    annualDrift: 0.0,
-    upstreamSymbol: 'AAPL',
-  },
-  {
-    symbol: 'MSFT',
-    name: 'Microsoft Corporation',
-    assetClass: 'STOCK',
-    quoteCurrency: 'USD',
-    precision: 2,
-    tickSize: 0.01,
-    spreadBps: 2,
-    session: SESSIONS.US_EQUITY,
-    educationalRisk: 3,
-    description: 'Software empresarial y computación en la nube. Peso relevante en los índices estadounidenses.',
-    minPlan: 'FREE',
-    basePrice: 418.72,
-    annualVolatility: 0.22,
-    annualDrift: 0.0,
-    upstreamSymbol: 'MSFT',
-  },
-  {
-    symbol: 'TSLA',
-    name: 'Tesla, Inc.',
-    assetClass: 'STOCK',
-    quoteCurrency: 'USD',
-    precision: 2,
-    tickSize: 0.01,
-    spreadBps: 3,
-    session: SESSIONS.US_EQUITY,
-    educationalRisk: 5,
-    description: 'Acción de alta volatilidad. Útil para estudiar el impacto del tamaño de posición.',
-    minPlan: 'STANDARD',
-    basePrice: 241.05,
-    annualVolatility: 0.52,
-    annualDrift: 0.0,
-    upstreamSymbol: 'TSLA',
-  },
-  {
-    symbol: 'NVDA',
-    name: 'NVIDIA Corporation',
-    assetClass: 'STOCK',
-    quoteCurrency: 'USD',
-    precision: 2,
-    tickSize: 0.01,
-    spreadBps: 3,
-    session: SESSIONS.US_EQUITY,
-    educationalRisk: 5,
-    description: 'Semiconductores para cómputo acelerado. Movimientos amplios tras publicar resultados.',
-    minPlan: 'STANDARD',
-    basePrice: 121.44,
-    annualVolatility: 0.48,
-    annualDrift: 0.0,
-    upstreamSymbol: 'NVDA',
-  },
-  {
-    symbol: 'AMZN',
-    name: 'Amazon.com, Inc.',
-    assetClass: 'STOCK',
-    quoteCurrency: 'USD',
-    precision: 2,
-    tickSize: 0.01,
-    spreadBps: 2,
-    session: SESSIONS.US_EQUITY,
-    educationalRisk: 4,
-    description: 'Comercio electrónico y servicios en la nube. Sensible al consumo y a los márgenes.',
-    minPlan: 'STANDARD',
-    basePrice: 186.33,
-    annualVolatility: 0.3,
-    annualDrift: 0.0,
-    upstreamSymbol: 'AMZN',
-  },
-
-  // ── Índices ───────────────────────────────────────────────────────────────
-  {
-    symbol: 'SPX500',
-    name: 'S&P 500',
-    assetClass: 'INDEX',
-    quoteCurrency: 'USD',
-    precision: 2,
-    tickSize: 0.01,
-    spreadBps: 1.5,
-    session: SESSIONS.US_EQUITY,
-    educationalRisk: 2,
-    description:
-      'El índice de referencia del mercado estadounidense: las 500 mayores empresas cotizadas, ponderadas por capitalización. Si quieres el fondo que lo replica, está en el catálogo como SPY.',
-    minPlan: 'FREE',
-    basePrice: 5648.4,
-    annualVolatility: 0.16,
-    annualDrift: 0.0,
-    yahooSymbol: '^GSPC',
-    displayTicker: 'SPX',
-  },
-  {
-    symbol: 'NAS100',
-    name: 'Nasdaq 100',
-    assetClass: 'INDEX',
-    quoteCurrency: 'USD',
-    precision: 2,
-    tickSize: 0.01,
-    spreadBps: 2,
-    session: SESSIONS.US_EQUITY,
-    educationalRisk: 3,
-    description:
-      'Las cien mayores empresas no financieras del Nasdaq, muy concentradas en tecnología. Más volátil que el S&P 500 por su menor diversificación sectorial.',
-    minPlan: 'STANDARD',
-    basePrice: 19672.1,
-    annualVolatility: 0.21,
-    annualDrift: 0.0,
-    yahooSymbol: '^NDX',
-    displayTicker: 'NDX',
-  },
-  {
-    symbol: 'GER40',
-    name: 'DAX 40',
-    assetClass: 'INDEX',
-    yahooSymbol: '^GDAXI',
-    displayTicker: 'DAX',
-    quoteCurrency: 'EUR',
-    precision: 2,
-    tickSize: 0.01,
-    spreadBps: 2.5,
-    session: { ...SESSIONS.US_EQUITY, openMinuteUtc: 7 * 60, closeMinuteUtc: 15 * 60 + 30, label: 'Lunes a viernes, 07:00 a 15:30 UTC' },
-    educationalRisk: 3,
-    description:
-      'Las cuarenta mayores empresas alemanas cotizadas en Fráncfort. Cotiza en euros y en horario europeo, que abre y cierra antes que Nueva York.',
-    minPlan: 'STANDARD',
-    basePrice: 18492.6,
-    annualVolatility: 0.18,
-    annualDrift: 0.0,
-  },
-
-  // ── Commodities ───────────────────────────────────────────────────────────
-  {
-    symbol: 'XAUUSD',
-    name: 'Oro · futuro COMEX',
-    assetClass: 'COMMODITY',
-    quoteCurrency: 'USD',
-    precision: 2,
-    tickSize: 0.01,
-    spreadBps: 3,
-    session: SESSIONS.METALS,
-    educationalRisk: 3,
-    description:
-      'El precio de la onza de oro en el contrato de referencia de COMEX. Es el activo refugio clásico: suele moverse contra el dólar y contra los tipos de interés reales.',
-    minPlan: 'FREE',
-    basePrice: 2482.15,
-    annualVolatility: 0.14,
-    annualDrift: 0.0,
-    yahooSymbol: 'GC=F',
-    displayTicker: 'XAU',
-  },
-  {
-    symbol: 'XAGUSD',
-    name: 'Plata · futuro COMEX',
-    assetClass: 'COMMODITY',
-    quoteCurrency: 'USD',
-    precision: 3,
-    tickSize: 0.001,
-    spreadBps: 6,
-    session: SESSIONS.METALS,
-    educationalRisk: 4,
-    description:
-      'La onza de plata en COMEX. Tiene demanda industrial además de financiera, y por eso es bastante más volátil que el oro.',
-    minPlan: 'STANDARD',
-    basePrice: 28.64,
-    annualVolatility: 0.26,
-    annualDrift: 0.0,
-    yahooSymbol: 'SI=F',
-    displayTicker: 'XAG',
-  },
-  {
-    symbol: 'WTIUSD',
-    name: 'Petróleo WTI · futuro NYMEX',
-    assetClass: 'COMMODITY',
-    quoteCurrency: 'USD',
-    precision: 2,
-    tickSize: 0.01,
-    spreadBps: 5,
-    session: SESSIONS.ENERGY,
-    educationalRisk: 5,
-    description:
-      'El barril de crudo estadounidense en su contrato de referencia. Muy sensible a la geopolítica, a las decisiones de la OPEP y a los inventarios semanales.',
-    minPlan: 'STANDARD',
-    basePrice: 74.82,
-    annualVolatility: 0.34,
-    annualDrift: 0.0,
-    yahooSymbol: 'CL=F',
-    displayTicker: 'WTI',
-  },
-];
-
-// Expanded demo universe. These are simulation parameters, never live quotes.
-const ETF_SEEDS: Array<[string, string, number, string]> = [
-  ['SPY', 'SPDR S&P 500 ETF Trust', 560, 'Grandes empresas de Estados Unidos.'],
-  ['VOO', 'Vanguard S&P 500 ETF', 515, 'Exposición amplia al S&P 500.'],
-  ['QQQ', 'Invesco QQQ Trust', 475, 'Las principales compañías no financieras del Nasdaq.'],
-  ['VTI', 'Vanguard Total Stock Market ETF', 275, 'Renta variable estadounidense de distintos tamaños.'],
-  ['VT', 'Vanguard Total World Stock ETF', 115, 'Renta variable de mercados desarrollados y emergentes.'],
-  ['VXUS', 'Vanguard Total International Stock ETF', 62, 'Acciones internacionales fuera de Estados Unidos.'],
-  ['IWM', 'iShares Russell 2000 ETF', 215, 'Pequeñas empresas estadounidenses.'],
-  ['SCHD', 'Schwab US Dividend Equity ETF', 28, 'Empresas estadounidenses seleccionadas por dividendos.'],
-  ['BND', 'Vanguard Total Bond Market ETF', 73, 'Bonos estadounidenses con grado de inversión.'],
-  ['TLT', 'iShares 20+ Year Treasury Bond ETF', 95, 'Bonos del Tesoro estadounidense a largo plazo.'],
-  ['GLD', 'SPDR Gold Shares', 230, 'Exposición al precio del oro mediante un fondo.'],
-  ['EEM', 'iShares MSCI Emerging Markets ETF', 43, 'Renta variable de mercados emergentes.'],
-  ['XLK', 'Technology Select Sector SPDR Fund', 220, 'Sector tecnológico del S&P 500.'],
-  ['XLE', 'Energy Select Sector SPDR Fund', 90, 'Sector energético del S&P 500.'],
-  ['VNQ', 'Vanguard Real Estate ETF', 92, 'Sector inmobiliario mediante valores cotizados.'],
-];
-SYMBOLS.push(...ETF_SEEDS.map(([symbol, name, basePrice, description]): SymbolSeed => ({
-  // Son fondos estadounidenses reales y su ticker de catalogo es el de bolsa,
-  // asi que Finnhub los cotiza directamente sin traduccion.
-  symbol, name, basePrice, description, assetClass: 'ETF', quoteCurrency: 'USD',
-  upstreamSymbol: symbol,
-  precision: 2, tickSize: 0.01, spreadBps: 2, session: SESSIONS.US_EQUITY,
-  educationalRisk: 3, minPlan: 'FREE', annualVolatility: 0.2, annualDrift: 0,
-})));
-const EXTRA_CRYPTO: Array<[string, string, number]> = [
-  ['ADAUSD', 'Cardano / Dólar estadounidense', 0.35], ['DOGEUSD', 'Dogecoin / Dólar estadounidense', 0.12],
-  ['AVAXUSD', 'Avalanche / Dólar estadounidense', 25], ['LINKUSD', 'Chainlink / Dólar estadounidense', 12],
-  ['DOTUSD', 'Polkadot / Dólar estadounidense', 4.5], ['LTCUSD', 'Litecoin / Dólar estadounidense', 65],
-  ['BNBUSD', 'BNB / Dólar estadounidense', 550], ['UNIUSD', 'Uniswap / Dólar estadounidense', 6.5],
-];
-SYMBOLS.push(...EXTRA_CRYPTO.map(([symbol, name, basePrice]): SymbolSeed => ({
-  upstreamSymbol: symbol.replace(/USD$/, 'USDT'),
-  symbol, name, basePrice, assetClass: 'CRYPTO', quoteCurrency: 'USD', precision: 4,
-  tickSize: 0.0001, spreadBps: 10, session: SESSIONS.CRYPTO, educationalRisk: 5,
-  description: 'Criptoactivo de alta volatilidad. Serie sintética para practicar gestión del riesgo.',
-  minPlan: 'FREE', annualVolatility: 0.7, annualDrift: 0,
-})));
-const EXTRA_FOREX: Array<[string, string, string, number]> = [
-  ['USDCHF', 'Dólar estadounidense / Franco suizo', 'CHF', 0.86],
-  ['USDCAD', 'Dólar estadounidense / Dólar canadiense', 'CAD', 1.36],
-  ['NZDUSD', 'Dólar neozelandés / Dólar estadounidense', 'USD', 0.61],
-  ['EURGBP', 'Euro / Libra esterlina', 'GBP', 0.85],
-  ['EURJPY', 'Euro / Yen japonés', 'JPY', 162],
-  ['GBPJPY', 'Libra esterlina / Yen japonés', 'JPY', 190],
-  ['USDCOP', 'Dólar estadounidense / Peso colombiano', 'COP', 4100],
-];
-// Los decimales siguen a la magnitud del par, no a una regla global: cuatro
-// decimales sobre un peso colombiano de 3.115 son ruido, y dos sobre un euro
-// de 1,16 esconden el movimiento del dia.
-const forexPrecision = (basePrice: number) => (basePrice >= 500 ? 2 : basePrice >= 20 ? 3 : 4);
-SYMBOLS.push(...EXTRA_FOREX.map(([symbol, name, quoteCurrency, basePrice]): SymbolSeed => ({
-  symbol, name, quoteCurrency, basePrice, assetClass: 'FOREX',
-  precision: forexPrecision(basePrice), tickSize: 10 ** -forexPrecision(basePrice),
-  spreadBps: 4, session: SESSIONS.FOREX, educationalRisk: 4, minPlan: 'FREE',
-  description: 'Par de divisas. Estudia el tipo de cambio y su sensibilidad al contexto económico.',
-  annualVolatility: 0.12, annualDrift: 0,
-})));
-
-// New IDs preserve historical USD simulations and identify the actual quote currency.
-for (const [symbol,name,basePrice] of [['BTCUSDT','Bitcoin / Tether',80000],['ETHUSDT','Ethereum / Tether',3000],['SOLUSDT','Solana / Tether',150]] as const) {
-  SYMBOLS.unshift({symbol,name,basePrice,quoteCurrency:'USDT',assetClass:'CRYPTO',precision:2,tickSize:.01,spreadBps:8,session:SESSIONS.CRYPTO,educationalRisk:5,minPlan:'FREE',description:'Referencia Binance Spot en USDT. Ejercicios con saldo virtual, sin ejecución en el exchange.',annualVolatility:.7,annualDrift:0});
+/**
+ * Decimales proporcionales a la magnitud.
+ *
+ * Cuatro decimales sobre un peso colombiano de 3.115 son ruido; ocho sobre un
+ * Shiba Inu de 0,000008 son el precio entero. Un catálogo cuyos precios van de
+ * la millonésima a las decenas de miles no admite un número fijo de decimales.
+ */
+function precisionFor(price: number): number {
+  if (price >= 500) return 2;
+  if (price >= 20) return 3;
+  if (price >= 1) return 4;
+  if (price >= 0.01) return 6;
+  return 8;
 }
+
+/**
+ * Los decimales de una divisa no siguen la misma regla.
+ *
+ * Un cruce por debajo de uno -EUR/GBP a 0,858- no necesita seis decimales como
+ * los necesitaría una criptomoneda al mismo precio: el mercado de divisas
+ * cotiza en pips, y el quinto decimal ya es el pipette. Pasar de ahí sería
+ * inventar una resolución que la fuente no tiene.
+ */
+function forexPrecision(price: number): number {
+  if (price >= 500) return 2;
+  if (price >= 20) return 3;
+  return 5;
+}
+
+const CURRENCY_NAME: Record<string, string> = {
+  USD: 'Dólar estadounidense', EUR: 'Euro', GBP: 'Libra esterlina', JPY: 'Yen japonés',
+  CHF: 'Franco suizo', CAD: 'Dólar canadiense', AUD: 'Dólar australiano', NZD: 'Dólar neozelandés',
+  MXN: 'Peso mexicano', COP: 'Peso colombiano', BRL: 'Real brasileño', CLP: 'Peso chileno',
+  ARS: 'Peso argentino', PEN: 'Sol peruano', ZAR: 'Rand sudafricano', TRY: 'Lira turca',
+  SEK: 'Corona sueca', NOK: 'Corona noruega', DKK: 'Corona danesa', CNY: 'Yuan chino',
+  INR: 'Rupia india', KRW: 'Won surcoreano', SGD: 'Dólar de Singapur', HKD: 'Dólar de Hong Kong',
+  PLN: 'Zloti polaco', CZK: 'Corona checa', HUF: 'Forinto húngaro', ILS: 'Séquel israelí',
+  THB: 'Baht tailandés', PHP: 'Peso filipino', UYU: 'Peso uruguayo',
+};
+
+/**
+ * Descripciones escritas a mano para los instrumentos que la gente busca por su
+ * nombre.
+ *
+ * El resto recibe una descripción construida a partir de lo que sabemos de
+ * cierto: su clase, su divisa, su horario. Es menos vistosa, pero no inventa un
+ * relato sobre una empresa que nadie ha mirado. Entre una frase honesta y
+ * genérica y otra específica y adivinada, la primera.
+ */
+const DESCRIPTIONS: Record<string, string> = {
+  AAPL: 'Compañía tecnológica de gran capitalización. Reacciona a resultados trimestrales y al ciclo de renovación de sus productos.',
+  MSFT: 'Software empresarial y computación en la nube. Peso relevante en los índices estadounidenses.',
+  NVDA: 'Semiconductores para cómputo acelerado. Movimientos amplios tras publicar resultados.',
+  TSLA: 'Acción de alta volatilidad. Útil para estudiar el impacto del tamaño de posición.',
+  AMZN: 'Comercio electrónico y servicios en la nube. Sensible al consumo y a los márgenes.',
+  GOOGL: 'Buscador, publicidad y nube. Su resultado depende en buena parte del ciclo publicitario.',
+  META: 'Redes sociales y publicidad digital, con una apuesta de gasto elevada en plataformas nuevas.',
+  KO: 'Consumo básico global. Suele moverse menos que el mercado, lo que la hace un buen contraste con una tecnológica.',
+  JPM: 'Banca de inversión y comercial. Los bancos reaccionan a los tipos de interés antes que casi ningún otro sector.',
+  BRKB: 'El vehículo de inversión de Warren Buffett: un conglomerado que a la vez posee empresas enteras y una cartera de acciones cotizadas.',
+  COIN: 'Bolsa de criptomonedas cotizada. Su resultado sigue de cerca el volumen del mercado cripto, así que amplifica sus ciclos.',
+  MSTR: 'Compañía de software cuyo balance está mayoritariamente invertido en bitcoin, lo que la convierte en una apuesta apalancada sobre él.',
+  EC: 'Petrolera colombiana cotizada en Nueva York. Un caso cercano para estudiar cómo el crudo y el peso mueven una misma acción.',
+  SPY: 'El fondo cotizado más negociado del mundo. Replica el S&P 500 y su precio ronda una décima parte del índice.',
+  QQQ: 'Fondo cotizado que replica el Nasdaq 100. Concentrado en tecnología, y por eso más volátil que el S&P 500.',
+  VOO: 'Exposición amplia al S&P 500 con una de las comisiones más bajas del mercado.',
+  VTI: 'Renta variable estadounidense completa: grandes, medianas y pequeñas empresas en una sola posición.',
+  VT: 'Renta variable de todo el mundo, desarrollados y emergentes, en un único fondo.',
+  BND: 'Bonos estadounidenses con grado de inversión. Sirve para ver cómo se comporta la renta fija cuando la bolsa cae.',
+  TLT: 'Bonos del Tesoro a más de veinte años. Muy sensible a los tipos de interés: es el ejemplo clásico de duración.',
+  GLD: 'Fondo respaldado por oro físico en custodia. Sigue al metal, pero su precio es una fracción de la onza.',
+  SLV: 'Fondo respaldado por plata física.',
+  IBIT: 'Fondo cotizado con bitcoin en custodia. Da exposición al activo desde una cuenta de bolsa corriente.',
+  ARKK: 'Fondo de gestión activa concentrado en compañías de crecimiento. Un buen caso para estudiar qué hace la concentración.',
+  BTCUSD: 'El activo digital de mayor capitalización. Alta volatilidad y mercado abierto todos los días.',
+  ETHUSD: 'Red de contratos inteligentes. Su precio suele amplificar los movimientos de Bitcoin.',
+  SOLUSD: 'Criptoactivo de alta beta. Ejemplo útil para estudiar el riesgo de concentración.',
+  XRPUSD: 'Muy sensible a noticias regulatorias. Buen caso para estudiar el riesgo de titular.',
+  DOGEUSD: 'Nació como una broma y se mueve con la atención pública. El ejemplo más claro de un precio sin fundamento operativo.',
+  SHIBUSD: 'Criptoactivo de precio unitario muy bajo. La cantidad de ceros no lo hace barato: lo que importa es su capitalización.',
+  EURUSD: 'El par de divisas más negociado del mundo. Cuánto vale un euro en dólares: sube cuando el euro se fortalece y baja cuando lo hace el dólar.',
+  GBPUSD: 'La libra frente al dólar. Reacciona con fuerza a las decisiones del Banco de Inglaterra y a los datos de inflación británicos.',
+  USDJPY: 'Cuántos yenes cuesta un dólar. Es el termómetro clásico de la diferencia de tipos de interés entre Estados Unidos y Japón.',
+  USDCOP: 'El dólar frente al peso colombiano. Se mueve con el petróleo, con la prima de riesgo del país y con las decisiones del Banco de la República.',
+  AUDUSD: 'Una divisa muy ligada a las materias primas: sigue de cerca la demanda industrial de China y el precio del hierro y el carbón.',
+};
+
+/** Instrumentos que merecen un aviso de riesgo más alto que el de su clase. */
+const HIGH_RISK = new Set([
+  'TSLA', 'NVDA', 'COIN', 'MSTR', 'PLTR', 'RIVN', 'LCID', 'NIO', 'SNOW', 'ROKU', 'SOFI', 'ETSY',
+  'ARKK', 'SOXX', 'SMH', 'GDX', 'USO', 'UNG', 'IBIT', 'ICLN', 'JETS',
+]);
+
+const SYMBOLS: SymbolSeed[] = [];
+
+// ── Acciones ────────────────────────────────────────────────────────────────
+for (const [symbol, name, basePrice, minPlan, yahoo] of STOCK_SEEDS) {
+  SYMBOLS.push({
+    symbol, name, basePrice, minPlan,
+    assetClass: 'STOCK', quoteCurrency: 'USD', precision: 2, tickSize: 0.01, spreadBps: 2,
+    session: SESSIONS.US_EQUITY,
+    educationalRisk: HIGH_RISK.has(symbol) ? 5 : 3,
+    description: DESCRIPTIONS[symbol]
+      ?? `Acción de ${name}. Su precio responde a los resultados trimestrales de la compañía y a lo que el mercado espera de su negocio.`,
+    upstreamSymbol: yahoo ?? symbol,
+    // Un ticker con guion -BRK-B- no cabe en un identificador interno, así que
+    // el catálogo usa BRKB y aquí se guarda el que entiende la fuente, que es
+    // además el que reconoce la persona.
+    ...(yahoo ? { yahooSymbol: yahoo, displayTicker: yahoo } : {}),
+    annualVolatility: 0.3, annualDrift: 0,
+  });
+}
+
+// ── Fondos cotizados ────────────────────────────────────────────────────────
+for (const [symbol, name, basePrice, minPlan] of ETF_SEEDS) {
+  SYMBOLS.push({
+    symbol, name, basePrice, minPlan,
+    assetClass: 'ETF', quoteCurrency: 'USD', precision: 2, tickSize: 0.01, spreadBps: 2,
+    session: SESSIONS.US_EQUITY,
+    educationalRisk: HIGH_RISK.has(symbol) ? 4 : 2,
+    description: DESCRIPTIONS[symbol]
+      ?? 'Fondo cotizado. Una sola posición reparte el dinero entre todos los valores que replica, así que su recorrido es el del conjunto y no el de una empresa.',
+    // Son fondos estadounidenses reales y su ticker de catálogo es el de bolsa,
+    // así que la fuente los cotiza directamente, sin traducción.
+    upstreamSymbol: symbol,
+    annualVolatility: 0.2, annualDrift: 0,
+  });
+}
+
+// ── Criptomonedas ───────────────────────────────────────────────────────────
+for (const [symbol, name, basePrice, minPlan, binance, yahoo] of CRYPTO_SEEDS) {
+  const precision = precisionFor(basePrice);
+  SYMBOLS.push({
+    symbol, name: `${name} / Dólar estadounidense`, basePrice, minPlan, precision,
+    assetClass: 'CRYPTO', quoteCurrency: 'USD', tickSize: 10 ** -precision,
+    spreadBps: 8, session: SESSIONS.CRYPTO, educationalRisk: 5,
+    description: DESCRIPTIONS[symbol]
+      ?? `${name} es un criptoactivo. El mercado no cierra ningún día del año y sus oscilaciones son amplias: sirve para estudiar cómo el tamaño de la posición cambia el riesgo, más que para adivinar su rumbo.`,
+    // El par que existe de verdad se negocia contra Tether, y esa traducción la
+    // hace el proveedor de Binance. Lo que Binance no lista se cotiza en Yahoo,
+    // donde el ticker no se puede derivar porque no sigue ningún patrón.
+    ...(binance ? { upstreamSymbol: binance } : {}),
+    yahooSymbol: yahoo,
+    annualVolatility: 0.7, annualDrift: 0,
+  });
+}
+
+// ── Divisas ─────────────────────────────────────────────────────────────────
+for (const [symbol, basePrice, minPlan] of FOREX_SEEDS) {
+  const base = symbol.slice(0, 3);
+  const quote = symbol.slice(3);
+  const precision = forexPrecision(basePrice);
+  SYMBOLS.push({
+    symbol, basePrice, minPlan, precision,
+    name: `${CURRENCY_NAME[base] ?? base} / ${CURRENCY_NAME[quote] ?? quote}`,
+    assetClass: 'FOREX', quoteCurrency: quote, tickSize: 10 ** -precision,
+    spreadBps: base === 'USD' || quote === 'USD' ? 2 : 4,
+    session: SESSIONS.FOREX,
+    educationalRisk: base === 'USD' && !['EUR', 'GBP', 'JPY', 'CHF', 'CAD', 'AUD', 'NZD'].includes(quote) ? 4 : 3,
+    description: DESCRIPTIONS[symbol]
+      ?? `Cuántos ${(CURRENCY_NAME[quote] ?? quote).toLowerCase()} cuesta un ${(CURRENCY_NAME[base] ?? base).toLowerCase()}. Un tipo de cambio se mueve por la diferencia entre dos economías, nunca por una sola.`,
+    annualVolatility: 0.12, annualDrift: 0,
+  });
+}
+
+// ── Índices ─────────────────────────────────────────────────────────────────
+for (const [symbol, name, yahoo, session, currency, basePrice, minPlan, description] of INDEX_SEEDS) {
+  SYMBOLS.push({
+    symbol, name, basePrice, minPlan, description,
+    assetClass: 'INDEX', quoteCurrency: currency, precision: 2, tickSize: 0.01, spreadBps: 2,
+    session: SESSIONS[session] ?? SESSIONS.US_EQUITY,
+    educationalRisk: symbol === 'VIX' ? 5 : 2,
+    yahooSymbol: yahoo,
+    displayTicker: yahoo.replace('^', ''),
+    annualVolatility: 0.18, annualDrift: 0,
+  });
+}
+
+// ── Materias primas ─────────────────────────────────────────────────────────
+for (const [symbol, name, yahoo, session, precision, basePrice, minPlan, description] of COMMODITY_SEEDS) {
+  SYMBOLS.push({
+    symbol, name, basePrice, minPlan, description, precision,
+    assetClass: 'COMMODITY', quoteCurrency: 'USD', tickSize: 10 ** -precision, spreadBps: 4,
+    session: SESSIONS[session] ?? SESSIONS.METALS,
+    educationalRisk: session === 'ENERGY' || session === 'AGRI' ? 5 : 3,
+    yahooSymbol: yahoo,
+    displayTicker: yahoo.replace('=F', ''),
+    annualVolatility: 0.3, annualDrift: 0,
+  });
+}
+
+// Estos identificadores existen desde antes y hay simulaciones guardadas contra
+// ellos: se conservan tal cual, con su cotización en USDT de Binance, aunque el
+// mismo activo aparezca también como par contra el dólar.
+for (const [symbol, name, basePrice] of [['BTCUSDT', 'Bitcoin / Tether', 80000], ['ETHUSDT', 'Ethereum / Tether', 3000], ['SOLUSDT', 'Solana / Tether', 150]] as const) {
+  SYMBOLS.unshift({
+    symbol, name, basePrice, quoteCurrency: 'USDT', assetClass: 'CRYPTO', precision: 2,
+    tickSize: 0.01, spreadBps: 8, session: SESSIONS.CRYPTO, educationalRisk: 5, minPlan: 'FREE',
+    description: 'Referencia Binance Spot en USDT. Ejercicios con saldo virtual, sin ejecución en el exchange.',
+    annualVolatility: 0.7, annualDrift: 0,
+  });
+}
+
+export { SYMBOLS };
+
 const BY_SYMBOL = new Map(SYMBOLS.map((s) => [s.symbol, s]));
 
 export function getSymbol(symbol: string): SymbolSeed | undefined {
@@ -497,12 +260,33 @@ export function listSymbols(assetClass?: string): SymbolSeed[] {
   return SYMBOLS.filter((s) => s.assetClass === assetClass);
 }
 
+/**
+ * Búsqueda de instrumentos.
+ *
+ * Ordena por dónde cae la coincidencia y no por el orden del catálogo. Con
+ * trescientos instrumentos eso deja de ser un detalle: quien escribe "AAP"
+ * espera Apple en la primera fila, no la primera acción del alfabeto cuyo
+ * nombre contenga esas tres letras en alguna parte.
+ */
 export function searchSymbols(query: string, limit = 20): SymbolSeed[] {
   const q = query.trim().toLowerCase();
   if (!q) return SYMBOLS.slice(0, limit);
-  return SYMBOLS.filter(
-    (s) => s.symbol.toLowerCase().includes(q) || s.name.toLowerCase().includes(q),
-  ).slice(0, limit);
+  const score = (s: SymbolSeed): number => {
+    const symbol = s.symbol.toLowerCase();
+    const ticker = (s.displayTicker ?? '').toLowerCase();
+    const name = s.name.toLowerCase();
+    if (symbol === q || ticker === q) return 0;
+    if (symbol.startsWith(q) || ticker.startsWith(q)) return 1;
+    if (name.startsWith(q)) return 2;
+    if (symbol.includes(q) || ticker.includes(q)) return 3;
+    if (name.includes(q)) return 4;
+    return Number.POSITIVE_INFINITY;
+  };
+  return SYMBOLS.map((s) => [s, score(s)] as const)
+    .filter(([, rank]) => Number.isFinite(rank))
+    .sort((a, b) => a[1] - b[1] || a[0].symbol.localeCompare(b[0].symbol))
+    .slice(0, limit)
+    .map(([s]) => s);
 }
 
 /** Símbolos que un usuario nuevo ve en su watchlist inicial. */

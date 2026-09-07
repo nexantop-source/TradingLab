@@ -44,13 +44,18 @@
   box-sizing: border-box;
   background: #fff;
 }
-.instrument-icon--fallback { background: var(--color-overlay); }
-.instrument-icon-fallback {
-  font: 600 8px/1 system-ui, sans-serif;
-  letter-spacing: 0;
-  color: var(--color-text);
-  max-width: 100%;
-  overflow: hidden;
+/* Monograma: el disco de quien no tiene logotipo propio.
+   No es un estado de error con otro nombre. Con trescientos instrumentos en el
+   catalogo, exigir arte para cada uno significaria no poder anadir ninguno, y
+   un ticker legible identifica mejor que un icono generico de "materia prima"
+   repetido veinte veces. El SVG trae su propio viewBox, asi que escala solo. */
+.instrument-icon--monogram { background: transparent; box-shadow: none; }
+.instrument-icon--monogram > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  font-family: var(--font-instrument-sans), system-ui, sans-serif;
 }
 .invest-brand-stack {
   display: flex;

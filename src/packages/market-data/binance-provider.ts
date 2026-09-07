@@ -71,7 +71,50 @@ export class BinanceMarketDataProvider implements MarketDataProvider {
     const spread=requireSymbol(symbol).spreadBps/20000;
     return {symbol,price:point.price,bid:point.price*(1-spread),ask:point.price*(1+spread),previousClose:Number(day.openPrice),change:point.price-Number(day.openPrice),changePercent:(point.price/Number(day.openPrice)-1)*100,dayHigh:Number(day.highPrice),dayLow:Number(day.lowPrice),volume:Number(day.volume),provenance:point.provenance};
   }
-  async getQuotes(symbols:string[],at?:number){return Promise.all(symbols.map(symbol=>this.getQuote(symbol,at)));}
+  /**
+   * Cotizaciones de muchos pares en una sola llamada.
+   *
+   * `getQuote` pide dos cosas por instrumento -la vela de un segundo y el
+   * resumen de 24 h- porque quien abre un grafico necesita el precio exacto de
+   * este segundo. Una lista no: necesita el ultimo precio de cada uno. Con
+   * sesenta y ocho criptomonedas en el catalogo, la via de una en una son ciento
+   * treinta y seis peticiones para pintar una tabla, y la fuente empieza a
+   * limitar la frecuencia justo cuando mas gente hay mirando.
+   */
+  async getQuotes(symbols:string[],at?:number):Promise<Quote[]>{
+    const pairs=new Map<string,string>();
+    for(const symbol of symbols){const pair=binancePair(symbol);if(pair)pairs.set(symbol,pair);}
+    const rest=symbols.filter(s=>!pairs.has(s));
+    const out:Quote[]=[];
+    if(pairs.size){
+      const list=[...new Set(pairs.values())];
+      const quoted=JSON.stringify(list);
+      try{
+        const raw=await this.json('ticker/24hr',{symbols:quoted},5000);
+        const rows=Array.isArray(raw)?raw as Array<Record<string,string>>:[];
+        const byPair=new Map(rows.map(r=>[String(r.symbol),r]));
+        const now=this.clock();
+        for(const [symbol,pair] of pairs){
+          const day=byPair.get(pair);
+          const price=Number(day?.lastPrice);
+          const open=Number(day?.openPrice);
+          if(!day||!Number.isFinite(price)||price<=0||!Number.isFinite(open)||open<=0)continue;
+          const spread=(getSymbol(symbol)?.spreadBps??8)/20000;
+          out.push({symbol,price,bid:price*(1-spread),ask:price*(1+spread),previousClose:open,
+            change:price-open,changePercent:(price/open-1)*100,
+            dayHigh:Number(day.highPrice)||price,dayLow:Number(day.lowPrice)||price,
+            volume:Number(day.volume)||0,provenance:this.provenance(Number(day.closeTime)||now)});
+        }
+      }catch{
+        // El lote es una optimizacion, no la unica via: si falla se vuelve al
+        // camino de siempre en lugar de dejar la lista sin criptomonedas.
+        const settled=await Promise.allSettled([...pairs.keys()].map(symbol=>this.getQuote(symbol,at)));
+        out.push(...settled.flatMap(r=>r.status==='fulfilled'?[r.value]:[]));
+      }
+    }
+    const settled=await Promise.allSettled(rest.map(symbol=>this.getQuote(symbol,at)));
+    return [...out,...settled.flatMap(r=>r.status==='fulfilled'?[r.value]:[])];
+  }
   async getCandles(params:{symbol:string;timeframe:Timeframe;limit:number;to?:number}):Promise<CandleSeries>{
     const pair=binancePair(params.symbol);
     if(!pair)return this.demo.getCandles(params);

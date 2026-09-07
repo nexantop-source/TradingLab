@@ -61,8 +61,12 @@ describe('cobertura de mercado', () => {
     // Cuatro decimales sobre un peso colombiano de 3.115 son ruido; dos sobre
     // un euro de 1,16 esconderían el movimiento de todo un día.
     expect(getSymbol('USDCOP')?.precision).toBe(2);
-    expect(getSymbol('EURGBP')?.precision).toBe(4);
+    expect(getSymbol('EURUSD')?.precision).toBe(5);
+    expect(getSymbol('EURGBP')?.precision).toBe(5);
     expect(getSymbol('EURJPY')?.precision).toBe(3);
+    // Una criptomoneda de precio ínfimo sí necesita bajar hasta la millonésima:
+    // con cuatro decimales, Shiba Inu valdría cero.
+    expect(getSymbol('SHIBUSD')?.precision).toBeGreaterThanOrEqual(6);
   });
 });
 
