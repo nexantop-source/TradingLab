@@ -40,6 +40,15 @@ Estado verificado sobre el código y la aplicación en ejecución.
 
 ### Bloqueantes
 
+- [ ] **Programador de cobros.** Crear el trabajo de Cloud Scheduler que invoca
+      `POST /api/billing/charge-due`. Sin él ninguna prueba gratuita convierte:
+      vencen y se quedan ahí, sin cobrar y sin avisar. Ver
+      `docs/BILLING-SCHEDULER.md`.
+- [ ] **`MARKET_DATA_PROVIDER=real`** en el entorno desplegado. Con `binance`,
+      todo lo que no es cripto sale del motor determinístico y se publica un
+      precio inventado. Comprobar en `/api/market/status` que `healthy` es
+      `true` y que las siete familias traen `real: true`.
+
 - [ ] **Revisión jurídica** de los siete documentos legales en cada jurisdicción de destino.
 - [ ] **Información registral** de la entidad: razón social, domicilio, identificación fiscal.
 - [ ] **PostgreSQL** en lugar de SQLite, con copias de seguridad automáticas y **restauración
