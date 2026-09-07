@@ -135,6 +135,15 @@ export interface AssetMeta {
    * no tiene historia real y no se ofrece como si la tuviera.
    */
   yahooSymbol?: string;
+  /**
+   * Orden de reconocimiento: cuanto más bajo, antes se enseña.
+   *
+   * No es capitalización ni volumen -no los tenemos y fingirlos seria peor-:
+   * es cuánta gente sabe qué es esto sin buscarlo. Con trescientos
+   * instrumentos, abrir la lista por orden alfabético pone a AAVE y ABBV
+   * delante de Bitcoin y Apple, que es justo lo contrario de lo que hace falta.
+   */
+  popularity?: number;
   description: string;
   /** Solo disponible a partir de este plan. */
   minPlan: PlanId;

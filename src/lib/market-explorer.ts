@@ -35,6 +35,7 @@ export async function getExplorerAssets(): Promise<ExplorerAsset[]> {
       // Cuando la exposición se obtiene por un fondo cotizado, se enseña su
       // ticker: es el instrumento que de verdad se está mirando.
       ticker: s.displayTicker ?? s.symbol,
+      popularity: s.popularity ?? 9999,
       name: s.name,
       assetClass: s.assetClass,
       precision: s.precision,

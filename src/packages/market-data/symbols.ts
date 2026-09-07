@@ -211,7 +211,6 @@ for (const [symbol, name, yahoo, session, currency, basePrice, minPlan, descript
     session: SESSIONS[session] ?? SESSIONS.US_EQUITY,
     educationalRisk: symbol === 'VIX' ? 5 : 2,
     yahooSymbol: yahoo,
-    displayTicker: yahoo.replace('^', ''),
     annualVolatility: 0.18, annualDrift: 0,
   });
 }
@@ -224,7 +223,6 @@ for (const [symbol, name, yahoo, session, precision, basePrice, minPlan, descrip
     session: SESSIONS[session] ?? SESSIONS.METALS,
     educationalRisk: session === 'ENERGY' || session === 'AGRI' ? 5 : 3,
     yahooSymbol: yahoo,
-    displayTicker: yahoo.replace('=F', ''),
     annualVolatility: 0.3, annualDrift: 0,
   });
 }
@@ -239,6 +237,40 @@ for (const [symbol, name, basePrice] of [['BTCUSDT', 'Bitcoin / Tether', 80000],
     description: 'Referencia Binance Spot en USDT. Ejercicios con saldo virtual, sin ejecución en el exchange.',
     annualVolatility: 0.7, annualDrift: 0,
   });
+}
+
+/**
+ * Orden de reconocimiento.
+ *
+ * Con cincuenta instrumentos daba igual como se abriera la lista; con
+ * trescientos, no. Por orden alfabetico lo primero que se ve es AAVE, ABBV y
+ * ABNB, y lo que la persona esperaba -Bitcoin, Apple, el S&P- queda enterrado
+ * a doscientas filas. Esta lista es lo que se ensena primero.
+ *
+ * No pretende ser capitalizacion ni volumen: no tenemos esos datos y fingirlos
+ * seria peor que no ordenar. Es otra cosa, mas util aqui: cuanta gente sabe que
+ * es esto sin tener que buscarlo. Por eso mezcla familias a proposito -Bitcoin,
+ * Apple, el oro y el euro en las primeras filas- en lugar de agrupar por clase:
+ * la primera pantalla tiene que decir "aqui hay de todo".
+ *
+ * Lo que no esta en la lista se ordena detras, por clase y alfabeticamente.
+ */
+const POPULAR = [
+  'BTCUSD', 'AAPL', 'SPY', 'ETHUSD', 'EURUSD', 'NVDA', 'XAUUSD', 'TSLA', 'QQQ', 'SPX500',
+  'MSFT', 'AMZN', 'GOOGL', 'USDCOP', 'SOLUSD', 'META', 'NAS100', 'WTIUSD', 'GBPUSD', 'XRPUSD',
+  'NFLX', 'USDJPY', 'AMD', 'VOO', 'DOGEUSD', 'US30', 'BNBUSD', 'XAGUSD', 'USDMXN', 'DIS',
+  'KO', 'ADAUSD', 'VTI', 'JPM', 'GLD', 'USDBRL', 'INTC', 'BA', 'V', 'AUDUSD',
+  'LTCUSD', 'BRENTUSD', 'IWM', 'COIN', 'AVAXUSD', 'MCD', 'USDCAD', 'LINKUSD', 'PLTR', 'GER40',
+  'NKE', 'VIX', 'BABA', 'UBER', 'JP225', 'DOTUSD', 'USDCHF', 'TLT', 'PYPL', 'SHIBUSD',
+  'MA', 'NGASUSD', 'COPPERUSD', 'UK100', 'SBUX', 'ORCL', 'BND', 'EURGBP', 'COFFEEUSD', 'TSM',
+];
+const POPULARITY = new Map(POPULAR.map((symbol, index) => [symbol, index]));
+
+/** Detras de los reconocibles, un orden estable por clase. */
+const CLASS_ORDER = ['CRYPTO', 'STOCK', 'ETF', 'FOREX', 'INDEX', 'COMMODITY'];
+for (const instrument of SYMBOLS) {
+  const known = POPULARITY.get(instrument.symbol);
+  instrument.popularity = known ?? 1000 + CLASS_ORDER.indexOf(instrument.assetClass) * 1000;
 }
 
 export { SYMBOLS };

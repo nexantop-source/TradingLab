@@ -13,6 +13,8 @@ export { AssetIcon } from './AssetIcon';
 export interface ExplorerAsset {
   symbol: string; name: string; assetClass: AssetClass; precision: number; currency: string;
   description: string; risk: number; minPlan: PlanId; session: string; price: number | null;
+  /** Orden de reconocimiento. Cuanto más bajo, antes se enseña. */
+  popularity?: number;
   change: number | null; synthetic: boolean; source: string; timestamp: number;
   /** Ticker que ve la persona. Difiere del interno cuando se cotiza por un fondo. */
   ticker?: string;
@@ -23,7 +25,9 @@ export function MarketExplorer({ assets, authenticated = false, initialWatchlist
 }) {
   const [category, setCategory] = useState('ALL');
   const [query, setQuery] = useState('');
-  const [sort, setSort] = useState('name');
+  // Abre por lo que la gente reconoce, no por orden alfabético: con
+  // trescientos instrumentos, la A pone AAVE y ABBV delante de Bitcoin.
+  const [sort, setSort] = useState('popular');
   const [watchlist, setWatchlist] = useState(initialWatchlist);
   const [selected, setSelected] = useState<ExplorerAsset | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -53,7 +57,8 @@ export function MarketExplorer({ assets, authenticated = false, initialWatchlist
       .filter(a => !q || `${a.ticker ?? a.symbol} ${a.symbol} ${a.name}`.toLowerCase().includes(q))
       .sort((a, b) => (q ? rank(a) - rank(b) : 0)
         || (sort === 'change' ? (b.change ?? -Infinity) - (a.change ?? -Infinity)
-          : sort === 'plan' ? Number(planAtLeast(plan, b.minPlan)) - Number(planAtLeast(plan, a.minPlan)) : 0)
+          : sort === 'plan' ? Number(planAtLeast(plan, b.minPlan)) - Number(planAtLeast(plan, a.minPlan))
+            : sort === 'popular' ? (a.popularity ?? 9999) - (b.popularity ?? 9999) : 0)
         || a.symbol.localeCompare(b.symbol));
   }, [assets, category, query, sort, watchlist, plan]);
   async function toggleWatch(asset: ExplorerAsset) {
@@ -68,7 +73,7 @@ export function MarketExplorer({ assets, authenticated = false, initialWatchlist
     finally { setBusy(null); }
   }
   return <div className="invest-explorer">
-    <div className="invest-explorer-tools"><label className="invest-search"><Search size={18} aria-hidden="true" /><input aria-label="Buscar activos" placeholder="Busca un ETF, una moneda o una empresa" value={query} onChange={e => { setQuery(e.target.value); setLimit(PAGE); }} />{query && <button type="button" onClick={() => setQuery('')} aria-label="Borrar búsqueda">×</button>}</label><label className="invest-sort"><ArrowDownUp size={16} /><select aria-label="Ordenar activos" value={sort} onChange={e => setSort(e.target.value)}><option value="name">Símbolo A–Z</option><option value="change">Mayor variación</option><option value="plan">Incluidos en mi plan</option></select></label></div>
+    <div className="invest-explorer-tools"><label className="invest-search"><Search size={18} aria-hidden="true" /><input aria-label="Buscar activos" placeholder="Busca un ETF, una moneda o una empresa" value={query} onChange={e => { setQuery(e.target.value); setLimit(PAGE); }} />{query && <button type="button" onClick={() => setQuery('')} aria-label="Borrar búsqueda">×</button>}</label><label className="invest-sort"><ArrowDownUp size={16} /><select aria-label="Ordenar activos" value={sort} onChange={e => setSort(e.target.value)}><option value="popular">Más conocidos</option><option value="name">Símbolo A–Z</option><option value="change">Mayor variación</option><option value="plan">Incluidos en mi plan</option></select></label></div>
     <FluidControl label="Categoría de mercado" value={category} onChange={v => { setCategory(v); setLimit(PAGE); }} options={[{ value: 'ALL', label: 'Todos' }, { value: 'ETF', label: 'ETFs' }, { value: 'CRYPTO', label: 'Cripto' }, { value: 'FOREX', label: 'Divisas' }, { value: 'STOCK', label: 'Acciones' }, { value: 'INDEX', label: 'Índices' }, { value: 'COMMODITY', label: 'Materias primas' }, { value: 'SAVED', label: 'Mi lista' }]} />
     <div className="invest-list-caption"><span>{filtered.length === assets.length ? `${assets.length} instrumentos` : `${filtered.length} de ${assets.length} instrumentos`}</span><span>{assets.every(a => a.synthetic) ? 'Precios simulados · no son cotizaciones reales' : 'Consulta la fuente de cada instrumento'}</span></div>
     {message && <div className="invest-feedback" role="status">{message}{!authenticated && <Link href="/entrar"> Iniciar sesión →</Link>}<button onClick={() => setMessage('')} aria-label="Cerrar mensaje">×</button></div>}
