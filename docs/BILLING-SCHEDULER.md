@@ -21,7 +21,23 @@ otras personas al alcance de cualquiera.
 
 ## Crear el trabajo
 
-Una vez, desde una consola con permisos sobre el proyecto:
+Con el script del repositorio, que lee la credencial desde Secret Manager y no
+la pasa por la terminal ni por ningún fichero. Necesita `firebase login`, el
+mismo camino que `db-remote.mjs`:
+
+```bash
+node scripts/billing-scheduler.mjs            # enseña qué haría, sin tocar nada
+node scripts/billing-scheduler.mjs --aplicar   # lo crea o lo actualiza
+node scripts/billing-scheduler.mjs --ejecutar  # lo lanza una vez, ahora
+```
+
+**Ya está creado** en `nexant-87204` / `us-east4`, ejecutándose a diario a las
+13:20 de Bogotá. El script es idempotente: volver a aplicarlo actualiza el
+trabajo existente en lugar de duplicarlo.
+
+### La alternativa, con gcloud
+
+Si prefieres hacerlo a mano, desde una consola con permisos sobre el proyecto:
 
 ```bash
 PROYECTO=nexant-87204

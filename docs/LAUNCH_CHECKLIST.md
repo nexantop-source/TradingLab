@@ -40,14 +40,13 @@ Estado verificado sobre el código y la aplicación en ejecución.
 
 ### Bloqueantes
 
-- [ ] **Programador de cobros.** Crear el trabajo de Cloud Scheduler que invoca
-      `POST /api/billing/charge-due`. Sin él ninguna prueba gratuita convierte:
-      vencen y se quedan ahí, sin cobrar y sin avisar. Ver
-      `docs/BILLING-SCHEDULER.md`.
-- [ ] **`MARKET_DATA_PROVIDER=real`** en el entorno desplegado. Con `binance`,
-      todo lo que no es cripto sale del motor determinístico y se publica un
-      precio inventado. Comprobar en `/api/market/status` que `healthy` es
-      `true` y que las siete familias traen `real: true`.
+- [x] **Programador de cobros.** Creado el 7 de septiembre de 2026 en
+      `nexant-87204` / `us-east4`, a las 13:20 de Bogotá. Sin él ninguna prueba
+      gratuita convertía. Ver `docs/BILLING-SCHEDULER.md`.
+- [x] **`MARKET_DATA_PROVIDER=real`** en el entorno desplegado. Con `binance`,
+      todo lo que no era cripto salía del motor determinístico y se publicaba un
+      precio inventado. Comprobado en `/api/market/status`: `healthy: true` y las
+      siete familias con `real: true`.
 
 - [ ] **Revisión jurídica** de los siete documentos legales en cada jurisdicción de destino.
 - [ ] **Información registral** de la entidad: razón social, domicilio, identificación fiscal.
