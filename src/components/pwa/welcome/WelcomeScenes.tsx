@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { ArrowDownRight, ArrowUpRight, BookOpen, ChevronRight, Compass, PencilLine, ShieldCheck, Sparkles } from 'lucide-react';
 import { Logo } from '@/components/Logo';
 import { AssetIcon } from '@/components/investment/AssetIcon';
+import { AssetOrbit } from './AssetOrbit';
 
 const INSTRUMENTS = [
   { symbol: 'BTCUSD', name: 'Bitcoin', category: 'Cripto', description: 'Aprende qué mueve un mercado que nunca se detiene.', position: 'north' },
@@ -17,35 +18,61 @@ const spring = { type: 'spring' as const, stiffness: 200, damping: 28 };
 const lift = (reduce: boolean, delay = 0) => ({ initial: reduce ? false as const : { opacity: 0, y: 18 }, animate: { opacity: 1, y: 0 }, transition: { ...spring, delay: reduce ? 0 : delay } });
 
 /** Real asset identities; intentionally no made-up quotes, yields, or endorsements. */
+/**
+ * Escena 1. La constelación de instrumentos reales.
+ *
+ * Sustituye a las órbitas dibujadas y al logotipo suelto: aquellas eran formas
+ * abstractas que podían ilustrar cualquier producto, y esto son las marcas que
+ * la persona va a encontrar dentro. Reconocer Apple y Bitcoin en el primer
+ * segundo dice qué es esto mejor que cualquier titular.
+ */
 export function MarketScene({ reduce }: { reduce: boolean }) {
   const [selected, setSelected] = useState(0);
   const instrument = INSTRUMENTS[selected];
-  return <section className="welcome-market-scene" aria-label="Explorador de instrumentos">
-    <div className="welcome-world-image" aria-hidden="true" />
-    <div className="welcome-world-shade" aria-hidden="true" />
-    <span className="welcome-art-label"><Compass size={14} /> ABRE TU MIRADA</span>
-    <svg className="welcome-orbits" viewBox="0 0 440 360" fill="none" aria-hidden="true">
-      <motion.ellipse cx="220" cy="174" rx="158" ry="104" transform="rotate(-25 220 174)" initial={reduce ? false : { pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: reduce ? 0 : 1.05, ease: 'easeOut' }} />
-      <motion.ellipse cx="220" cy="174" rx="126" ry="138" transform="rotate(32 220 174)" initial={reduce ? false : { pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: reduce ? 0 : 1.2, ease: 'easeOut' }} />
-    </svg>
-    <motion.div className="welcome-brand-lens" initial={reduce ? false : { opacity: 0, scale: 0.82, rotate: -9 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} transition={spring} aria-hidden="true"><span /><Logo size="lg" withWordmark={false} /></motion.div>
-    <div className="welcome-instrument-cloud" role="group" aria-label="Toca un instrumento para descubrirlo">
-      {INSTRUMENTS.map((item, index) => <motion.button key={item.symbol} {...lift(reduce, index * 0.065)} className={`welcome-instrument welcome-instrument--${item.position}`} type="button" onClick={() => setSelected(index)} aria-label={`Descubrir ${item.name}`} aria-pressed={selected === index}>
-        <AssetIcon symbol={item.symbol} size="lg" /><span>{item.name}</span>
-      </motion.button>)}
-    </div>
-    <motion.div className="welcome-market-caption" {...lift(reduce, 0.2)}>
-      <div><span>{instrument.category}</span><strong>{instrument.name}</strong></div>
-      <p aria-live="polite" aria-atomic="true">{instrument.description}</p>
-    </motion.div>
-  </section>;
+
+  return (
+    <section className="welcome-market-scene" aria-label="Explorador de instrumentos">
+      <span className="welcome-art-label">
+        <Compass size={14} /> ABRE TU MIRADA
+      </span>
+
+      <AssetOrbit reduce={reduce} />
+
+      <div className="welcome-instrument-picker" role="group" aria-label="Toca un instrumento para descubrirlo">
+        {INSTRUMENTS.map((item, index) => (
+          <motion.button
+            key={item.symbol}
+            {...lift(reduce, 0.3 + index * 0.05)}
+            type="button"
+            onClick={() => setSelected(index)}
+            aria-label={`Descubrir ${item.name}`}
+            aria-pressed={selected === index}
+            data-active={selected === index || undefined}
+          >
+            <AssetIcon symbol={item.symbol} size="sm" />
+            <span>{item.name}</span>
+          </motion.button>
+        ))}
+      </div>
+
+      <motion.div className="welcome-market-caption" {...lift(reduce, 0.36)}>
+        <div>
+          <span>{instrument.category}</span>
+          <strong>{instrument.name}</strong>
+        </div>
+        <p aria-live="polite" aria-atomic="true">
+          {instrument.description}
+        </p>
+      </motion.div>
+    </section>
+  );
 }
 
+/** Trazados de la escena de práctica: neutro, al alza y a la baja. */
 const NEUTRAL_PATH = 'M 12 120 C 34 120 34 105 56 110 S 87 134 109 115 S 137 86 160 98 S 188 116 209 99 S 239 78 262 91 S 285 105 306 91 S 325 86 338 86';
 const UP_PATH = 'M 12 120 C 34 120 34 105 56 110 S 87 134 109 115 S 137 86 160 98 S 188 116 209 99 S 239 60 262 72 S 285 46 306 52 S 325 29 338 26';
 const DOWN_PATH = 'M 12 120 C 34 120 34 105 56 110 S 87 134 109 115 S 137 86 160 98 S 188 116 209 99 S 239 138 262 124 S 285 148 306 135 S 325 160 338 160';
 
-/** Interactive lesson only. These paths are hypothetical and never create an order. */
 export function PracticeScene({ reduce }: { reduce: boolean }) {
   const [direction, setDirection] = useState<'up' | 'down' | null>(null);
   const gradient = useId().replace(/:/g, '');

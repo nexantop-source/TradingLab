@@ -124,3 +124,100 @@ html[data-app-mode='standalone'] .welcome-app.ios-welcome { background: var(--co
 @supports not (backdrop-filter: blur(1px)) {
   .welcome-brand-lens { background: var(--color-blue); }.welcome-instrument > .instrument-icon { background: var(--color-surface); }.welcome-practice-ticket { background: var(--color-surface); }.welcome-journal-ticket { background: var(--color-bg); }.welcome-risk-chip { background: var(--color-surface); }
 }
+
+/* ── Constelación de instrumentos ────────────────────────────────────────── */
+/* Los SVG del catálogo ya traen su propio fondo -el naranja de Bitcoin, el
+   degradado de Apple-, así que recortarlos en círculo los deja llenos de color
+   en lugar de un glifo flotando sobre un hueco. `object-fit: cover` garantiza
+   que el disco quede lleno aunque el icono no sea cuadrado. */
+.asset-orbit {
+  position: relative;
+  width: min(100%, 340px);
+  aspect-ratio: 1;
+  margin: 0 auto;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+}
+
+.orbit-halo {
+  position: absolute; inset: 12%;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--color-blue-soft), transparent 68%);
+}
+
+.orbit-ring { position: absolute; inset: 0; display: grid; place-items: center; will-change: transform; }
+.orbit-slot { position: absolute; top: 50%; left: 50%; display: block; }
+
+.orbit-token {
+  display: block; width: 100%; height: 100%;
+  border-radius: 50%; overflow: hidden;
+  background: var(--color-elevated);
+  border: 1px solid var(--color-border-strong);
+  box-shadow: var(--shadow-lifted);
+  will-change: transform;
+}
+.orbit-token img {
+  display: block; width: 100%; height: 100%;
+  object-fit: cover; border-radius: 50%;
+}
+
+.orbit-core {
+  position: relative; z-index: 2;
+  display: grid; place-items: center;
+  width: 92px; height: 92px;
+  border-radius: 50%;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  box-shadow: var(--shadow-lifted);
+}
+
+/* El pulso sugiere que el mercado late, sin fingir un precio concreto. */
+.orbit-pulse {
+  position: absolute; z-index: 1;
+  width: 92px; height: 92px; border-radius: 50%;
+  border: 1px solid var(--color-blue);
+  animation: orbit-pulse 3.4s var(--ease-out-soft) infinite;
+  pointer-events: none;
+}
+.orbit-pulse--late { animation-delay: 1.7s; }
+@keyframes orbit-pulse {
+  0%   { transform: scale(1);   opacity: 0.55; }
+  70%  { transform: scale(2.5); opacity: 0; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+@media (max-width: 400px) {
+  .asset-orbit { width: min(100%, 290px); }
+  .orbit-core { width: 74px; height: 74px; }
+  .orbit-pulse { width: 74px; height: 74px; }
+}
+
+/* Sin movimiento la composición se queda quieta y completa: nadie pierde
+   información por no querer animaciones. */
+@media (prefers-reduced-motion: reduce) {
+  .orbit-pulse { display: none; }
+  .orbit-ring, .orbit-token { animation: none !important; }
+}
+
+/* Selector bajo la constelación. Fichas pequeñas, porque el protagonista es el
+   orbital: si compiten, la escena deja de tener un punto de entrada claro. */
+.welcome-instrument-picker {
+  display: flex; flex-wrap: wrap; justify-content: center;
+  gap: var(--space-2); margin-top: var(--space-5);
+}
+.welcome-instrument-picker button {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  min-height: 40px; padding: var(--space-1) var(--space-3) var(--space-1) var(--space-1);
+  border: 1px solid var(--color-border); border-radius: var(--radius-full);
+  background: var(--color-surface); color: var(--color-muted);
+  font-size: var(--text-2xs); font-weight: 500; cursor: pointer;
+  transition: color 180ms, border-color 180ms, background-color 180ms;
+}
+.welcome-instrument-picker button[data-active] {
+  color: var(--color-text);
+  border-color: var(--color-blue);
+  background: var(--color-blue-soft);
+}
+.welcome-instrument-picker button:focus-visible { outline: 2px solid var(--color-blue); outline-offset: 2px; }
