@@ -57,7 +57,7 @@ export const SYMBOLS: SymbolSeed[] = [
   // ── Forex ──────────────────────────────────────────────────────────────────
   {
     symbol: 'EURUSD',
-    name: 'Euro / Dólar estadounidense',
+    name: 'Invesco CurrencyShares Euro Trust',
     assetClass: 'FOREX',
     quoteCurrency: 'USD',
     precision: 5,
@@ -65,15 +65,18 @@ export const SYMBOLS: SymbolSeed[] = [
     spreadBps: 1.2,
     session: SESSIONS.FOREX,
     educationalRisk: 3,
-    description: 'El par más negociado del mundo. Reacciona a las decisiones del BCE y de la Reserva Federal.',
+    description:
+      'Fondo cotizado que replica al euro frente al dólar manteniendo depósitos en euros. No es el par EUR/USD: es un instrumento bursátil que lo sigue, y cotiza en horario de Nueva York.',
     minPlan: 'FREE',
     basePrice: 1.0865,
     annualVolatility: 0.07,
     annualDrift: 0.0,
+    upstreamSymbol: 'FXE',
+    displayTicker: 'FXE',
   },
   {
     symbol: 'GBPUSD',
-    name: 'Libra esterlina / Dólar estadounidense',
+    name: 'Invesco CurrencyShares British Pound Trust',
     assetClass: 'FOREX',
     quoteCurrency: 'USD',
     precision: 5,
@@ -81,15 +84,18 @@ export const SYMBOLS: SymbolSeed[] = [
     spreadBps: 1.6,
     session: SESSIONS.FOREX,
     educationalRisk: 3,
-    description: 'Suele moverse más que el EUR/USD. Muy sensible a los datos macroeconómicos británicos.',
+    description:
+      'Fondo cotizado que sigue a la libra esterlina frente al dólar. No es el par GBP/USD: cotiza en bolsa estadounidense y respeta su horario.',
     minPlan: 'FREE',
     basePrice: 1.2712,
     annualVolatility: 0.085,
     annualDrift: 0.0,
+    upstreamSymbol: 'FXB',
+    displayTicker: 'FXB',
   },
   {
     symbol: 'USDJPY',
-    name: 'Dólar estadounidense / Yen japonés',
+    name: 'Invesco CurrencyShares Japanese Yen Trust',
     assetClass: 'FOREX',
     quoteCurrency: 'JPY',
     precision: 3,
@@ -97,11 +103,14 @@ export const SYMBOLS: SymbolSeed[] = [
     spreadBps: 1.4,
     session: SESSIONS.FOREX,
     educationalRisk: 3,
-    description: 'Históricamente ligado a los diferenciales de tipos de interés entre Estados Unidos y Japón.',
+    description:
+      'Fondo cotizado que sigue al yen japonés. Atención a la dirección: sube cuando el yen se aprecia, es decir, cuando USD/JPY baja.',
     minPlan: 'FREE',
     basePrice: 151.42,
     annualVolatility: 0.09,
     annualDrift: 0.0,
+    upstreamSymbol: 'FXY',
+    displayTicker: 'FXY',
   },
   {
     symbol: 'USDMXN',
@@ -121,7 +130,7 @@ export const SYMBOLS: SymbolSeed[] = [
   },
   {
     symbol: 'AUDUSD',
-    name: 'Dólar australiano / Dólar estadounidense',
+    name: 'Invesco CurrencyShares Australian Dollar Trust',
     assetClass: 'FOREX',
     quoteCurrency: 'USD',
     precision: 5,
@@ -129,11 +138,14 @@ export const SYMBOLS: SymbolSeed[] = [
     spreadBps: 1.8,
     session: SESSIONS.FOREX,
     educationalRisk: 3,
-    description: 'Divisa vinculada a materias primas: correlaciona con el ciclo de la minería.',
+    description:
+      'Fondo cotizado que sigue al dólar australiano frente al estadounidense.',
     minPlan: 'STANDARD',
     basePrice: 0.6588,
     annualVolatility: 0.088,
     annualDrift: 0.0,
+    upstreamSymbol: 'FXA',
+    displayTicker: 'FXA',
   },
 
   // ── Criptomonedas ─────────────────────────────────────────────────────────
@@ -141,6 +153,7 @@ export const SYMBOLS: SymbolSeed[] = [
     symbol: 'BTCUSD',
     name: 'Bitcoin / Dólar estadounidense',
     assetClass: 'CRYPTO',
+    upstreamSymbol: 'BTCUSDT',
     quoteCurrency: 'USD',
     precision: 2,
     tickSize: 0.01,
@@ -157,6 +170,7 @@ export const SYMBOLS: SymbolSeed[] = [
     symbol: 'ETHUSD',
     name: 'Ethereum / Dólar estadounidense',
     assetClass: 'CRYPTO',
+    upstreamSymbol: 'ETHUSDT',
     quoteCurrency: 'USD',
     precision: 2,
     tickSize: 0.01,
@@ -173,6 +187,7 @@ export const SYMBOLS: SymbolSeed[] = [
     symbol: 'SOLUSD',
     name: 'Solana / Dólar estadounidense',
     assetClass: 'CRYPTO',
+    upstreamSymbol: 'SOLUSDT',
     quoteCurrency: 'USD',
     precision: 3,
     tickSize: 0.001,
@@ -189,6 +204,7 @@ export const SYMBOLS: SymbolSeed[] = [
     symbol: 'XRPUSD',
     name: 'XRP / Dólar estadounidense',
     assetClass: 'CRYPTO',
+    upstreamSymbol: 'XRPUSDT',
     quoteCurrency: 'USD',
     precision: 4,
     tickSize: 0.0001,
@@ -218,6 +234,7 @@ export const SYMBOLS: SymbolSeed[] = [
     basePrice: 224.31,
     annualVolatility: 0.24,
     annualDrift: 0.0,
+    upstreamSymbol: 'AAPL',
   },
   {
     symbol: 'MSFT',
@@ -234,6 +251,7 @@ export const SYMBOLS: SymbolSeed[] = [
     basePrice: 418.72,
     annualVolatility: 0.22,
     annualDrift: 0.0,
+    upstreamSymbol: 'MSFT',
   },
   {
     symbol: 'TSLA',
@@ -250,6 +268,7 @@ export const SYMBOLS: SymbolSeed[] = [
     basePrice: 241.05,
     annualVolatility: 0.52,
     annualDrift: 0.0,
+    upstreamSymbol: 'TSLA',
   },
   {
     symbol: 'NVDA',
@@ -266,6 +285,7 @@ export const SYMBOLS: SymbolSeed[] = [
     basePrice: 121.44,
     annualVolatility: 0.48,
     annualDrift: 0.0,
+    upstreamSymbol: 'NVDA',
   },
   {
     symbol: 'AMZN',
@@ -282,12 +302,13 @@ export const SYMBOLS: SymbolSeed[] = [
     basePrice: 186.33,
     annualVolatility: 0.3,
     annualDrift: 0.0,
+    upstreamSymbol: 'AMZN',
   },
 
   // ── Índices ───────────────────────────────────────────────────────────────
   {
     symbol: 'SPX500',
-    name: 'Índice S&P 500 (referencia)',
+    name: 'SPDR S&P 500 ETF Trust',
     assetClass: 'INDEX',
     quoteCurrency: 'USD',
     precision: 2,
@@ -295,15 +316,18 @@ export const SYMBOLS: SymbolSeed[] = [
     spreadBps: 1.5,
     session: SESSIONS.US_EQUITY,
     educationalRisk: 2,
-    description: 'Cesta de 500 grandes compañías estadounidenses. Referencia habitual de mercado.',
+    description:
+      'El fondo cotizado más negociado del mundo. Replica el S&P 500, que reúne a las 500 mayores empresas estadounidenses. Su precio ronda una décima parte del índice.',
     minPlan: 'FREE',
     basePrice: 5648.4,
     annualVolatility: 0.16,
     annualDrift: 0.0,
+    upstreamSymbol: 'SPY',
+    displayTicker: 'SPY',
   },
   {
     symbol: 'NAS100',
-    name: 'Índice Nasdaq 100 (referencia)',
+    name: 'Invesco QQQ Trust',
     assetClass: 'INDEX',
     quoteCurrency: 'USD',
     precision: 2,
@@ -311,23 +335,28 @@ export const SYMBOLS: SymbolSeed[] = [
     spreadBps: 2,
     session: SESSIONS.US_EQUITY,
     educationalRisk: 3,
-    description: 'Concentrado en tecnología. Suele moverse más que un índice amplio.',
+    description:
+      'Fondo cotizado que replica el Nasdaq 100, concentrado en tecnología. Más volátil que el S&P 500 por su menor diversificación sectorial.',
     minPlan: 'STANDARD',
     basePrice: 19672.1,
     annualVolatility: 0.21,
     annualDrift: 0.0,
+    upstreamSymbol: 'QQQ',
+    displayTicker: 'QQQ',
   },
   {
     symbol: 'GER40',
-    name: 'Índice de referencia alemán',
+    name: 'iShares MSCI Germany ETF',
     assetClass: 'INDEX',
+    upstreamSymbol: 'EWG',
     quoteCurrency: 'EUR',
     precision: 2,
     tickSize: 0.01,
     spreadBps: 2.5,
     session: { ...SESSIONS.US_EQUITY, openMinuteUtc: 7 * 60, closeMinuteUtc: 15 * 60 + 30, label: 'Lunes a viernes, 07:00 a 15:30 UTC' },
     educationalRisk: 3,
-    description: 'Principales compañías cotizadas de Alemania. Útil para comparar regiones.',
+    description:
+      'Fondo cotizado estadounidense con exposición a grandes empresas alemanas. Cotiza en dólares y en horario de Nueva York, no de Fráncfort.',
     minPlan: 'STANDARD',
     basePrice: 18492.6,
     annualVolatility: 0.18,
@@ -337,7 +366,7 @@ export const SYMBOLS: SymbolSeed[] = [
   // ── Commodities ───────────────────────────────────────────────────────────
   {
     symbol: 'XAUUSD',
-    name: 'Oro / Dólar estadounidense',
+    name: 'SPDR Gold Shares',
     assetClass: 'COMMODITY',
     quoteCurrency: 'USD',
     precision: 2,
@@ -345,15 +374,18 @@ export const SYMBOLS: SymbolSeed[] = [
     spreadBps: 3,
     session: SESSIONS.METALS,
     educationalRisk: 3,
-    description: 'Metal precioso considerado activo refugio. Sensible a tipos reales y al dólar.',
+    description:
+      'Fondo cotizado respaldado por oro físico en custodia. Sigue al metal, pero su precio es una fracción de la onza y descuenta los gastos del fondo.',
     minPlan: 'FREE',
     basePrice: 2482.15,
     annualVolatility: 0.14,
     annualDrift: 0.0,
+    upstreamSymbol: 'GLD',
+    displayTicker: 'GLD',
   },
   {
     symbol: 'XAGUSD',
-    name: 'Plata / Dólar estadounidense',
+    name: 'iShares Silver Trust',
     assetClass: 'COMMODITY',
     quoteCurrency: 'USD',
     precision: 3,
@@ -361,15 +393,18 @@ export const SYMBOLS: SymbolSeed[] = [
     spreadBps: 6,
     session: SESSIONS.METALS,
     educationalRisk: 4,
-    description: 'Metal con demanda industrial y financiera. Más volátil que el oro.',
+    description:
+      'Fondo cotizado respaldado por plata física. La plata es bastante más volátil que el oro y este fondo lo refleja.',
     minPlan: 'STANDARD',
     basePrice: 28.64,
     annualVolatility: 0.26,
     annualDrift: 0.0,
+    upstreamSymbol: 'SLV',
+    displayTicker: 'SLV',
   },
   {
     symbol: 'WTIUSD',
-    name: 'Petróleo WTI / Dólar estadounidense',
+    name: 'United States Oil Fund',
     assetClass: 'COMMODITY',
     quoteCurrency: 'USD',
     precision: 2,
@@ -377,11 +412,14 @@ export const SYMBOLS: SymbolSeed[] = [
     spreadBps: 5,
     session: SESSIONS.ENERGY,
     educationalRisk: 5,
-    description: 'Crudo de referencia estadounidense. Muy sensible a la geopolítica y a los inventarios.',
+    description:
+      'Fondo cotizado con exposición al petróleo mediante futuros. No sigue exactamente al barril al contado: la renovación de los contratos introduce diferencias.',
     minPlan: 'STANDARD',
     basePrice: 74.82,
     annualVolatility: 0.34,
     annualDrift: 0.0,
+    upstreamSymbol: 'USO',
+    displayTicker: 'USO',
   },
 ];
 
@@ -404,7 +442,10 @@ const ETF_SEEDS: Array<[string, string, number, string]> = [
   ['VNQ', 'Vanguard Real Estate ETF', 92, 'Sector inmobiliario mediante valores cotizados.'],
 ];
 SYMBOLS.push(...ETF_SEEDS.map(([symbol, name, basePrice, description]): SymbolSeed => ({
+  // Son fondos estadounidenses reales y su ticker de catalogo es el de bolsa,
+  // asi que Finnhub los cotiza directamente sin traduccion.
   symbol, name, basePrice, description, assetClass: 'ETF', quoteCurrency: 'USD',
+  upstreamSymbol: symbol,
   precision: 2, tickSize: 0.01, spreadBps: 2, session: SESSIONS.US_EQUITY,
   educationalRisk: 3, minPlan: 'FREE', annualVolatility: 0.2, annualDrift: 0,
 })));
@@ -415,6 +456,7 @@ const EXTRA_CRYPTO: Array<[string, string, number]> = [
   ['BNBUSD', 'BNB / Dólar estadounidense', 550], ['UNIUSD', 'Uniswap / Dólar estadounidense', 6.5],
 ];
 SYMBOLS.push(...EXTRA_CRYPTO.map(([symbol, name, basePrice]): SymbolSeed => ({
+  upstreamSymbol: symbol.replace(/USD$/, 'USDT'),
   symbol, name, basePrice, assetClass: 'CRYPTO', quoteCurrency: 'USD', precision: 4,
   tickSize: 0.0001, spreadBps: 10, session: SESSIONS.CRYPTO, educationalRisk: 5,
   description: 'Criptoactivo de alta volatilidad. Serie sintética para practicar gestión del riesgo.',

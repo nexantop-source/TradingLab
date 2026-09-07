@@ -116,6 +116,18 @@ export interface AssetMeta {
   session: MarketSession;
   /** Nivel de riesgo educativo, 1 (más estable) a 5 (más volátil). */
   educationalRisk: 1 | 2 | 3 | 4 | 5;
+  /**
+   * Ticker con el que hay que pedir este instrumento al proveedor externo.
+   * Ausente cuando ningún proveedor real lo cubre, que es la forma de decir
+   * "esto todavía no tiene precio verdadero" sin inventarse uno.
+   */
+  upstreamSymbol?: string;
+  /**
+   * Simbolo que se muestra a la persona. Cuando la exposicion se obtiene a
+   * traves de un fondo cotizado, aqui va el del fondo: ensenar un precio real
+   * bajo una etiqueta que no le corresponde es peor que no tener el dato.
+   */
+  displayTicker?: string;
   description: string;
   /** Solo disponible a partir de este plan. */
   minPlan: PlanId;
