@@ -6,7 +6,7 @@ import { ensureDemoAccount } from '@/lib/demo-account';
 import { listOpenPositions, settleDueSimulations } from '@/lib/simulation-service';
 import { getUsage, allowedIndicators } from '@/lib/entitlements';
 import { marketData, getSymbol, SYMBOLS, getEventsForSymbol } from '@tl/market-data';
-import { entitlements } from '@tl/types/plans';
+import { entitlements, planAtLeast, PLAN_ENTITLEMENTS } from '@tl/types/plans';
 import { Terminal } from './Terminal';
 import { fromJson } from '@/lib/json';
 import Link from 'next/link';
@@ -32,6 +32,29 @@ export default async function TerminalPage({
   const meta = getSymbol(requested) ?? getSymbol('BTCUSD')!;
   const timeframes = ['1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w'] as const;
   const timeframe = timeframes.find(value => value === params.tf) ?? '1h';
+
+  // Un instrumento fuera del plan se lista igual en todas partes: esconderlo
+  // haria creer que no existe. Lo que no puede es abrirse a medias -grafico en
+  // blanco, pulso devolviendo 403 y ningun motivo a la vista-, asi que aqui se
+  // dice con todas las letras que hace falta otro plan, y cual.
+  if (!planAtLeast(user.plan, meta.minPlan)) {
+    const required = PLAN_ENTITLEMENTS[meta.minPlan];
+    return (
+      <div className="terminal-locked">
+        <span className="terminal-locked-plan">Incluido en {required.name}</span>
+        <h1>{meta.name}</h1>
+        <p>{meta.description}</p>
+        <p className="terminal-locked-note">
+          Tu plan actual es {PLAN_ENTITLEMENTS[user.plan].name}. Este instrumento se practica desde {required.name},
+          con el mismo saldo virtual y las mismas herramientas que ya usas.
+        </p>
+        <div className="terminal-locked-actions">
+          <Link className="invest-button" href={`/precios?desde=${encodeURIComponent(meta.symbol)}`}>Ver el plan {required.name}</Link>
+          <Link className="invest-text-link" href="/explorar">Elegir otro instrumento</Link>
+        </div>
+      </div>
+    );
+  }
 
   const provider = marketData();
   const account = await ensureDemoAccount(user.id);
@@ -136,6 +159,9 @@ export default async function TerminalPage({
         name: s.name,
         assetClass: s.assetClass,
         minPlan: s.minPlan,
+        // Cuando la exposición se obtiene por otro vehículo se enseña su ticker:
+        // quien busca "oro" reconoce XAU antes que XAUUSD.
+        ...(s.displayTicker ? { ticker: s.displayTicker } : {}),
       }))}
       openPositions={openPositions}
       closedRecent={closedRecent.map((s) => ({
