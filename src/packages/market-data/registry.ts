@@ -2,6 +2,7 @@ import type { MarketDataProvider } from './provider';
 import { SyntheticMarketDataProvider } from './synthetic-provider';
 import { BinanceMarketDataProvider } from './binance-provider';
 import { FinnhubMarketDataProvider } from './finnhub-provider';
+import { YahooMarketDataProvider } from './yahoo-provider';
 import { CompositeMarketDataProvider } from './composite-provider';
 
 /**
@@ -31,6 +32,9 @@ registry.set('binance', binance);
 const finnhub = new FinnhubMarketDataProvider();
 registerProvider(finnhub);
 registry.set('finnhub', finnhub);
+const yahoo = new YahooMarketDataProvider();
+registerProvider(yahoo);
+registry.set('yahoo', yahoo);
 // El enrutador es el proveedor recomendado: manda cada instrumento a la fuente
 // que de verdad lo cubre y falla, en vez de simular, cuando ninguna lo hace.
 const composite = new CompositeMarketDataProvider();

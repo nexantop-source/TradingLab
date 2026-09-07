@@ -9,6 +9,7 @@ import type {
 import { MarketDataError, type MarketDataProvider } from './provider';
 import { BinanceMarketDataProvider, binancePair } from './binance-provider';
 import { FinnhubMarketDataProvider } from './finnhub-provider';
+import { YahooMarketDataProvider, yahooTicker } from './yahoo-provider';
 import { getSymbol, listSymbols } from './symbols';
 
 /**
@@ -17,8 +18,12 @@ import { getSymbol, listSymbols } from './symbols';
  * Ninguna fuente gratuita cubre todas las clases de activo, así que cada
  * instrumento va a la que de verdad lo tiene:
  *
- *   · cripto → Binance, en tiempo real y sin clave;
- *   · acciones y fondos cotizados → Finnhub, en tiempo real de EE. UU.
+ *   · cripto → Binance, observación por segundo y sin clave;
+ *   · divisas, índices, materias primas, acciones y fondos → Yahoo Finance,
+ *     que es la única gratuita que además entrega el histórico completo;
+ *   · acciones y fondos estadounidenses → Finnhub como respaldo de cotización
+ *     cuando Yahoo falla, porque tener dos fuentes para lo mismo es lo que
+ *     evita que una caída deje la lista vacía.
  *
  * Lo importante es lo que **no** hace: un instrumento sin fuente real no cae a
  * la simulación por la puerta de atrás. Falla y lo dice. Un precio inventado
@@ -30,9 +35,10 @@ export class CompositeMarketDataProvider implements MarketDataProvider {
   readonly label = 'Mercado real';
   readonly declaredDelaySeconds = 20;
   readonly synthetic = false;
-  readonly attribution = { text: 'Datos de Binance y Finnhub', url: 'https://finnhub.io/' };
+  readonly attribution = { text: 'Datos de Binance, Yahoo Finance y Finnhub', url: 'https://finance.yahoo.com/' };
 
   private readonly binance = new BinanceMarketDataProvider();
+  private readonly yahoo = new YahooMarketDataProvider();
   private readonly finnhub = new FinnhubMarketDataProvider();
 
   /**
@@ -47,7 +53,14 @@ export class CompositeMarketDataProvider implements MarketDataProvider {
     // diga que es cripto: sin esa comprobacion el proveedor caeria a su motor
     // sintetico en silencio, que es justo lo que este enrutador debe impedir.
     if (binancePair(symbol)) return this.binance;
+    if (yahooTicker(symbol)) return this.yahoo;
     return getSymbol(symbol)?.upstreamSymbol ? this.finnhub : null;
+  }
+
+  /** Respaldo de cotización, solo donde de verdad existe otra fuente. */
+  private backup(symbol: string, primary: MarketDataProvider): MarketDataProvider | null {
+    if (primary === this.yahoo && getSymbol(symbol)?.upstreamSymbol) return this.finnhub;
+    return null;
   }
 
   private require(symbol: string): MarketDataProvider {
@@ -68,12 +81,36 @@ export class CompositeMarketDataProvider implements MarketDataProvider {
   }
 
   async getQuote(symbol: string, at?: number): Promise<Quote> {
-    return this.require(symbol).getQuote(symbol, at);
+    const primary = this.require(symbol);
+    try {
+      return await primary.getQuote(symbol, at);
+    } catch (error) {
+      const backup = this.backup(symbol, primary);
+      if (!backup) throw error;
+      return backup.getQuote(symbol, at);
+    }
   }
 
+  /**
+   * Varias cotizaciones a la vez.
+   *
+   * Se agrupan por fuente antes de pedirlas para que cada una use su propia
+   * llamada por lotes. El explorador pide sesenta instrumentos: sesenta
+   * peticiones sueltas tardan segundos y agotan la cuota, una por lote no.
+   */
   async getQuotes(symbols: string[], at?: number): Promise<Quote[]> {
-    const results = await Promise.allSettled(symbols.map((s) => this.getQuote(s, at)));
-    return results.flatMap((r) => (r.status === 'fulfilled' ? [r.value] : []));
+    const byProvider = new Map<MarketDataProvider, string[]>();
+    for (const symbol of symbols) {
+      const provider = this.route(symbol);
+      if (!provider) continue;
+      const bucket = byProvider.get(provider);
+      if (bucket) bucket.push(symbol);
+      else byProvider.set(provider, [symbol]);
+    }
+    const settled = await Promise.allSettled(
+      [...byProvider].map(([provider, group]) => provider.getQuotes(group, at)),
+    );
+    return settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
   }
 
   async getCandles(params: { symbol: string; timeframe: Timeframe; limit: number; to?: number }): Promise<CandleSeries> {
@@ -107,14 +144,14 @@ export class CompositeMarketDataProvider implements MarketDataProvider {
 
   async healthCheck(): Promise<{ ok: boolean; latencyMs: number; message: string }> {
     const started = Date.now();
-    const [crypto, equities] = await Promise.all([this.binance.healthCheck(), this.finnhub.healthCheck()]);
-    const ok = crypto.ok && equities.ok;
+    const [crypto, broad] = await Promise.all([this.binance.healthCheck(), this.yahoo.healthCheck()]);
+    const ok = crypto.ok && broad.ok;
     return {
       ok,
       latencyMs: Date.now() - started,
       message: ok
-        ? 'Binance y Finnhub responden con precios reales.'
-        : `Cripto: ${crypto.message} · Acciones y fondos: ${equities.message}`,
+        ? 'Binance y Yahoo Finance responden con precios e histórico reales.'
+        : `Cripto: ${crypto.message} · Resto del mercado: ${broad.message}`,
     };
   }
 }

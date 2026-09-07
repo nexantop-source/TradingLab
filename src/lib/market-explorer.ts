@@ -16,8 +16,11 @@ import type { ExplorerAsset } from '@/components/investment/MarketExplorer';
 export async function getExplorerAssets(): Promise<ExplorerAsset[]> {
   const provider = marketData();
   const at = Date.now();
-  const settled = await Promise.allSettled(SYMBOLS.map((s) => provider.getQuote(s.symbol, at)));
-  const quotes = settled.flatMap((result) => (result.status === 'fulfilled' ? [result.value] : []));
+  // Una sola llamada por lotes, no cincuenta y tres sueltas: el proveedor agrupa
+  // cada instrumento con los de su misma fuente y pide veinte de golpe. Con una
+  // petición por símbolo la página tardaba segundos y la fuente empezaba a
+  // limitar la frecuencia, que es exactamente lo que dejaba la lista a medias.
+  const quotes = await provider.getQuotes(SYMBOLS.map((s) => s.symbol), at);
   const bySymbol = new Map(quotes.map((q) => [q.symbol, q]));
 
   return SYMBOLS.filter((s) => {

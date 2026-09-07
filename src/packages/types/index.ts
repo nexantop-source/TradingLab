@@ -128,6 +128,13 @@ export interface AssetMeta {
    * bajo una etiqueta que no le corresponde es peor que no tener el dato.
    */
   displayTicker?: string;
+  /**
+   * Ticker de Yahoo Finance. Es la fuente que cubre lo que ninguna otra da
+   * gratis: divisas al contado, indices, futuros de materias primas y el
+   * historico completo de cualquiera de ellos. Cuando falta, el instrumento
+   * no tiene historia real y no se ofrece como si la tuviera.
+   */
+  yahooSymbol?: string;
   description: string;
   /** Solo disponible a partir de este plan. */
   minPlan: PlanId;

@@ -57,7 +57,7 @@ export const SYMBOLS: SymbolSeed[] = [
   // ── Forex ──────────────────────────────────────────────────────────────────
   {
     symbol: 'EURUSD',
-    name: 'Invesco CurrencyShares Euro Trust',
+    name: 'Euro / Dólar estadounidense',
     assetClass: 'FOREX',
     quoteCurrency: 'USD',
     precision: 5,
@@ -66,17 +66,15 @@ export const SYMBOLS: SymbolSeed[] = [
     session: SESSIONS.FOREX,
     educationalRisk: 3,
     description:
-      'Fondo cotizado que replica al euro frente al dólar manteniendo depósitos en euros. No es el par EUR/USD: es un instrumento bursátil que lo sigue, y cotiza en horario de Nueva York.',
+      'El par de divisas más negociado del mundo. Cuánto vale un euro en dólares: sube cuando el euro se fortalece y baja cuando lo hace el dólar.',
     minPlan: 'FREE',
     basePrice: 1.0865,
     annualVolatility: 0.07,
     annualDrift: 0.0,
-    upstreamSymbol: 'FXE',
-    displayTicker: 'FXE',
   },
   {
     symbol: 'GBPUSD',
-    name: 'Invesco CurrencyShares British Pound Trust',
+    name: 'Libra esterlina / Dólar estadounidense',
     assetClass: 'FOREX',
     quoteCurrency: 'USD',
     precision: 5,
@@ -85,17 +83,15 @@ export const SYMBOLS: SymbolSeed[] = [
     session: SESSIONS.FOREX,
     educationalRisk: 3,
     description:
-      'Fondo cotizado que sigue a la libra esterlina frente al dólar. No es el par GBP/USD: cotiza en bolsa estadounidense y respeta su horario.',
+      'La libra frente al dólar. Reacciona con fuerza a las decisiones del Banco de Inglaterra y a los datos de inflación británicos.',
     minPlan: 'FREE',
     basePrice: 1.2712,
     annualVolatility: 0.085,
     annualDrift: 0.0,
-    upstreamSymbol: 'FXB',
-    displayTicker: 'FXB',
   },
   {
     symbol: 'USDJPY',
-    name: 'Invesco CurrencyShares Japanese Yen Trust',
+    name: 'Dólar estadounidense / Yen japonés',
     assetClass: 'FOREX',
     quoteCurrency: 'JPY',
     precision: 3,
@@ -104,13 +100,11 @@ export const SYMBOLS: SymbolSeed[] = [
     session: SESSIONS.FOREX,
     educationalRisk: 3,
     description:
-      'Fondo cotizado que sigue al yen japonés. Atención a la dirección: sube cuando el yen se aprecia, es decir, cuando USD/JPY baja.',
+      'Cuántos yenes cuesta un dólar. Es el termómetro clásico de la diferencia de tipos de interés entre Estados Unidos y Japón.',
     minPlan: 'FREE',
     basePrice: 151.42,
     annualVolatility: 0.09,
     annualDrift: 0.0,
-    upstreamSymbol: 'FXY',
-    displayTicker: 'FXY',
   },
   {
     symbol: 'USDMXN',
@@ -130,7 +124,7 @@ export const SYMBOLS: SymbolSeed[] = [
   },
   {
     symbol: 'AUDUSD',
-    name: 'Invesco CurrencyShares Australian Dollar Trust',
+    name: 'Dólar australiano / Dólar estadounidense',
     assetClass: 'FOREX',
     quoteCurrency: 'USD',
     precision: 5,
@@ -139,13 +133,11 @@ export const SYMBOLS: SymbolSeed[] = [
     session: SESSIONS.FOREX,
     educationalRisk: 3,
     description:
-      'Fondo cotizado que sigue al dólar australiano frente al estadounidense.',
+      'Una divisa muy ligada a las materias primas: sigue de cerca la demanda industrial de China y el precio del hierro y el carbón.',
     minPlan: 'STANDARD',
     basePrice: 0.6588,
     annualVolatility: 0.088,
     annualDrift: 0.0,
-    upstreamSymbol: 'FXA',
-    displayTicker: 'FXA',
   },
 
   // ── Criptomonedas ─────────────────────────────────────────────────────────
@@ -308,7 +300,7 @@ export const SYMBOLS: SymbolSeed[] = [
   // ── Índices ───────────────────────────────────────────────────────────────
   {
     symbol: 'SPX500',
-    name: 'SPDR S&P 500 ETF Trust',
+    name: 'S&P 500',
     assetClass: 'INDEX',
     quoteCurrency: 'USD',
     precision: 2,
@@ -317,17 +309,17 @@ export const SYMBOLS: SymbolSeed[] = [
     session: SESSIONS.US_EQUITY,
     educationalRisk: 2,
     description:
-      'El fondo cotizado más negociado del mundo. Replica el S&P 500, que reúne a las 500 mayores empresas estadounidenses. Su precio ronda una décima parte del índice.',
+      'El índice de referencia del mercado estadounidense: las 500 mayores empresas cotizadas, ponderadas por capitalización. Si quieres el fondo que lo replica, está en el catálogo como SPY.',
     minPlan: 'FREE',
     basePrice: 5648.4,
     annualVolatility: 0.16,
     annualDrift: 0.0,
-    upstreamSymbol: 'SPY',
-    displayTicker: 'SPY',
+    yahooSymbol: '^GSPC',
+    displayTicker: 'SPX',
   },
   {
     symbol: 'NAS100',
-    name: 'Invesco QQQ Trust',
+    name: 'Nasdaq 100',
     assetClass: 'INDEX',
     quoteCurrency: 'USD',
     precision: 2,
@@ -336,19 +328,20 @@ export const SYMBOLS: SymbolSeed[] = [
     session: SESSIONS.US_EQUITY,
     educationalRisk: 3,
     description:
-      'Fondo cotizado que replica el Nasdaq 100, concentrado en tecnología. Más volátil que el S&P 500 por su menor diversificación sectorial.',
+      'Las cien mayores empresas no financieras del Nasdaq, muy concentradas en tecnología. Más volátil que el S&P 500 por su menor diversificación sectorial.',
     minPlan: 'STANDARD',
     basePrice: 19672.1,
     annualVolatility: 0.21,
     annualDrift: 0.0,
-    upstreamSymbol: 'QQQ',
-    displayTicker: 'QQQ',
+    yahooSymbol: '^NDX',
+    displayTicker: 'NDX',
   },
   {
     symbol: 'GER40',
-    name: 'iShares MSCI Germany ETF',
+    name: 'DAX 40',
     assetClass: 'INDEX',
-    upstreamSymbol: 'EWG',
+    yahooSymbol: '^GDAXI',
+    displayTicker: 'DAX',
     quoteCurrency: 'EUR',
     precision: 2,
     tickSize: 0.01,
@@ -356,7 +349,7 @@ export const SYMBOLS: SymbolSeed[] = [
     session: { ...SESSIONS.US_EQUITY, openMinuteUtc: 7 * 60, closeMinuteUtc: 15 * 60 + 30, label: 'Lunes a viernes, 07:00 a 15:30 UTC' },
     educationalRisk: 3,
     description:
-      'Fondo cotizado estadounidense con exposición a grandes empresas alemanas. Cotiza en dólares y en horario de Nueva York, no de Fráncfort.',
+      'Las cuarenta mayores empresas alemanas cotizadas en Fráncfort. Cotiza en euros y en horario europeo, que abre y cierra antes que Nueva York.',
     minPlan: 'STANDARD',
     basePrice: 18492.6,
     annualVolatility: 0.18,
@@ -366,7 +359,7 @@ export const SYMBOLS: SymbolSeed[] = [
   // ── Commodities ───────────────────────────────────────────────────────────
   {
     symbol: 'XAUUSD',
-    name: 'SPDR Gold Shares',
+    name: 'Oro · futuro COMEX',
     assetClass: 'COMMODITY',
     quoteCurrency: 'USD',
     precision: 2,
@@ -375,17 +368,17 @@ export const SYMBOLS: SymbolSeed[] = [
     session: SESSIONS.METALS,
     educationalRisk: 3,
     description:
-      'Fondo cotizado respaldado por oro físico en custodia. Sigue al metal, pero su precio es una fracción de la onza y descuenta los gastos del fondo.',
+      'El precio de la onza de oro en el contrato de referencia de COMEX. Es el activo refugio clásico: suele moverse contra el dólar y contra los tipos de interés reales.',
     minPlan: 'FREE',
     basePrice: 2482.15,
     annualVolatility: 0.14,
     annualDrift: 0.0,
-    upstreamSymbol: 'GLD',
-    displayTicker: 'GLD',
+    yahooSymbol: 'GC=F',
+    displayTicker: 'XAU',
   },
   {
     symbol: 'XAGUSD',
-    name: 'iShares Silver Trust',
+    name: 'Plata · futuro COMEX',
     assetClass: 'COMMODITY',
     quoteCurrency: 'USD',
     precision: 3,
@@ -394,17 +387,17 @@ export const SYMBOLS: SymbolSeed[] = [
     session: SESSIONS.METALS,
     educationalRisk: 4,
     description:
-      'Fondo cotizado respaldado por plata física. La plata es bastante más volátil que el oro y este fondo lo refleja.',
+      'La onza de plata en COMEX. Tiene demanda industrial además de financiera, y por eso es bastante más volátil que el oro.',
     minPlan: 'STANDARD',
     basePrice: 28.64,
     annualVolatility: 0.26,
     annualDrift: 0.0,
-    upstreamSymbol: 'SLV',
-    displayTicker: 'SLV',
+    yahooSymbol: 'SI=F',
+    displayTicker: 'XAG',
   },
   {
     symbol: 'WTIUSD',
-    name: 'United States Oil Fund',
+    name: 'Petróleo WTI · futuro NYMEX',
     assetClass: 'COMMODITY',
     quoteCurrency: 'USD',
     precision: 2,
@@ -413,13 +406,13 @@ export const SYMBOLS: SymbolSeed[] = [
     session: SESSIONS.ENERGY,
     educationalRisk: 5,
     description:
-      'Fondo cotizado con exposición al petróleo mediante futuros. No sigue exactamente al barril al contado: la renovación de los contratos introduce diferencias.',
+      'El barril de crudo estadounidense en su contrato de referencia. Muy sensible a la geopolítica, a las decisiones de la OPEP y a los inventarios semanales.',
     minPlan: 'STANDARD',
     basePrice: 74.82,
     annualVolatility: 0.34,
     annualDrift: 0.0,
-    upstreamSymbol: 'USO',
-    displayTicker: 'USO',
+    yahooSymbol: 'CL=F',
+    displayTicker: 'WTI',
   },
 ];
 
@@ -471,8 +464,13 @@ const EXTRA_FOREX: Array<[string, string, string, number]> = [
   ['GBPJPY', 'Libra esterlina / Yen japonés', 'JPY', 190],
   ['USDCOP', 'Dólar estadounidense / Peso colombiano', 'COP', 4100],
 ];
+// Los decimales siguen a la magnitud del par, no a una regla global: cuatro
+// decimales sobre un peso colombiano de 3.115 son ruido, y dos sobre un euro
+// de 1,16 esconden el movimiento del dia.
+const forexPrecision = (basePrice: number) => (basePrice >= 500 ? 2 : basePrice >= 20 ? 3 : 4);
 SYMBOLS.push(...EXTRA_FOREX.map(([symbol, name, quoteCurrency, basePrice]): SymbolSeed => ({
-  symbol, name, quoteCurrency, basePrice, assetClass: 'FOREX', precision: 4, tickSize: 0.0001,
+  symbol, name, quoteCurrency, basePrice, assetClass: 'FOREX',
+  precision: forexPrecision(basePrice), tickSize: 10 ** -forexPrecision(basePrice),
   spreadBps: 4, session: SESSIONS.FOREX, educationalRisk: 4, minPlan: 'FREE',
   description: 'Par de divisas. Estudia el tipo de cambio y su sensibilidad al contexto económico.',
   annualVolatility: 0.12, annualDrift: 0,
