@@ -95,6 +95,25 @@ export function SimpleTerminal(props: TerminalProps & { onAdvanced: () => void }
   const liveAvailable = props.symbol.assetClass === 'CRYPTO';
   const chartTicks = useMemo(() => pulse.ticks.slice(-121), [pulse.ticks]);
   const onSummary = useCallback((summary: { changePercent: number } | null) => setPeriodChange(summary?.changePercent ?? null), []);
+  // Estas tres cosas se calculaban en cada render, y esta pantalla se vuelve a
+  // pintar una vez por segundo con el pulso del mercado: eran trescientos
+  // objetos nuevos por segundo, con un `find` sobre el catálogo por cada
+  // elemento de la lista de seguimiento. Además de gastar, hacía que la hoja de
+  // cambio de instrumento se reiniciara continuamente.
+  const closeSwitcher = useCallback(() => setSwitcherOpen(false), []);
+  const switcherCatalog = useMemo(
+    () => props.catalog.map(c => ({ symbol: c.symbol, name: c.name, assetClass: c.assetClass as never, minPlan: c.minPlan as never, ticker: c.ticker, popularity: c.popularity })),
+    [props.catalog],
+  );
+  const switcherWatchlist = useMemo(() => {
+    const meta = new Map(props.catalog.map(c => [c.symbol, c]));
+    return props.watchlist.map(w => ({
+      symbol: w.symbol, name: w.name, assetClass: w.assetClass as never,
+      minPlan: (meta.get(w.symbol)?.minPlan ?? 'FREE') as never,
+      ticker: meta.get(w.symbol)?.ticker, popularity: meta.get(w.symbol)?.popularity,
+      price: w.price, changePercent: w.changePercent, precision: w.precision, favorite: w.favorite,
+    }));
+  }, [props.catalog, props.watchlist]);
   // El rótulo dice de dónde viene el precio y con qué frecuencia se renueva.
   // "Cada segundo" solo es cierto donde la fuente lo entrega así; en una acción
   // el dato llega cada veinte segundos y a veces con minutos de retraso.
@@ -106,9 +125,7 @@ export function SimpleTerminal(props: TerminalProps & { onAdvanced: () => void }
     ...(thisPosition.takeProfit !== null ? [{ price: thisPosition.takeProfit, label: 'TP', tone: 'positive' as const }] : []),
   ] : [];
   return <div className="simple-terminal" data-terminal="simple" data-has-position={Boolean(thisPosition)}>
-    <InstrumentSwitcher open={switcherOpen} onClose={() => setSwitcherOpen(false)} current={props.symbol.symbol} plan={props.user.plan}
-      watchlist={props.watchlist.map(w => ({ symbol: w.symbol, name: w.name, assetClass: w.assetClass as never, minPlan: (props.catalog.find(c => c.symbol === w.symbol)?.minPlan ?? 'FREE') as never, ticker: props.catalog.find(c => c.symbol === w.symbol)?.ticker, price: w.price, changePercent: w.changePercent, precision: w.precision, favorite: w.favorite }))}
-      catalog={props.catalog.map(c => ({ symbol: c.symbol, name: c.name, assetClass: c.assetClass as never, minPlan: c.minPlan as never, ticker: c.ticker }))} />
+    <InstrumentSwitcher open={switcherOpen} onClose={closeSwitcher} current={props.symbol.symbol} plan={props.user.plan} watchlist={switcherWatchlist} catalog={switcherCatalog} />
     <header className="simple-terminal-top"><button type="button" className="simple-instrument" onClick={() => setSwitcherOpen(true)} aria-haspopup="dialog" aria-expanded={switcherOpen} aria-label={`Cambiar instrumento. Ahora: ${props.symbol.name}`}><AssetIcon symbol={props.symbol.symbol} assetClass={props.symbol.assetClass as never} name={props.symbol.name} /><span><strong>{props.symbol.symbol}</strong><small>{props.symbol.name}</small></span><ChevronDown size={17} /></button><button type="button" onClick={()=>setToolsOpen(!toolsOpen)} aria-expanded={toolsOpen} className="simple-advanced-button"><SlidersHorizontal size={16} />Herramientas</button></header>
     {toolsOpen && <section className="chart-tools" aria-label="Herramientas del gráfico"><div><button aria-pressed={chartType==='candles'} onClick={()=>setChartType('candles')}>Velas · 5 s</button><button aria-pressed={indicator==='SMA20'} onClick={()=>setIndicator(indicator==='SMA20'?null:'SMA20')}>Media SMA20</button>{props.availableIndicators.includes('EMA12')?<button aria-pressed={indicator==='EMA12'} onClick={()=>setIndicator(indicator==='EMA12'?null:'EMA12')}>Media EMA12</button>:<Link href="/planes">EMA12 · Mejorar a Plus</Link>}<button onClick={()=>setIndicator(null)}>Quitar indicador</button></div><p>Arrastra para explorar. Pellizca para ampliar. Cada periodo trae su propia serie: cinco minutos dentro de un día, una semana cuando miras todo el historial. Entrada, SL y TP aparecen sobre la gráfica cuando están en el rango visible.</p></section>}
     <div className="simple-terminal-grid"><section className="simple-market-panel" aria-label="Precio y gráfico de práctica">

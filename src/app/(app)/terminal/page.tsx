@@ -159,6 +159,7 @@ export default async function TerminalPage({
         name: s.name,
         assetClass: s.assetClass,
         minPlan: s.minPlan,
+        popularity: s.popularity,
         // Cuando la exposición se obtiene por otro vehículo se enseña su ticker:
         // quien busca "oro" reconoce XAU antes que XAUUSD.
         ...(s.displayTicker ? { ticker: s.displayTicker } : {}),

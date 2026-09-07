@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowUpRight, Lock, Search, Star, X } from 'lucide-react';
@@ -36,6 +37,8 @@ export interface SwitcherInstrument {
   assetClass: AssetClass;
   minPlan: PlanId;
   ticker?: string;
+  /** Orden de reconocimiento. Cuanto más bajo, antes se enseña. */
+  popularity?: number;
   /** Presente solo para lo que la persona ya sigue. */
   favorite?: boolean;
   price?: number;
@@ -84,21 +87,38 @@ export function InstrumentSwitcher({
   plan: PlanId;
 }) {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const [query, setQuery] = useState('');
   const [family, setFamily] = useState('ALL');
   const search = useRef<HTMLInputElement>(null);
-  const sheet = useRef<HTMLDivElement>(null);
+  // `onClose` llega como una función nueva en cada render del padre, y el padre
+  // se vuelve a pintar cada segundo con el pulso del mercado. Tenerla en las
+  // dependencias del efecto hacía que el efecto se reejecutara una vez por
+  // segundo y borrara el campo: escribir aquí era literalmente imposible.
+  const close = useRef(onClose);
+  close.current = onClose;
 
+  // La hoja se pinta en el `body`, fuera del árbol de la terminal. Un diálogo a
+  // pantalla completa no puede depender de que ningún ancestro tenga -hoy o
+  // mañana- un `overflow`, un `transform` o un contexto de apilamiento propio:
+  // cualquiera de los tres lo recorta o lo esconde, y eso no se ve venir hasta
+  // que alguien lo reporta.
+  useEffect(() => setMounted(true), []);
+
+  // Solo al abrir. Nada de lo que pase después puede vaciar lo que se escribió.
   useEffect(() => {
     if (!open) return;
     setQuery('');
     setFamily('ALL');
     // El teclado del móvil tapando media hoja al abrir es peor que un toque de
     // más, así que el foco va al campo pero sin forzar el teclado en táctil.
-    const touch = matchMedia('(pointer: coarse)').matches;
-    if (!touch) search.current?.focus();
+    if (!matchMedia('(pointer: coarse)').matches) search.current?.focus();
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
+      if (event.key === 'Escape') close.current();
     };
     document.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
@@ -106,7 +126,7 @@ export function InstrumentSwitcher({
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = '';
     };
-  }, [open, onClose]);
+  }, [open]);
 
   const q = query.trim().toLowerCase();
   const saved = useMemo(
@@ -116,22 +136,26 @@ export function InstrumentSwitcher({
   const results = useMemo(() => {
     const pool = catalog.filter((c) => family === 'ALL' || c.assetClass === family);
     if (!q) {
-      // Sin búsqueda, lo que se incluye en el plan va primero: es lo que se
-      // puede abrir ahora mismo, y por eso es lo que se enseña primero.
+      // Sin búsqueda mandan dos cosas, en este orden: lo que se puede abrir
+      // ahora mismo, y dentro de eso lo que la persona reconoce sin buscarlo.
       return pool
         .slice()
-        .sort((a, b) => Number(planAtLeast(plan, b.minPlan)) - Number(planAtLeast(plan, a.minPlan)) || a.symbol.localeCompare(b.symbol))
+        .sort((a, b) => Number(planAtLeast(plan, b.minPlan)) - Number(planAtLeast(plan, a.minPlan))
+          || (a.popularity ?? 9999) - (b.popularity ?? 9999)
+          || a.symbol.localeCompare(b.symbol))
         .slice(0, VISIBLE);
     }
     return pool
       .map((c) => [c, score(c, q)] as const)
       .filter(([, rank]) => Number.isFinite(rank))
-      .sort((a, b) => a[1] - b[1] || a[0].symbol.localeCompare(b[0].symbol))
+      .sort((a, b) => a[1] - b[1]
+        || (a[0].popularity ?? 9999) - (b[0].popularity ?? 9999)
+        || a[0].symbol.localeCompare(b[0].symbol))
       .slice(0, VISIBLE)
       .map(([c]) => c);
   }, [catalog, family, q, plan]);
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
   function choose(item: SwitcherInstrument) {
     onClose();
@@ -155,7 +179,15 @@ export function InstrumentSwitcher({
           <strong>{item.ticker ?? item.symbol}</strong>
           <small>{item.name}</small>
         </span>
-        {showQuote && item.price != null ? (
+        {/* Una sola cosa a la derecha, no dos. El precio, el nombre de la
+            familia y el candado compitiendo por el mismo hueco es lo que
+            estrujaba la fila hasta cortar el nombre del instrumento. */}
+        {!allowed ? (
+          <span className="switcher-lock">
+            <Lock size={13} aria-hidden="true" />
+            {PLAN_ENTITLEMENTS[item.minPlan].name}
+          </span>
+        ) : showQuote && item.price != null ? (
           <span className="switcher-quote">
             <strong>{item.price.toLocaleString('en-US', { maximumFractionDigits: item.precision ?? 2 })}</strong>
             <small className={(item.changePercent ?? 0) < 0 ? 'simple-negative' : 'simple-positive'}>
@@ -166,19 +198,13 @@ export function InstrumentSwitcher({
         ) : (
           <span className="switcher-class">{ASSET_CLASS_LABEL[item.assetClass]}</span>
         )}
-        {!allowed && (
-          <span className="switcher-lock">
-            <Lock size={13} aria-hidden="true" />
-            {PLAN_ENTITLEMENTS[item.minPlan].name}
-          </span>
-        )}
       </button>
     );
   };
 
-  return (
+  return createPortal(
     <div className="switcher-backdrop" onPointerDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-      <div className="switcher-sheet" ref={sheet} role="dialog" aria-modal="true" aria-label="Cambiar de instrumento">
+      <div className="switcher-sheet" role="dialog" aria-modal="true" aria-label="Cambiar de instrumento">
         <header className="switcher-head">
           <h2>Cambiar de instrumento</h2>
           <button type="button" onClick={onClose} aria-label="Cerrar"><X size={18} /></button>
@@ -228,10 +254,11 @@ export function InstrumentSwitcher({
 
         <footer className="switcher-foot">
           <Link href="/explorar" onClick={onClose}>
-            Ver todos los mercados, con su ficha y su detalle <ArrowUpRight size={15} />
+            Ver los {catalog.length} mercados, con su ficha y su detalle <ArrowUpRight size={15} />
           </Link>
         </footer>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
