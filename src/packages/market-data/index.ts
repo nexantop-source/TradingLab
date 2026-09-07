@@ -3,6 +3,7 @@ export * from './registry';
 export * from './symbols';
 export * from './indicators';
 export * from './market-hours';
+export * from './tradability';
 export * from './deterministic';
 export * from './calendar';
 export * from './news';

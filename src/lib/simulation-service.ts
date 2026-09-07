@@ -2,7 +2,7 @@ import 'server-only';
 import { db } from './db';
 import { toJson, fromJson } from './json';
 import { demoTransaction, postManyInTransaction, ensureDemoAccount } from './demo-account';
-import { marketData, requireSymbol, snapshotIndicators, activeProviderId, type MarketDataProvider } from '@tl/market-data';
+import { marketData, requireSymbol, snapshotIndicators, activeProviderId, quoteIsTradable, type MarketDataProvider } from '@tl/market-data';
 import type { Simulation } from '@prisma/client';
 import { entryMinuteSampleTimes } from './entry-minute';
 import {
@@ -89,8 +89,21 @@ export async function createSimulation(params: {
   }
 
   const quote = await provider.getQuote(meta.symbol);
-  if (process.env.REQUIRE_REAL_MARKET_DATA === 'true' && (quote.provenance.synthetic || quote.provenance.freshness !== 'REALTIME' || Date.now() - quote.provenance.sourceTimestamp > 10000 || quote.provenance.sourceTimestamp > Date.now() + 1000)) {
-    throw new SimulationError('No hay una cotización real vigente para este instrumento. No se abrirá ningún ejercicio con precios sintéticos o desactualizados.', 'INVALID_INPUT');
+  if (process.env.REQUIRE_REAL_MARKET_DATA === 'true' && !quoteIsTradable(quote, provider)) {
+    // Un precio viejo y un precio inventado no son el mismo problema, y decirle
+    // lo mismo a la persona en los dos casos la deja sin saber qué hacer.
+    //
+    // Si el precio es real pero lleva horas quieto, lo que pasa es que ese
+    // mercado no está negociando: un festivo que nuestro calendario de sesiones
+    // no conoce, una media sesión, un cierre imprevisto. Eso se dice tal cual,
+    // con la fecha del último cruce, porque es accionable: se vuelve mañana.
+    const quieto = !quote.provenance.synthetic && Number.isFinite(quote.provenance.sourceTimestamp);
+    throw new SimulationError(
+      quieto
+        ? `${meta.name} no está negociando ahora mismo: el último cruce real fue el ${new Date(quote.provenance.sourceTimestamp).toLocaleString('es-CO', { dateStyle: 'long', timeStyle: 'short', timeZone: 'UTC' })} UTC. Puede ser un festivo o un cierre imprevisto del mercado.`
+        : 'No hay una cotización real vigente para este instrumento. No se abrirá ningún ejercicio con precios sintéticos o desactualizados.',
+      quieto ? 'MARKET_CLOSED' : 'INVALID_INPUT',
+    );
   }
   const account = await ensureDemoAccount(userId);
 
@@ -146,9 +159,15 @@ export async function createSimulation(params: {
 
   // ── Persistencia y asientos ──────────────────────────────────────────────
   const { simulation, balance } = await demoTransaction(async tx => {
-    // Recheck after context loading and on transaction retries: a quote can
-    // become stale while the provider or database is busy.
-    if (process.env.REQUIRE_REAL_MARKET_DATA === 'true' && Date.now() - quote.provenance.sourceTimestamp > 10000) {
+    // Se vuelve a comprobar dentro de la transacción: entre cotizar y persistir
+    // hay una carga de contexto y puede haber reintentos, y en ese hueco el
+    // precio envejece.
+    //
+    // Con la misma regla que la primera puerta, y no con otro número escrito a
+    // mano. Tenía diez segundos, heredados de cuando la única fuente entregaba
+    // un precio por segundo: dejaba pasar el euro en la primera comprobación y
+    // lo rechazaba aquí, de forma intermitente, según lo que tardara la base.
+    if (process.env.REQUIRE_REAL_MARKET_DATA === 'true' && !quoteIsTradable(quote, provider)) {
       throw new SimulationError('La cotización venció antes de abrir el ejercicio. Inténtalo con un precio actualizado.', 'INVALID_INPUT');
     }
     const dailyLimit = entitlements(plan).simulationsPerDay;
