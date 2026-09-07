@@ -10,6 +10,7 @@ import { MarketDataError, type MarketDataProvider } from './provider';
 import { BinanceMarketDataProvider, binancePair } from './binance-provider';
 import { FinnhubMarketDataProvider } from './finnhub-provider';
 import { YahooMarketDataProvider, yahooTicker } from './yahoo-provider';
+import { FxFallbackProvider } from './fx-fallback-provider';
 import { getSymbol, listSymbols } from './symbols';
 
 /**
@@ -40,6 +41,7 @@ export class CompositeMarketDataProvider implements MarketDataProvider {
   private readonly binance = new BinanceMarketDataProvider();
   private readonly yahoo = new YahooMarketDataProvider();
   private readonly finnhub = new FinnhubMarketDataProvider();
+  private readonly fxFallback = new FxFallbackProvider();
 
   /**
    * Fuente que cubre un instrumento, o `null` si ninguna lo cubre.
@@ -57,10 +59,21 @@ export class CompositeMarketDataProvider implements MarketDataProvider {
     return getSymbol(symbol)?.upstreamSymbol ? this.finnhub : null;
   }
 
-  /** Respaldo de cotización, solo donde de verdad existe otra fuente. */
+  /**
+   * Respaldo de cotización, solo donde de verdad existe otra fuente.
+   *
+   * Yahoo cubre casi todo el catálogo, pero es una API no publicada que bloquea
+   * rangos de centros de datos de vez en cuando. Si nos cierra la puerta desde
+   * producción, el usuario pierde el 80 % de la lista por una causa que no
+   * tiene nada que ver con él, así que donde hay una segunda fuente se usa:
+   * Finnhub para acciones y fondos de Estados Unidos, y una referencia diaria
+   * para divisas. Índices y materias primas no tienen respaldo gratuito: ahí se
+   * falla y se dice, que es lo que toca cuando no se sabe el precio.
+   */
   private backup(symbol: string, primary: MarketDataProvider): MarketDataProvider | null {
-    if (primary === this.yahoo && getSymbol(symbol)?.upstreamSymbol) return this.finnhub;
-    return null;
+    if (primary !== this.yahoo) return null;
+    if (getSymbol(symbol)?.upstreamSymbol) return this.finnhub;
+    return this.fxFallback.supports(symbol) ? this.fxFallback : null;
   }
 
   private require(symbol: string): MarketDataProvider {
@@ -110,7 +123,31 @@ export class CompositeMarketDataProvider implements MarketDataProvider {
     const settled = await Promise.allSettled(
       [...byProvider].map(([provider, group]) => provider.getQuotes(group, at)),
     );
-    return settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
+    const quotes = settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
+
+    // Lo que no volvió, al respaldo. Este camino -el que usa el explorador para
+    // pedir el catálogo entero- no tenía ninguno: bastaba que la fuente
+    // principal fallara para que doscientos sesenta y ocho instrumentos
+    // desaparecieran de la lista, incluidos los ciento setenta y tres que la
+    // segunda fuente sí sabe cotizar. `getQuote` sí caía al respaldo, así que
+    // abrir un instrumento funcionaba y encontrarlo no: la peor combinación.
+    const answered = new Set(quotes.map((q) => q.symbol));
+    const pending = new Map<MarketDataProvider, string[]>();
+    for (const symbol of symbols) {
+      if (answered.has(symbol)) continue;
+      const primary = this.route(symbol);
+      const backup = primary ? this.backup(symbol, primary) : null;
+      if (!backup) continue;
+      const bucket = pending.get(backup);
+      if (bucket) bucket.push(symbol);
+      else pending.set(backup, [symbol]);
+    }
+    if (pending.size === 0) return quotes;
+
+    const rescued = await Promise.allSettled(
+      [...pending].map(([provider, group]) => provider.getQuotes(group, at)),
+    );
+    return [...quotes, ...rescued.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))];
   }
 
   async getCandles(params: { symbol: string; timeframe: Timeframe; limit: number; to?: number }): Promise<CandleSeries> {

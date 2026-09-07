@@ -9,4 +9,5 @@ export * from './news';
 export { SyntheticMarketDataProvider } from './synthetic-provider';
 export { FinnhubMarketDataProvider } from './finnhub-provider';
 export { YahooMarketDataProvider, yahooTicker } from './yahoo-provider';
+export { FxFallbackProvider } from './fx-fallback-provider';
 export { CompositeMarketDataProvider } from './composite-provider';
