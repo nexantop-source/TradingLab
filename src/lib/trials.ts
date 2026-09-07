@@ -9,10 +9,16 @@ import {
   wompiAmountInCents,
   wompiPaymentDescription,
   wompiPaymentIdempotencyKey,
+  wompiReference,
   type WompiInterval,
   type WompiPlanId,
 } from './wompi';
-import { chargePaymentSource, createPaymentSource } from './wompi-recurring';
+import {
+  CARD_VERIFICATION_AMOUNT_IN_CENTS,
+  chargePaymentSource,
+  createPaymentSource,
+  verifyPaymentSource,
+} from './wompi-recurring';
 import { convertUsdToCopCents, currentTrm, exchangeQuoteTag } from './cop-exchange';
 import { track } from './analytics';
 import { ANALYTICS_EVENTS } from '@tl/analytics';
@@ -49,7 +55,9 @@ export class TrialError extends Error {
       | 'ALREADY_SUBSCRIBED'
       | 'TRIAL_ALREADY_USED'
       | 'NO_TRIAL_ACTIVE'
-      | 'NOT_CONFIGURED',
+      | 'NOT_CONFIGURED'
+      /** El banco no autorizó el cobro de validación. La tarjeta no sirve. */
+      | 'CARD_NOT_VERIFIED',
     message: string,
     status = 409,
   ) {
@@ -231,6 +239,34 @@ export async function startTrial(params: {
     email: params.email,
   });
 
+  /**
+   * Y guardarla tampoco demuestra que se le pueda cobrar.
+   *
+   * Wompi acepta cualquier token válido y deja la fuente en `AVAILABLE` sin
+   * preguntarle nada al banco emisor: una tarjeta sin fondos, bloqueada para
+   * comercio electrónico o de prueba pasa ese filtro igual que una buena. Sin
+   * este paso, el primer cobro real llegaba siete días después -con el acceso
+   * ya regalado y la persona ya ida-, y era entonces cuando se descubría.
+   *
+   * Se cobra el mínimo que Wompi acepta y se anula acto seguido. La persona ve
+   * una retención pequeña que desaparece en unas horas; nosotros sabemos que la
+   * tarjeta responde antes de dar nada.
+   */
+  const verification = await verifyPaymentSource({
+    paymentSourceId: source.wompiId,
+    email: params.email,
+    reference: wompiReference(params.userId, `verify-${now.getTime()}`, config.integritySecret),
+  });
+  if (!verification.verified) {
+    throw new TrialError(
+      'CARD_NOT_VERIFIED',
+      verification.statusMessage
+        ? `Tu banco no autorizó la validación de la tarjeta: ${verification.statusMessage}`
+        : 'Tu banco no autorizó la validación de la tarjeta. Prueba con otra o consulta con tu banco.',
+      402,
+    );
+  }
+
   const consentText = mandateText({
     planId: params.planId,
     interval: params.interval,
@@ -259,6 +295,9 @@ export async function startTrial(params: {
       data: {
         userId: params.userId,
         paymentSourceId: paymentSource.id,
+        verificationTransactionId: verification.transactionId,
+        verificationAmountCents: verification.amountInCents,
+        verificationVoided: verification.voided,
         planId: params.planId,
         interval: params.interval,
         priceUsdCents: pricing.usdCents,

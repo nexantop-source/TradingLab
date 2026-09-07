@@ -180,6 +180,12 @@ model BillingMandate {
   /// Texto íntegro aceptado. Se guarda para poder demostrar qué se autorizó.
   consentText     String
   acceptedAt      DateTime      @default(now())
+  /// Transaccion de validacion: el cobro minimo que demostro que al banco se le
+  /// puede cobrar. Se anula en el acto; se guarda para poder auditarlo.
+  verificationTransactionId String?
+  verificationAmountCents   Int?
+  /// `false` cuando la anulacion fallo y hay un importe pendiente de devolver.
+  verificationVoided        Boolean @default(true)
   ipHash          String?
   userAgent       String?
   revokedAt       DateTime?

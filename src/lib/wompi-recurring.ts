@@ -256,6 +256,131 @@ export interface ChargeResult {
  * tarde por webhook. Conceder acceso aquí sería regalar el periodo ante una
  * transacción que puede acabar rechazada.
  */
+// ── Verificación de tarjeta ─────────────────────────────────────────────────
+
+/**
+ * Importe de la verificación, en centavos de peso.
+ *
+ * No es una cifra elegida: es el mínimo que Wompi acepta. Pedirle un peso
+ * devuelve `422 El monto mínimo de una transacción es $1,500`, comprobado
+ * contra su API. Se cobra ese mínimo y se anula acto seguido.
+ */
+export const CARD_VERIFICATION_AMOUNT_IN_CENTS = 150_000;
+
+/** Cuánto se espera a que el banco resuelva antes de rendirse. */
+const VERIFICATION_TIMEOUT_MS = 25_000;
+const VERIFICATION_POLL_MS = 1_500;
+
+export interface CardVerification {
+  /** `true` solo si el banco aprobó un cobro real. */
+  verified: boolean;
+  transactionId: string | null;
+  status: 'APPROVED' | 'PENDING' | 'DECLINED' | 'VOIDED' | 'ERROR' | null;
+  statusMessage: string | null;
+  amountInCents: number;
+  /** `true` si el importe ya se devolvió. Cuando es `false`, hay que devolverlo. */
+  voided: boolean;
+}
+
+async function readTransaction(id: string, privateKey: string, apiBaseUrl: string) {
+  const body = await wompiFetch(`${apiBaseUrl}/transactions/${encodeURIComponent(id)}`, {
+    method: 'GET',
+    authorization: privateKey,
+  });
+  return transactionSchema.safeParse(body);
+}
+
+/**
+ * Comprueba que a una tarjeta guardada se le puede cobrar de verdad.
+ *
+ * Guardarla no lo demuestra. `payment_sources` acepta cualquier token válido y
+ * deja la fuente en `AVAILABLE` sin preguntarle nada al banco emisor: una
+ * tarjeta sin fondos, bloqueada para comercio electrónico o directamente de
+ * prueba pasa ese filtro igual que una buena. El primer cobro real llega siete
+ * días después, cuando ya se regaló el acceso y la persona se fue.
+ *
+ * Un cobro pequeño sí lo demuestra, porque recorre el mismo camino que recorrerá
+ * el cobro de verdad: red de tarjetas, emisor y autorización. Se anula en cuanto
+ * responde, así que el dinero no llega a salir de la cuenta -queda unas horas
+ * como retención y desaparece-.
+ *
+ * Si la anulación falla, se dice. Un importe cobrado y no devuelto es un
+ * problema aunque sea pequeño, y taparlo con un `catch` vacío lo convierte en un
+ * problema que nadie ve.
+ */
+export async function verifyPaymentSource(params: {
+  paymentSourceId: number;
+  email: string;
+  reference: string;
+  now?: () => number;
+}): Promise<CardVerification> {
+  const config = readWompiConfig(process.env, { requireIntegrity: true });
+  const privateKey = requirePrivateKey(config);
+  const clock = params.now ?? Date.now;
+  const amountInCents = CARD_VERIFICATION_AMOUNT_IN_CENTS;
+
+  const signature = wompiIntegritySignature(params.reference, amountInCents, config.integritySecret);
+  const created = await wompiFetch(`${config.apiBaseUrl}/transactions`, {
+    method: 'POST',
+    authorization: privateKey,
+    body: JSON.stringify({
+      amount_in_cents: amountInCents,
+      currency: 'COP',
+      customer_email: params.email,
+      reference: params.reference,
+      payment_source_id: params.paymentSourceId,
+      signature,
+      payment_method: { installments: 1 },
+      // No es un cobro recurrente: lo inicia la persona en ese momento, al
+      // apuntarse. Declararlo al revés es motivo de contracargo.
+      recurrent: false,
+    }),
+  });
+
+  const parsed = transactionSchema.safeParse(created);
+  if (!parsed.success) {
+    throw new WompiError('WOMPI_BAD_RESPONSE', 'Wompi no devolvió una transacción legible.', 502);
+  }
+
+  const transactionId = parsed.data.data.id;
+  let status = parsed.data.data.status;
+  let statusMessage = parsed.data.data.status_message ?? null;
+
+  const deadline = clock() + VERIFICATION_TIMEOUT_MS;
+  while (status === 'PENDING' && clock() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, VERIFICATION_POLL_MS));
+    const check = await readTransaction(transactionId, privateKey, config.apiBaseUrl);
+    if (!check.success) break;
+    status = check.data.data.status;
+    statusMessage = check.data.data.status_message ?? null;
+  }
+
+  if (status !== 'APPROVED') {
+    // Nada que devolver: el banco no llegó a retener nada.
+    return { verified: false, transactionId, status, statusMessage, amountInCents, voided: true };
+  }
+
+  let voided = false;
+  try {
+    await wompiFetch(`${config.apiBaseUrl}/transactions/${encodeURIComponent(transactionId)}/void`, {
+      method: 'POST',
+      authorization: privateKey,
+      body: JSON.stringify({}),
+    });
+    voided = true;
+  } catch (error) {
+    // La verificación es válida -el banco aprobó- pero queda dinero retenido.
+    // Se registra alto y claro para que alguien lo devuelva a mano.
+    console.error(
+      `[wompi] Verificación aprobada sin anular. Devolver a mano la transacción ${transactionId} ` +
+        `por ${amountInCents} centavos COP.`,
+      error,
+    );
+  }
+
+  return { verified: true, transactionId, status, statusMessage, amountInCents, voided };
+}
+
 export async function chargePaymentSource(params: {
   paymentSourceId: number;
   amountInCents: number;

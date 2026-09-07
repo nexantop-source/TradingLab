@@ -116,6 +116,37 @@ try {
   check('fecha de cobro anunciada', afterStart.nextChargeAt !== null);
   check('no se cobró nada hoy', (await db.payment.count()) === 0);
 
+  const mandate = await db.billingMandate.findFirst({ where: { userId: user.id } });
+  check('la tarjeta se validó con un cobro real', Boolean(mandate?.verificationTransactionId), mandate?.verificationTransactionId ?? 'sin transacción');
+  check('la validación se devolvió', mandate?.verificationVoided === true);
+
+  // ── 1b. Una tarjeta que el banco rechaza no abre la prueba ────────────────
+  step('Una tarjeta que no autoriza no puede abrir la prueba');
+  // Guardarla funciona -Wompi la deja AVAILABLE sin preguntarle al banco-, así
+  // que este caso es exactamente el que se colaba antes: acceso concedido y
+  // primer cobro imposible siete días después.
+  const declinedUser = await db.user.create({
+    data: { email: 'qa-trial-declined@example.invalid', passwordHash: 'NO_LOGIN', name: 'QA Rechazo' },
+  });
+  const declinedTokens = await acceptance();
+  let declinedCode = 'ninguno';
+  try {
+    await startTrial({
+      userId: declinedUser.id,
+      email: declinedUser.email,
+      planId: 'PREMIUM',
+      interval: 'MONTHLY',
+      cardToken: await tokenizeCard('4111111111111111'),
+      acceptanceToken: declinedTokens.termsToken,
+      personalDataToken: declinedTokens.personalDataToken,
+    });
+  } catch (error) {
+    declinedCode = (error as { code?: string }).code ?? 'sin código';
+  }
+  check('se rechaza antes de conceder nada', declinedCode === 'CARD_NOT_VERIFIED', declinedCode);
+  check('no queda suscripción', (await db.subscription.count({ where: { userId: declinedUser.id } })) === 0);
+  check('no queda mandato', (await db.billingMandate.count({ where: { userId: declinedUser.id } })) === 0);
+
   // ── 2. Una prueba por cuenta ──────────────────────────────────────────────
   step('Una segunda prueba en la misma cuenta debe rechazarse');
   const second = await trialEligibility(user.id);
