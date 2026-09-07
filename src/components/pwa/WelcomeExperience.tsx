@@ -35,8 +35,10 @@ export function WelcomeExperience() {
           onDragEnd={(_, info) => { const projected = info.offset.x + info.velocity.x * 0.1; if (Math.abs(projected) > 65) goTo(scene + (projected < 0 ? 1 : -1)); }} style={{ touchAction: 'pan-y' }}>
           <AnimatePresence initial={false} mode="popLayout" custom={direction}>
             <motion.div key={current.name} className="welcome-scene-art" data-scene={current.name} custom={direction}
-              initial={reduce ? { opacity: 0 } : { opacity: 0, x: direction * 34, scale: 0.97 }} animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={reduce ? { opacity: 0 } : { opacity: 0, x: direction * -24, scale: 0.98 }} transition={reduce ? { duration: 0.12 } : { type: 'spring', stiffness: 260, damping: 32 }}>
+              initial={reduce ? { opacity: 0 } : { opacity: 0, x: direction * 120, scale: 0.86, rotate: direction * 4 }}
+              animate={{ opacity: 1, x: 0, scale: 1, rotate: 0 }}
+              exit={reduce ? { opacity: 0 } : { opacity: 0, x: direction * -90, scale: 0.9, rotate: direction * -3 }}
+              transition={reduce ? { duration: 0.12 } : { type: 'spring', stiffness: 210, damping: 26, mass: 0.9 }}>
               {scene === 0 ? <MarketScene reduce={reduce} /> : scene === 1 ? <PracticeScene reduce={reduce} /> : <LearningScene reduce={reduce} />}
             </motion.div>
           </AnimatePresence>
@@ -44,8 +46,24 @@ export function WelcomeExperience() {
         <section className="welcome-content" aria-label="Descubre TradingLab">
           <div className="welcome-story" aria-live="polite" aria-atomic="true">
             <span className="welcome-eyebrow">{current.eyebrow}</span>
-            <motion.div key={current.name} initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 32 }}>
-              <h1>{current.title}</h1><p>{current.text}</p>
+            <motion.div
+              key={current.name}
+              initial={reduce ? false : 'hidden'}
+              animate="shown"
+              variants={{ hidden: {}, shown: { transition: { staggerChildren: 0.07, delayChildren: 0.08 } } }}
+            >
+              <motion.h1
+                variants={{ hidden: { opacity: 0, y: 22 }, shown: { opacity: 1, y: 0 } }}
+                transition={{ type: 'spring', stiffness: 240, damping: 28 }}
+              >
+                {current.title}
+              </motion.h1>
+              <motion.p
+                variants={{ hidden: { opacity: 0, y: 16 }, shown: { opacity: 1, y: 0 } }}
+                transition={{ type: 'spring', stiffness: 240, damping: 30 }}
+              >
+                {current.text}
+              </motion.p>
             </motion.div>
           </div>
           <nav className="welcome-navigation" aria-label="Presentación de TradingLab">
