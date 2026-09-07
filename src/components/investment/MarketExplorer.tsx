@@ -79,7 +79,7 @@ export function MarketExplorer({ assets, authenticated = false, initialWatchlist
     {message && <div className="invest-feedback" role="status">{message}{!authenticated && <Link href="/entrar"> Iniciar sesión →</Link>}<button onClick={() => setMessage('')} aria-label="Cerrar mensaje">×</button></div>}
     <div className="invest-market-table"><div className="invest-market-head"><span>Instrumento</span><span>Precio de referencia</span><span>Variación de la sesión</span><span>Mercado</span><span>Seguimiento</span></div>
       {filtered.slice(0, limit).map(a => <div className="invest-market-row" key={a.symbol}>
-        <button className="invest-asset-name" onClick={() => setSelected(a)}><AssetIcon {...a} /><span><strong>{a.ticker ?? a.symbol}{!planAtLeast(plan, a.minPlan) && <em className="invest-plan-tag">{PLAN_ENTITLEMENTS[a.minPlan].name}</em>}</strong><small>{a.name}</small></span></button>
+        <button className="invest-asset-name" onClick={() => setSelected(a)}><AssetIcon {...a} /><span><strong>{a.ticker ?? a.symbol}{!planAtLeast(plan, a.minPlan) && <em className="invest-plan-tag">{PLAN_ENTITLEMENTS[a.minPlan].name}</em>}</strong><small title={a.name}>{a.name}</small></span></button>
         <span className="invest-quote">{a.price == null ? 'No disponible' : a.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: a.precision })}<small>{a.currency} · {a.synthetic ? 'DEMO' : a.source}</small></span>
         <span className={`invest-change ${(a.change ?? 0) < 0 ? 'down' : ''}`}>{a.change == null ? '—' : `${a.change >= 0 ? '+' : ''}${a.change.toFixed(2)}%`}</span>
         <span className="invest-market-class">{ASSET_CLASS_LABEL[a.assetClass]}</span>
