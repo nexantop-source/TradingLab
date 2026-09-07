@@ -184,12 +184,15 @@ export function CheckoutView({
                 planName={plan.name}
                 interval={intent.interval}
               />
-              <p className="mt-5 border-t border-[var(--color-border)] pt-5 text-center text-[11px] text-[var(--color-muted)]">
-                ¿Prefieres pagar un periodo suelto, sin dejar tarjeta guardada? Usa el pago único de abajo.
-              </p>
             </Card>
           )}
 
+          {/* Con prueba disponible no se ofrece tambien el pago suelto: dos
+              llamadas a la accion compitiendo no dan a elegir, obligan a
+              comparar dos ofertas del mismo producto justo cuando la persona
+              ya habia decidido, y la que gana suele ser ninguna. */}
+          {!trial && (
+          <>
           <div className="checkout-currency"><ShieldCheck size={20} aria-hidden="true" /><p>TradingLab es de Colombia. Al continuar calculamos y validamos el importe en COP. Verás el total exacto en Wompi antes de autorizar el pago.</p></div>
           <Card className="checkout-payment p-6">
             <div className="flex items-start gap-3">
@@ -261,6 +264,8 @@ export function CheckoutView({
 
             <p className="checkout-period-note mt-4 text-[12px] leading-relaxed text-[var(--color-muted)]">Un solo periodo. Sin renovación automática.<br />No es un depósito para invertir.</p>
           </Card>
+          </>
+          )}
 
           <details className="checkout-details checkout-assurance"><summary><LockKeyhole size={16} aria-hidden="true" />Sobre la seguridad de tu pago<ChevronDown size={16} aria-hidden="true" /></summary><p>{PAYMENT_REGION_NOTICE}</p><p>Tu tarjeta se gestiona en Wompi; TradingLab no recibe ni almacena su número. El ID se vincula a esta cuenta automáticamente.</p><p>Usamos una referencia única y firma de integridad. Solo activamos el plan tras validar el evento firmado y verificar la transacción con Wompi. Volver del checkout no activa el plan por sí solo.</p><p>Este checkout compra un periodo de acceso. No autoriza renovaciones ni débitos recurrentes automáticos.</p></details>
         </div>

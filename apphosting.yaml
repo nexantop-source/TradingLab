@@ -121,6 +121,44 @@ env:
     availability:
       - RUNTIME
 
+  # Cobrar una tarjeta guardada -la prueba gratuita al vencer- es la unica
+  # operacion que necesita la llave privada. El Checkout Web nunca la uso, por
+  # eso no estaba declarada.
+  - variable: WOMPI_PRIVATE_KEY
+    secret: TRADINGLAB_WOMPI_PRIVATE_KEY
+    availability:
+      - RUNTIME
+
+  # Cotizaciones reales de acciones y fondos cotizados estadounidenses.
+  - variable: FINNHUB_API_KEY
+    secret: TRADINGLAB_FINNHUB_API_KEY
+    availability:
+      - RUNTIME
+
+  # Notificaciones push. Sin ambas claves la funcion queda apagada sola.
+  - variable: VAPID_PUBLIC_KEY
+    secret: TRADINGLAB_VAPID_PUBLIC_KEY
+    availability:
+      - RUNTIME
+
+  - variable: VAPID_PRIVATE_KEY
+    secret: TRADINGLAB_VAPID_PRIVATE_KEY
+    availability:
+      - RUNTIME
+
+  - variable: VAPID_SUBJECT
+    value: mailto:brayanmeneses@kardtg.com
+    availability:
+      - RUNTIME
+
+  # Compartido con Cloud Scheduler: autoriza el despachador de recordatorios y
+  # el cobro al vencer la prueba. Sin el, ambas rutas responden 503 en lugar de
+  # quedar abiertas.
+  - variable: PUSH_DISPATCH_SECRET
+    secret: TRADINGLAB_PUSH_DISPATCH_SECRET
+    availability:
+      - RUNTIME
+
   - variable: ADS_PROVIDER
     # Las campañas directas no facturan en producción hasta tener idempotencia
     # persistente multi-instancia. El cliente conserva house ads de respaldo.

@@ -32,6 +32,7 @@ import {
   Compass,
   WalletCards,
   ChevronLeft,
+  PanelLeft,
 } from 'lucide-react';
 import { PLAN_ENTITLEMENTS } from '@tl/types/plans';
 import { Logo } from '@/components/Logo';
@@ -103,7 +104,31 @@ export function AppShell({
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [notifOpen, setNotifOpen] = React.useState(false);
   const [commandOpen, setCommandOpen] = React.useState(false);
+  // Plegar la barra lateral es una preferencia de trabajo, no un estado de
+  // navegacion: quien opera con el grafico la quiere fuera y lo quiere para
+  // siempre, no una vez por pagina.
+  const [railCollapsed, setRailCollapsed] = React.useState(false);
   const shellRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    try {
+      setRailCollapsed(window.localStorage.getItem('tl-rail') === 'collapsed');
+    } catch {
+      // Un navegador que bloquea el almacenamiento no debe impedir usar la app.
+    }
+  }, []);
+
+  function toggleRail() {
+    setRailCollapsed((collapsed) => {
+      const next = !collapsed;
+      try {
+        window.localStorage.setItem('tl-rail', next ? 'collapsed' : 'expanded');
+      } catch {
+        /* Preferencia de conveniencia: si no se puede guardar, se pierde y ya. */
+      }
+      return next;
+    });
+  }
 
   const isAdmin = ADMIN_ROLES.includes(user.role);
   const immersive = IMMERSIVE_ROUTES.some((r) => pathname.startsWith(r));
@@ -140,7 +165,7 @@ export function AppShell({
   }
 
   return (
-    <div ref={shellRef} data-app-flow={pathname.startsWith('/onboarding') ? 'onboarding' : checkout ? 'checkout' : 'workspace'} className="app-shell min-h-dvh bg-[var(--color-bg)] lg:flex">
+    <div ref={shellRef} data-rail={railCollapsed ? 'collapsed' : 'expanded'} data-app-flow={pathname.startsWith('/onboarding') ? 'onboarding' : checkout ? 'checkout' : 'workspace'} className="app-shell min-h-dvh bg-[var(--color-bg)] lg:flex">
       {/* ── Barra lateral (escritorio) ──────────────────────────────────── */}
       <aside className="app-sidebar hidden w-64 shrink-0 flex-col border-r border-[var(--color-border)] lg:flex">
         <div className="app-brand-block px-5 py-6">
@@ -148,8 +173,6 @@ export function AppShell({
             <Logo size="sm" />
           </Link>
         </div>
-
-        <BalanceCard cents={balanceCents} />
 
         <nav aria-label="Navegación principal" className="flex-1 space-y-6 overflow-y-auto px-3 py-4">
           <NavGroup items={NAV_PRIMARY} pathname={pathname} />
@@ -228,8 +251,18 @@ export function AppShell({
 
         {/* Barra superior de escritorio */}
         <header className="app-topbar sticky top-0 z-30 hidden h-16 items-center gap-4 border-b border-[var(--color-border)] px-8 backdrop-blur-xl lg:flex">
+          <button
+            type="button"
+            onClick={toggleRail}
+            aria-expanded={!railCollapsed}
+            aria-label={railCollapsed ? 'Mostrar la navegación' : 'Ocultar la navegación'}
+            className="app-rail-toggle"
+          >
+            <PanelLeft className="size-4" aria-hidden="true" />
+          </button>
           <Breadcrumb pathname={pathname} />
           <div className="ml-auto flex items-center gap-3">
+            <BalanceChip cents={balanceCents} />
             <button
               type="button"
               onClick={() => setCommandOpen(true)}
@@ -343,57 +376,89 @@ export function AppShell({
  * Se muestra siempre la asignación inicial al lado, para que la cifra tenga
  * una referencia y se lea cuánto queda del capital con el que se empezó.
  */
+/**
+ * Capital de práctica, en la cabecera.
+ *
+ * Vive aquí y no en la barra lateral por dos motivos: sigue visible cuando la
+ * navegación se pliega -que es justo cuando alguien está operando- y ocupa el
+ * lugar donde una plataforma financiera pone su cifra importante.
+ *
+ * La composición es la que hace que se lea como dinero y no como un marcador:
+ * los millares en monoespaciada con `tabular-nums` para que no bailen al
+ * actualizarse, los centavos en menor jerarquía, y la variación frente a la
+ * asignación inicial al lado. Una cifra sola no dice nada; comparada con su
+ * punto de partida, dice si se está cuidando o quemando.
+ */
+function BalanceChip({ cents }: { cents: number }) {
+  const units = Math.trunc(cents / 100);
+  const decimals = String(Math.abs(cents % 100)).padStart(2, '0');
+  const delta = cents - INITIAL_DEMO_BALANCE_CENTS;
+  const down = delta < 0;
+  const pct = (delta / INITIAL_DEMO_BALANCE_CENTS) * 100;
+
+  return (
+    <Link
+      href="/portafolio"
+      className="app-balance-chip"
+      aria-label={`Capital de práctica: ${units} dólares con ${decimals} centavos`}
+    >
+      <span className="app-balance-chip-mark" aria-hidden="true">
+        <WalletCards className="size-3.5" />
+      </span>
+      <span className="app-balance-chip-figure">
+        <span className="app-balance-chip-label">Capital de práctica</span>
+        <span className="num app-balance-chip-amount">
+          <small>USD</small>
+          {units.toLocaleString('es-CO')}
+          <em>,{decimals}</em>
+        </span>
+      </span>
+      {delta !== 0 && (
+        <span className="num app-balance-chip-delta" data-down={down || undefined}>
+          {down ? '−' : '+'}
+          {Math.abs(pct).toFixed(1)} %
+        </span>
+      )}
+    </Link>
+  );
+}
+
+/** Versión apilada para el menú móvil, donde hay ancho pero no altura. */
 function BalanceCard({ cents }: { cents: number }) {
   const units = Math.trunc(cents / 100);
   const decimals = String(Math.abs(cents % 100)).padStart(2, '0');
-  const spent = INITIAL_DEMO_BALANCE_CENTS - cents;
-  const usedPercent = Math.min(100, Math.max(0, (spent / INITIAL_DEMO_BALANCE_CENTS) * 100));
-  const down = cents < INITIAL_DEMO_BALANCE_CENTS;
+  const delta = cents - INITIAL_DEMO_BALANCE_CENTS;
+  const down = delta < 0;
+  const remaining = Math.min(100, Math.max(0, (cents / INITIAL_DEMO_BALANCE_CENTS) * 100));
 
   return (
-    <div className="app-balance-card mx-4 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-[length:var(--text-2xs)] font-medium uppercase tracking-[var(--tracking-label)] text-[var(--color-subtle)]">
-          Capital de práctica
-        </span>
+    <div className="app-balance-card mx-4">
+      <div className="app-balance-card-head">
+        <span>Capital de práctica</span>
         <DemoBadge />
       </div>
-
-      <p className="num mt-2.5 flex items-baseline gap-1 tracking-[var(--tracking-tight)]">
-        <span className="text-[length:var(--text-2xs)] font-medium text-[var(--color-subtle)]">USD</span>
-        <span className="text-[length:var(--text-xl)] font-semibold tabular-nums">
-          {units.toLocaleString('es-CO')}
-        </span>
-        <span className="text-[length:var(--text-xs)] font-medium tabular-nums text-[var(--color-muted)]">
-          ,{decimals}
-        </span>
+      <p className="num app-balance-card-amount">
+        <small>USD</small>
+        {units.toLocaleString('es-CO')}
+        <em>,{decimals}</em>
       </p>
-
-      {/* Cuánto queda de la asignación inicial. Una cifra sola no dice nada;
-          comparada con su punto de partida, sí. */}
       <div
-        className="mt-3 h-1 overflow-hidden rounded-[var(--radius-full)] bg-[var(--color-overlay)]"
+        className="app-balance-card-track"
         role="img"
-        aria-label={`Has usado el ${Math.round(usedPercent)} % de tu capital inicial`}
+        aria-label={`Conservas el ${Math.round(remaining)} % de tu capital inicial`}
       >
-        <span
-          className="block h-full rounded-[var(--radius-full)] transition-[width] duration-500 ease-[var(--ease-out-soft)]"
-          style={{
-            width: `${100 - usedPercent}%`,
-            background: down ? 'var(--color-negative)' : 'var(--color-positive)',
-          }}
-        />
+        <span style={{ width: `${remaining}%` }} data-down={down || undefined} />
       </div>
-      <p className="mt-2 flex items-center justify-between gap-2 text-[length:var(--text-2xs)] text-[var(--color-subtle)]">
+      <p className="app-balance-card-foot">
         <span>
-          de USD <span className="num tabular-nums">{(INITIAL_DEMO_BALANCE_CENTS / 100).toLocaleString('es-CO')}</span> iniciales
+          de USD <span className="num">{(INITIAL_DEMO_BALANCE_CENTS / 100).toLocaleString('es-CO')}</span> iniciales
         </span>
-        <span className={down ? 'text-[var(--color-negative)]' : 'text-[var(--color-positive)]'}>
-          {down ? '−' : '+'}
-          <span className="num tabular-nums">
-            {Math.abs(spent / 100).toLocaleString('es-CO', { maximumFractionDigits: 0 })}
+        {delta !== 0 && (
+          <span className="num" data-down={down || undefined}>
+            {down ? '−' : '+'}
+            {Math.abs(delta / 100).toLocaleString('es-CO', { maximumFractionDigits: 0 })}
           </span>
-        </span>
+        )}
       </p>
     </div>
   );
