@@ -10,7 +10,7 @@ import type {
 import { TIMEFRAME_SECONDS } from '@tl/types';
 import { MarketDataError, type MarketDataProvider } from './provider';
 import { getSymbol, listSymbols } from './symbols';
-import { marketStatusFor } from './market-hours';
+import { marketStatusFor, observedMarketStatus } from './market-hours';
 
 /**
  * Proveedor de todo lo que no es cripto: divisas al contado, índices, materias
@@ -387,7 +387,11 @@ export class YahooMarketDataProvider implements MarketDataProvider {
 
   private provenance(symbol: string, sourceTimestamp: number, receivedAt: number, currency: string): DataProvenance {
     const now = Date.now();
-    const status = this.getMarketStatus(symbol, now);
+    // El estado que se enseña sale de cuándo se cruzó el último precio, no solo
+    // del calendario: es lo que evita anunciar como activo un mercado que lleva
+    // horas parado por un festivo que la tabla no conoce.
+    const session = getSymbol(symbol)?.session;
+    const status = session ? observedMarketStatus(session, now, sourceTimestamp) : this.getMarketStatus(symbol, now);
     const age = Math.max(0, now - sourceTimestamp);
     return {
       provider: this.id,

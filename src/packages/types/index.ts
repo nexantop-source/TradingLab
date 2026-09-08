@@ -152,6 +152,18 @@ export interface AssetMeta {
 export interface MarketSession {
   /** `true` para mercados 24/7 como criptomonedas. */
   alwaysOpen: boolean;
+  /**
+   * Ventana continua de una semana, en minutos desde el domingo a las 00:00
+   * UTC. Para los mercados que abren una vez el domingo por la tarde y no
+   * vuelven a cerrar hasta el viernes: divisas, metales, energía.
+   *
+   * No se puede describir con `days` más una franja horaria diaria. Al
+   * intentarlo, la etiqueta decía «domingo 22:00 a viernes 22:00» y el código
+   * hacía «lunes 00:00 a viernes 24:00»: el viernes por la noche dábamos por
+   * abierto un mercado ya cerrado y enseñábamos su último precio como si
+   * siguiera vivo, que es exactamente lo que se veía en pantalla.
+   */
+  weekly?: { openMinuteUtc: number; closeMinuteUtc: number };
   /** Días de la semana abiertos (0 = domingo). */
   days: number[];
   /** Apertura en minutos desde medianoche UTC. */

@@ -8,7 +8,9 @@ import { COMMODITY_SEEDS, CRYPTO_SEEDS, ETF_SEEDS, FOREX_SEEDS, INDEX_SEEDS, STO
  */
 const SESSIONS: Record<string, MarketSession> = {
   CRYPTO: { alwaysOpen: true, days: [0, 1, 2, 3, 4, 5, 6], openMinuteUtc: 0, closeMinuteUtc: 1440, label: '24 h, todos los días' },
-  FOREX: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 0, closeMinuteUtc: 1440, label: 'Domingo 22:00 a viernes 22:00 UTC' },
+  FOREX: { alwaysOpen: false, days: [0, 1, 2, 3, 4, 5], openMinuteUtc: 0, closeMinuteUtc: 1440,
+    weekly: { openMinuteUtc: 22 * 60, closeMinuteUtc: 5 * 1440 + 22 * 60 },
+    label: 'Domingo 22:00 a viernes 22:00 UTC' },
   US_EQUITY: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 13 * 60 + 30, closeMinuteUtc: 20 * 60, label: 'Lunes a viernes, 13:30 a 20:00 UTC' },
   EU_EQUITY: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 7 * 60, closeMinuteUtc: 15 * 60 + 30, label: 'Lunes a viernes, 07:00 a 15:30 UTC' },
   UK_EQUITY: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 8 * 60, closeMinuteUtc: 16 * 60 + 30, label: 'Lunes a viernes, 08:00 a 16:30 UTC' },
@@ -19,8 +21,12 @@ const SESSIONS: Record<string, MarketSession> = {
   IN_EQUITY: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 3 * 60 + 45, closeMinuteUtc: 10 * 60, label: 'Lunes a viernes, 03:45 a 10:00 UTC' },
   AU_EQUITY: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 0, closeMinuteUtc: 6 * 60, label: 'Lunes a viernes, 00:00 a 06:00 UTC' },
   LATAM_EQUITY: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 13 * 60, closeMinuteUtc: 21 * 60, label: 'Lunes a viernes, 13:00 a 21:00 UTC' },
-  METALS: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 0, closeMinuteUtc: 1440, label: 'Casi continuo de lunes a viernes' },
-  ENERGY: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 0, closeMinuteUtc: 1380, label: 'Lunes a viernes, con pausa diaria' },
+  METALS: { alwaysOpen: false, days: [0, 1, 2, 3, 4, 5], openMinuteUtc: 0, closeMinuteUtc: 1440,
+    weekly: { openMinuteUtc: 23 * 60, closeMinuteUtc: 5 * 1440 + 22 * 60 },
+    label: 'Domingo 23:00 a viernes 22:00 UTC, con pausa diaria' },
+  ENERGY: { alwaysOpen: false, days: [0, 1, 2, 3, 4, 5], openMinuteUtc: 0, closeMinuteUtc: 1380,
+    weekly: { openMinuteUtc: 23 * 60, closeMinuteUtc: 5 * 1440 + 22 * 60 },
+    label: 'Domingo 23:00 a viernes 22:00 UTC, con pausa diaria' },
   AGRI: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 13 * 60, closeMinuteUtc: 18 * 60 + 20, label: 'Lunes a viernes, 13:00 a 18:20 UTC' },
 };
 

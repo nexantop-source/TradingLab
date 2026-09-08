@@ -9,7 +9,7 @@ import type {
 } from '@tl/types';
 import { MarketDataError, type MarketDataProvider } from './provider';
 import { getSymbol, listSymbols } from './symbols';
-import { marketStatusFor } from './market-hours';
+import { marketStatusFor, observedMarketStatus } from './market-hours';
 
 /**
  * Proveedor de acciones y fondos cotizados, sobre Finnhub.
@@ -145,7 +145,7 @@ export class FinnhubMarketDataProvider implements MarketDataProvider {
     const now = Date.now();
     const age = now - entry.sourceTimestamp;
     const session = getSymbol(symbol)?.session;
-    const status = session ? marketStatusFor(session, now) : 'OPEN';
+    const status = session ? observedMarketStatus(session, now, entry.sourceTimestamp) : 'OPEN';
     return {
       provider: this.id,
       providerLabel: this.label,

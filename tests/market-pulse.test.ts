@@ -93,8 +93,19 @@ describe('closed market uses a stable calendar boundary', () => {
     expect(result.provenance.marketStatus).toBe('PRE_OPEN');
     expect(result.provenance.freshness).toBe('MARKET_CLOSED');
   });
-  it('handles sessions closing at midnight without relative-step drift', () => {
+  it('congela el fin de semana de divisas en el cierre real del viernes', () => {
+    // El mercado de divisas cierra el viernes a las 22:00 UTC, no a medianoche.
+    // Esta prueba fijaba la medianoche, que era lo que hacía el código y no lo
+    // que decía su propia etiqueta: entre las 22:00 y las 24:00 del viernes se
+    // anunciaba abierto un mercado ya cerrado, con su último precio congelado
+    // presentado como si siguiera vivo.
     const forex = getSymbol('EURUSD')!.session;
-    expect(lastOpenTimestamp(forex, Date.UTC(2026, 8, 6, 19, 47, 11))).toBe(Date.UTC(2026, 8, 5) - 1);
+    const cierreDelViernes = Date.UTC(2026, 8, 4, 22) - 1;
+    expect(lastOpenTimestamp(forex, Date.UTC(2026, 8, 6, 19, 47, 11))).toBe(cierreDelViernes);
+    expect(marketStatusFor(forex, cierreDelViernes)).toBe('OPEN');
+    expect(marketStatusFor(forex, Date.UTC(2026, 8, 4, 22, 30))).toBe('CLOSED');
+    // Y el domingo por la tarde ya está abierto, que es lo que la etiqueta
+    // prometía y el código negaba.
+    expect(marketStatusFor(forex, Date.UTC(2026, 8, 6, 22, 30))).toBe('OPEN');
   });
 });
