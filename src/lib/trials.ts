@@ -41,7 +41,7 @@ import { ANALYTICS_EVENTS } from '@tl/analytics';
 export const TRIAL_DAYS = 7;
 export const TRIAL_PLANS: WompiPlanId[] = ['STANDARD', 'PREMIUM'];
 /** Se sube cuando cambia el texto del mandato. Queda grabado en cada aceptación. */
-export const MANDATE_CONSENT_VERSION = '2026-09-06';
+export const MANDATE_CONSENT_VERSION = '2026-09-20';
 /** Intentos de cobro antes de dar el periodo por perdido. */
 export const MAX_CHARGE_ATTEMPTS = 3;
 /** Espera entre reintentos tras un rechazo. */
@@ -65,6 +65,12 @@ export class TrialError extends Error {
     this.name = 'TrialError';
     this.status = status;
   }
+}
+
+export function trialPaymentsConfigured(): boolean {
+  if (process.env.BILLING_PROVIDER !== 'wompi') return false;
+  try { return Boolean(readWompiConfig(process.env, { requireIntegrity: true, requireEvents: true }).privateKey); }
+  catch { return false; }
 }
 
 // ── Precio ──────────────────────────────────────────────────────────────────
@@ -138,8 +144,8 @@ export function mandateText(params: {
 
   return [
     `Autorizo a TradingLab a guardar mi tarjeta y a cobrarla de forma ${cadence} por el plan ${plan.name}, a USD ${price} por periodo.${conversion}`,
-    `Durante los primeros ${params.trialDays} días no se cobra nada. El primer cobro será el ${fecha}.`,
-    'Puedo cancelar en cualquier momento desde Facturación. Si cancelo antes del primer cobro, no se me cobra nada y conservo el acceso hasta que termine la prueba.',
+    `La membresía no se cobra durante los primeros ${params.trialDays} días. Para validar la tarjeta se solicita un cargo de COP 1.500 y su anulación; el banco determina cuándo libera el importe. El primer cobro del plan será el ${fecha}.`,
+    'Puedo cancelar en cualquier momento desde Facturación. Si cancelo antes del primer cobro del plan, no se cobra la membresía y conservo el acceso hasta que termine la prueba.',
     'TradingLab es una plataforma educativa y de simulación: el pago da acceso a contenido y herramientas de práctica, nunca a la gestión de dinero real.',
   ].join(' ');
 }
@@ -191,6 +197,7 @@ export interface StartTrialResult {
   planId: WompiPlanId;
   interval: WompiInterval;
   trialEndsAt: Date;
+  verificationVoided: boolean;
   firstChargeAt: Date;
   amountInCents: number;
   card: { brand: string | null; lastFour: string | null };
@@ -217,6 +224,9 @@ export async function startTrial(params: {
     throw new TrialError('PLAN_NOT_ELIGIBLE', 'Este plan no tiene prueba gratuita.', 400);
   }
 
+  if (process.env.BILLING_PROVIDER !== 'wompi') {
+    throw new TrialError('NOT_CONFIGURED', 'Las pruebas con tarjeta requieren Wompi activo.', 503);
+  }
   const now = params.now ?? new Date();
   const eligibility = await trialEligibility(params.userId, now);
   if (!eligibility.eligible) {
@@ -252,11 +262,30 @@ export async function startTrial(params: {
    * una retención pequeña que desaparece en unas horas; nosotros sabemos que la
    * tarjeta responde antes de dar nada.
    */
-  const verification = await verifyPaymentSource({
+  const reference = wompiReference(params.userId, `verify-${randomBytes(12).toString('hex')}`, config.integritySecret);
+  const attempt = await db.$transaction(async tx => {
+    await tx.user.update({ where: { id: params.userId }, data: { updatedAt: new Date() } });
+    const unresolved = await tx.auditLog.findFirst({ where: { actorId: params.userId, entity: 'WOMPI_VERIFICATION', action: { in: ['PENDING', 'REVIEW_REQUIRED'] } } });
+    const used = await tx.billingMandate.findFirst({ where: { userId: params.userId }, select: { id: true } });
+    if (unresolved || used) throw new TrialError('CARD_NOT_VERIFIED', 'Ya existe una prueba o validación pendiente. Revisa Facturación o contacta con soporte antes de reintentar.', 409);
+    return tx.auditLog.create({ data: { actorId: params.userId, entity: 'WOMPI_VERIFICATION', entityId: reference, action: 'PENDING', diff: JSON.stringify({ environment: config.environment, amountInCents: CARD_VERIFICATION_AMOUNT_IN_CENTS, paymentSourceId: source.wompiId }) } });
+  });
+  let verification;
+  try {
+    verification = await verifyPaymentSource({
     paymentSourceId: source.wompiId,
     email: params.email,
-    reference: wompiReference(params.userId, `verify-${now.getTime()}`, config.integritySecret),
-  });
+    reference,
+    onTransaction: async id => { await db.auditLog.update({ where: { id: attempt.id }, data: { diff: JSON.stringify({ environment: config.environment, transactionId: id, reference, amountInCents: CARD_VERIFICATION_AMOUNT_IN_CENTS }) } }); },
+    });
+    await db.auditLog.update({ where: { id: attempt.id }, data: { action: verification.status === 'PENDING' || (verification.verified && !verification.voided) ? 'REVIEW_REQUIRED' : verification.verified ? 'PENDING' : 'RESOLVED', diff: JSON.stringify({ environment: config.environment, reference, ...verification }) } });
+  } catch (error) {
+    await db.auditLog.update({ where: { id: attempt.id }, data: { action: 'REVIEW_REQUIRED' } });
+    throw error;
+  }
+  if (verification.status === 'PENDING') {
+    throw new TrialError('CARD_NOT_VERIFIED', `La validación sigue pendiente en Wompi. No se activó la prueba. Contacta con soporte antes de reintentar. Referencia: ${verification.transactionId}`, 409);
+  }
   if (!verification.verified) {
     throw new TrialError(
       'CARD_NOT_VERIFIED',
@@ -277,6 +306,15 @@ export async function startTrial(params: {
   });
 
   await db.$transaction(async (tx) => {
+    // Serialize entitlement grants across concurrent requests and instances.
+    await tx.user.update({ where: { id: params.userId }, data: { updatedAt: new Date() } });
+    const prior = await tx.billingMandate.findFirst({ where: { userId: params.userId }, select: { id: true } });
+    const active = await tx.subscription.findUnique({ where: { userId: params.userId } });
+    if (prior || (active && ['ACTIVE', 'TRIALING', 'PAST_DUE'].includes(active.status) && active.currentPeriodEnd > new Date())) {
+      throw new TrialError('TRIAL_ALREADY_USED', 'La cuenta ya tiene un periodo o una prueba. Revisa Facturación.');
+    }
+    const owner = await tx.paymentSource.findUnique({ where: { wompiId_environment: { wompiId: source.wompiId, environment: source.environment } } });
+    if (owner && owner.userId !== params.userId) throw new TrialError('CARD_NOT_VERIFIED', 'No se pudo vincular esta tarjeta.', 409);
     const paymentSource = await tx.paymentSource.upsert({
       where: { wompiId_environment: { wompiId: source.wompiId, environment: source.environment } },
       create: {
@@ -288,9 +326,10 @@ export async function startTrial(params: {
         expMonth: params.expMonth ?? null,
         expYear: params.expYear ?? null,
       },
-      update: { userId: params.userId, status: 'ACTIVE' },
+      update: { status: 'ACTIVE' },
     });
 
+    if (verification.voided) await tx.auditLog.update({ where: { id: attempt.id }, data: { action: 'RESOLVED' } });
     await tx.billingMandate.create({
       data: {
         userId: params.userId,
@@ -369,6 +408,7 @@ export async function startTrial(params: {
     planId: params.planId,
     interval: params.interval,
     trialEndsAt,
+    verificationVoided: verification.voided,
     firstChargeAt: trialEndsAt,
     amountInCents: pricing.amountInCents,
     card: { brand: source.brand, lastFour: source.lastFour },
@@ -487,7 +527,10 @@ export async function chargeDueSubscriptions(now = new Date()): Promise<ChargeRu
     const planId = subscription.planId as WompiPlanId;
     const interval = subscription.interval as WompiInterval;
 
+    let submittedToWompi = false;
     try {
+      const config = readWompiConfig();
+      if (subscription.paymentSource.environment !== config.environment) throw new TrialError('NOT_CONFIGURED', 'La tarjeta guardada pertenece a otro ambiente.', 503);
       const pricing = await trialPricing(planId, interval);
       const reference = chargeReference();
       const idempotencyKey = wompiPaymentIdempotencyKey(reference);
@@ -495,7 +538,13 @@ export async function chargeDueSubscriptions(now = new Date()): Promise<ChargeRu
       // El Payment se crea ANTES de llamar a Wompi. Si la llamada se pierde por
       // red, queda el rastro para conciliar por webhook en lugar de un cobro
       // huérfano que nadie sabe a quién pertenece.
-      await db.payment.create({
+      const claimed = await db.$transaction(async tx => {
+        const claim = await tx.subscription.updateMany({
+          where: { userId: subscription.userId, nextChargeAt: subscription.nextChargeAt, cancelAtPeriodEnd: false },
+          data: { nextChargeAt: null },
+        });
+        if (claim.count !== 1) return false;
+        await tx.payment.create({
         data: {
           userId: subscription.userId,
           amountCents: pricing.amountInCents,
@@ -504,8 +553,11 @@ export async function chargeDueSubscriptions(now = new Date()): Promise<ChargeRu
           description: `${wompiPaymentDescription(planId, interval)}${pricing.quoteTag}`,
           idempotencyKey,
         },
+        });
+        return true;
       });
-
+      if (!claimed) { report.skipped++; continue; }
+      submittedToWompi = true;
       const charge = await chargePaymentSource({
         paymentSourceId: subscription.paymentSource.wompiId,
         amountInCents: pricing.amountInCents,
@@ -537,7 +589,10 @@ export async function chargeDueSubscriptions(now = new Date()): Promise<ChargeRu
     } catch (error) {
       report.errors++;
       const message = error instanceof WompiError ? error.message : 'No pudimos procesar el cobro.';
-      await onChargeFailed(subscription.userId, subscription.chargeAttempts, message, now);
+      if (submittedToWompi) {
+        // An uncertain network result is not a bank rejection. Do not charge again.
+        await db.subscription.update({ where: { userId: subscription.userId }, data: { nextChargeAt: null, lastChargeError: 'Resultado pendiente de conciliación con Wompi. No se repetirá el cobro automáticamente.' } });
+      } else await onChargeFailed(subscription.userId, subscription.chargeAttempts, message, now);
     }
   }
 

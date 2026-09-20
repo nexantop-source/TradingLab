@@ -233,6 +233,7 @@ const transactionSchema = z.object({
     status: z.enum(['PENDING', 'APPROVED', 'DECLINED', 'VOIDED', 'ERROR']),
     status_message: z.string().nullish(),
     amount_in_cents: z.number().int(),
+    currency: z.literal('COP'),
     reference: z.string().min(1),
   }),
 });
@@ -313,6 +314,7 @@ export async function verifyPaymentSource(params: {
   email: string;
   reference: string;
   now?: () => number;
+  onTransaction?: (id: string) => Promise<void>;
 }): Promise<CardVerification> {
   const config = readWompiConfig(process.env, { requireIntegrity: true });
   const privateKey = requirePrivateKey(config);
@@ -343,6 +345,10 @@ export async function verifyPaymentSource(params: {
   }
 
   const transactionId = parsed.data.data.id;
+  const matches = (data: typeof parsed.data.data) => data.id === transactionId
+    && data.reference === params.reference && data.amount_in_cents === amountInCents;
+  if (!matches(parsed.data.data)) throw new WompiError('WOMPI_VERIFICATION_MISMATCH', 'La validación no corresponde a esta solicitud.', 502);
+  await params.onTransaction?.(transactionId);
   let status = parsed.data.data.status;
   let statusMessage = parsed.data.data.status_message ?? null;
 
@@ -350,24 +356,33 @@ export async function verifyPaymentSource(params: {
   while (status === 'PENDING' && clock() < deadline) {
     await new Promise((resolve) => setTimeout(resolve, VERIFICATION_POLL_MS));
     const check = await readTransaction(transactionId, privateKey, config.apiBaseUrl);
-    if (!check.success) break;
+    if (!check.success || !matches(check.data.data)) throw new WompiError('WOMPI_VERIFICATION_MISMATCH', 'No pudimos confirmar la validación de la tarjeta.', 502);
     status = check.data.data.status;
     statusMessage = check.data.data.status_message ?? null;
   }
 
   if (status !== 'APPROVED') {
     // Nada que devolver: el banco no llegó a retener nada.
-    return { verified: false, transactionId, status, statusMessage, amountInCents, voided: true };
+    return { verified: false, transactionId, status, statusMessage, amountInCents, voided: status !== 'PENDING' };
   }
 
   let voided = false;
   try {
-    await wompiFetch(`${config.apiBaseUrl}/transactions/${encodeURIComponent(transactionId)}/void`, {
+    const reversal = await wompiFetch(`${config.apiBaseUrl}/transactions/${encodeURIComponent(transactionId)}/void`, {
       method: 'POST',
       authorization: privateKey,
       body: JSON.stringify({}),
     });
-    voided = true;
+    const reversed = transactionSchema.safeParse(reversal);
+    voided = reversed.success && matches(reversed.data.data) && reversed.data.data.status === 'VOIDED';
+    const voidDeadline = clock() + VERIFICATION_TIMEOUT_MS;
+    // An accepted void request can still be asynchronous. Confirm its final state.
+    while (!voided && clock() < voidDeadline) {
+      await new Promise(resolve => setTimeout(resolve, VERIFICATION_POLL_MS));
+      const confirmation = await readTransaction(transactionId, privateKey, config.apiBaseUrl);
+      if (!confirmation.success || !matches(confirmation.data.data)) break;
+      voided = confirmation.data.data.status === 'VOIDED';
+    }
   } catch (error) {
     // La verificación es válida -el banco aprobó- pero queda dinero retenido.
     // Se registra alto y claro para que alguien lo devuelva a mano.
@@ -426,6 +441,9 @@ export async function chargePaymentSource(params: {
   }
   if (parsed.data.data.reference !== params.reference) {
     throw new WompiError('WOMPI_REFERENCE_MISMATCH', 'La transacción no corresponde al cobro solicitado.', 502);
+  }
+  if (parsed.data.data.amount_in_cents !== params.amountInCents) {
+    throw new WompiError('WOMPI_AMOUNT_MISMATCH', 'El importe no corresponde al cobro solicitado.', 502);
   }
 
   return {

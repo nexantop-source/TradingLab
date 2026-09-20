@@ -1,3 +1,5 @@
+import { enforce } from '@/lib/rate-limit';
+import { CARD_VERIFICATION_AMOUNT_IN_CENTS } from '@/lib/wompi-recurring';
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { fail, handleError, ok, clientIp } from '@/lib/api';
@@ -12,6 +14,7 @@ import {
   mandateText,
   startTrial,
   trialEligibility,
+  trialPaymentsConfigured,
   trialPricing,
   TrialError,
 } from '@/lib/trials';
@@ -47,6 +50,7 @@ const cancelSchema = z.object({ reason: z.string().trim().max(300).optional() })
 export async function GET(req: NextRequest) {
   try {
     const { user } = await requireAuth();
+    if (!trialPaymentsConfigured()) return fail('TRIAL_NOT_CONFIGURED', 'La prueba con tarjeta no está disponible. Puedes elegir pago único con Wompi.', 503);
     const planId = (req.nextUrl.searchParams.get('plan') ?? 'PREMIUM') as WompiPlanId;
     const interval = (req.nextUrl.searchParams.get('interval') ?? 'MONTHLY') as WompiInterval;
     if (!TRIAL_PLANS.includes(planId) || !['MONTHLY', 'YEARLY'].includes(interval)) {
@@ -63,6 +67,7 @@ export async function GET(req: NextRequest) {
 
     return ok({
       eligible: true,
+      verificationAmountInCents: CARD_VERIFICATION_AMOUNT_IN_CENTS,
       trialDays: TRIAL_DAYS,
       firstChargeAt: firstChargeAt.toISOString(),
       amountInCents: pricing.amountInCents,
@@ -100,6 +105,7 @@ export async function POST(req: NextRequest) {
     if (!isSameOriginRequest(req)) {
       return fail('CROSS_SITE_REQUEST', 'No pudimos validar el origen de la solicitud.', 403);
     }
+    await enforce(`trial:${user.id}`, { limit: 4, windowSeconds: 3600 });
     const input = startSchema.parse(await req.json());
     if (input.consentVersion !== MANDATE_CONSENT_VERSION) {
       // El texto cambió mientras la persona lo leía: se rehace, no se asume.
@@ -126,6 +132,7 @@ export async function POST(req: NextRequest) {
       firstChargeAt: result.firstChargeAt.toISOString(),
       amountInCents: result.amountInCents,
       card: result.card,
+      verificationVoided: result.verificationVoided,
     });
   } catch (error) {
     if (error instanceof TrialError) return fail(error.code, error.message, error.status);

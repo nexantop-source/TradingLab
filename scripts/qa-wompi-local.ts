@@ -17,7 +17,7 @@ async function main() {
   Object.assign(process.env, {
     DATABASE_URL: `file:${join(directory, 'isolated.db').replaceAll('\\', '/')}`,
     WOMPI_ENVIRONMENT: 'production', WOMPI_EVENT_HUB_ENABLED: 'true', BILLING_PROVIDER: 'wompi',
-    WOMPI_PUBLIC_KEY: 'pub_prod_LOCAL_FIXTURE', WOMPI_PRIVATE_KEY: '',
+    WOMPI_PUBLIC_KEY: 'pub_prod_LOCAL_FIXTURE', WOMPI_PRIVATE_KEY: 'prv_prod_LOCAL_FIXTURE',
     WOMPI_EVENTS_SECRET: 'prod_events_LOCAL_FIXTURE', WOMPI_INTEGRITY_SECRET: 'prod_integrity_LOCAL_FIXTURE',
     WOMPI_PRICING_MODE: 'fixed_cop', WOMPI_STANDARD_MONTHLY_AMOUNT_IN_CENTS: '5990000',
     NEXT_PUBLIC_APP_URL: 'https://local-fixture.invalid',

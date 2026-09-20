@@ -133,6 +133,7 @@ export function AppShell({
   const isAdmin = ADMIN_ROLES.includes(user.role);
   const immersive = IMMERSIVE_ROUTES.some((r) => pathname.startsWith(r));
   const checkout = pathname === '/pago';
+  const billingFlow = checkout || pathname === '/planes';
   const backHref = checkout ? '/precios' : pathname.startsWith('/academia/') ? '/academia' : pathname.startsWith('/noticias/') ? '/noticias' : null;
 
   React.useEffect(() => {
@@ -228,11 +229,11 @@ export function AppShell({
           </Link>
           <span className="native-toolbar-title">{pathname === '/panel' ? 'TradingLab' : pathname === '/explorar' ? 'Mercados' : pathname === '/portafolio' ? 'Portafolio' : BREADCRUMB_LABELS[pathname.split('/')[1]] ?? 'TradingLab'}</span>
 
-          <Link href={user.plan === 'FREE' ? '/precios' : '/billing'} className="app-plan-chip" aria-label={user.plan === 'FREE' ? 'Explore activo. Mejorar mi plan' : `Gestionar plan ${PLAN_ENTITLEMENTS[user.plan].name}`}>{user.plan === 'FREE' ? 'Explore · Mejorar' : PLAN_ENTITLEMENTS[user.plan].name}</Link>
+          {!billingFlow && <><Link href={user.plan === 'FREE' ? '/precios' : '/billing'} className="app-plan-chip" aria-label={user.plan === 'FREE' ? 'Explore activo. Mejorar mi plan' : `Gestionar plan ${PLAN_ENTITLEMENTS[user.plan].name}`}>{user.plan === 'FREE' ? 'Explore · Mejorar' : PLAN_ENTITLEMENTS[user.plan].name}</Link>
           <span className="app-header-balance num ml-auto flex items-center gap-1.5 text-[13px] font-semibold">
             {(balanceCents / 100).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             <DemoBadge />
-          </span>
+          </span></>}
 
           <NotificationsButton
             count={notifications.length}
@@ -262,7 +263,7 @@ export function AppShell({
           </button>
           <Breadcrumb pathname={pathname} />
           <div className="ml-auto flex items-center gap-3">
-            <BalanceChip cents={balanceCents} />
+            {!billingFlow && <BalanceChip cents={balanceCents} />}
             <button
               type="button"
               onClick={() => setCommandOpen(true)}

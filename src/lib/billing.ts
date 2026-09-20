@@ -93,6 +93,7 @@ class MockBillingProvider implements BillingProvider {
         userId: params.userId,
         planId: params.planId,
         status: useTrial ? 'TRIALING' : 'ACTIVE',
+        source: 'MOCK',
         interval: params.interval,
         currentPeriodStart: new Date(now),
         currentPeriodEnd,
@@ -104,6 +105,7 @@ class MockBillingProvider implements BillingProvider {
       update: {
         planId: params.planId,
         status: useTrial ? 'TRIALING' : 'ACTIVE',
+        source: 'MOCK',
         interval: params.interval,
         currentPeriodStart: new Date(now),
         currentPeriodEnd,
@@ -234,7 +236,7 @@ let provider: BillingProvider | null = null;
 export function resolveBillingProviderId(
   env: Readonly<Record<string, string | undefined>> = process.env,
 ): 'wompi' | 'mock' | 'disabled' {
-  const providerId = (env.BILLING_PROVIDER ?? (env.NODE_ENV === 'production' ? 'disabled' : 'mock'))
+  const providerId = (env.BILLING_PROVIDER ?? 'disabled')
     .trim()
     .toLowerCase();
 

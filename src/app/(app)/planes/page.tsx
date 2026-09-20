@@ -6,7 +6,7 @@ import { getAuth } from '@/lib/auth';
 import { PLAN_ENTITLEMENTS, PLAN_ORDER, yearlyDiscountPercent } from '@tl/types/plans';
 import { PLANS, type PlanId } from '@tl/types';
 import { Badge } from '@tl/ui';
-import { trialEligibility, TRIAL_DAYS, TRIAL_PLANS } from '@/lib/trials';
+import { trialEligibility, trialPaymentsConfigured, TRIAL_DAYS, TRIAL_PLANS } from '@/lib/trials';
 import { IntervalPlans } from './IntervalPlans';
 
 export const dynamic = 'force-dynamic';
@@ -42,7 +42,7 @@ export default async function AppPlansPage() {
       highlights: plan.highlights.slice(0, 7),
       isCurrent: id === current,
       isDowngrade: PLAN_ORDER[id] < PLAN_ORDER[current],
-      trialAvailable: eligibility.eligible && TRIAL_PLANS.includes(id as (typeof TRIAL_PLANS)[number]),
+      trialAvailable: trialPaymentsConfigured() && eligibility.eligible && TRIAL_PLANS.includes(id as (typeof TRIAL_PLANS)[number]),
     };
   });
 
@@ -51,12 +51,12 @@ export default async function AppPlansPage() {
       <header>
         <p className="app-page-kicker">Tu plan</p>
         <h1 className="mt-2 text-[length:var(--text-2xl)] font-semibold tracking-[var(--tracking-display)]">
-          Invierte en tu criterio.
+          Elige cómo quieres aprender.
         </h1>
         <p className="mt-2.5 max-w-2xl text-[length:var(--text-xs)] leading-relaxed text-[var(--color-muted)]">
           Ahora mismo tienes <strong className="text-[var(--color-text)]">{PLAN_ENTITLEMENTS[current].name}</strong>.
-          {eligibility.eligible
-            ? ` Puedes probar cualquier plan de pago durante ${TRIAL_DAYS} días sin coste y cancelar antes del primer cobro.`
+          {trialPaymentsConfigured() && eligibility.eligible
+            ? ` Compara los límites y elige pago único o ${TRIAL_DAYS} días de prueba con tarjeta validada.`
             : ' Los cambios de plan se aplican al confirmar el pago.'}
         </p>
       </header>
@@ -71,8 +71,8 @@ export default async function AppPlansPage() {
         <ul className="mt-3 grid gap-2.5 sm:grid-cols-2">
           {[
             'Práctica exclusivamente con dinero virtual, nunca con dinero real',
-            'Academia con certificado al completar cada ruta',
-            'Diario educativo completo para revisar tus decisiones',
+            'Academia según tu plan, con seguimiento de progreso',
+            'Diario educativo con el historial incluido en tu plan',
             'Procedencia del dato visible en cada gráfico, con su latencia',
           ].map((item) => (
             <li

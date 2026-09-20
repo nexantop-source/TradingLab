@@ -7,6 +7,7 @@ import { CardBrand } from './CardBrand';
 
 export interface TrialStarted {
   planName: string;
+  verificationVoided?: boolean;
   trialDays: number;
   firstChargeAt: string;
   usdCents: number;
@@ -42,7 +43,7 @@ export function TrialSuccess({ started }: { started: TrialStarted }) {
         Listo. Tienes {started.planName} durante {started.trialDays} días.
       </h1>
       <p className="trial-success-lede">
-        No se te ha cobrado nada. Tu tarjeta queda guardada para el primer cobro, y puedes cancelar antes sin coste.
+        La membresía empieza con una prueba. {started.verificationVoided ? 'Wompi confirmó la anulación del cargo de validación de COP 1.500; el banco determina cuándo libera el importe.' : 'La anulación del cargo de validación de COP 1.500 está pendiente de confirmación. Contacta con soporte desde Facturación.'} Puedes cancelar la renovación desde Facturación.
       </p>
 
       <dl className="trial-success-facts">

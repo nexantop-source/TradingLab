@@ -68,6 +68,9 @@ export function readWompiConfig(
   options: ReadConfigOptions = {},
 ): WompiConfig {
   const environment = env.WOMPI_ENVIRONMENT;
+  if (env.NODE_ENV === 'production' && environment === 'sandbox') {
+    throw new WompiError('WOMPI_SANDBOX_FORBIDDEN', 'Los pagos de prueba no están permitidos en producción.', 503);
+  }
   if (environment !== 'sandbox' && environment !== 'production') {
     throw new WompiError(
       'WOMPI_NOT_CONFIGURED',
@@ -733,11 +736,14 @@ export async function fetchWompiTransaction(
   }
 
   let response: Response;
+  if (!config.privateKey) {
+    throw new WompiError('WOMPI_PRIVATE_KEY_MISSING', 'La verificación de pagos requiere configurar la llave privada de Wompi.', 503);
+  }
   try {
     response = await fetch(`${config.apiBaseUrl}/transactions/${encodeURIComponent(transactionId)}`, {
       method: 'GET',
       redirect: 'error',
-      headers: { Authorization: `Bearer ${config.publicKey}`, Accept: 'application/json' },
+      headers: { Authorization: `Bearer ${config.privateKey}`, Accept: 'application/json' },
       cache: 'no-store',
       signal: AbortSignal.timeout(8_000),
     });

@@ -10,6 +10,7 @@
  * Se niega a correr fuera de sandbox.
  */
 import assert from 'node:assert/strict';
+import { DatabaseSync } from 'node:sqlite';
 import { mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -31,9 +32,12 @@ if (sandbox.WOMPI_ENVIRONMENT !== 'sandbox') {
 }
 
 const directory = mkdtempSync(join(tmpdir(), 'tradinglab-trial-qa-'));
+const empty = new DatabaseSync(join(directory, 'trial.db')); empty.exec('PRAGMA user_version = 0'); empty.close();
 Object.assign(process.env, sandbox, {
   DATABASE_URL: `file:${join(directory, 'trial.db').replaceAll('\\', '/')}`,
   DATABASE_PROVIDER: 'sqlite',
+  BILLING_PROVIDER: 'wompi',
+  NODE_ENV: 'test',
   NEXT_PUBLIC_APP_URL: 'https://local-fixture.invalid',
   WOMPI_PRICING_MODE: 'fixed_cop',
   WOMPI_STANDARD_MONTHLY_AMOUNT_IN_CENTS: '5990000',
@@ -112,9 +116,9 @@ try {
   check('días restantes visibles', afterStart.trialDaysLeft === 7, String(afterStart.trialDaysLeft));
   check('tarjeta visible en facturación', afterStart.card?.lastFour === '4242');
   check('mandato guardado', afterStart.mandate !== null);
-  check('mandato declara el precio', (afterStart.nextChargeAmountUsdCents ?? 0) === 2999);
+  check('mandato declara el precio', (afterStart.nextChargeAmountUsdCents ?? 0) === 1999);
   check('fecha de cobro anunciada', afterStart.nextChargeAt !== null);
-  check('no se cobró nada hoy', (await db.payment.count()) === 0);
+  check('no se cobró membresía hoy', (await db.payment.count()) === 0);
 
   const mandate = await db.billingMandate.findFirst({ where: { userId: user.id } });
   check('la tarjeta se validó con un cobro real', Boolean(mandate?.verificationTransactionId), mandate?.verificationTransactionId ?? 'sin transacción');

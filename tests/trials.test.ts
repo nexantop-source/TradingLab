@@ -9,7 +9,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('server-only', () => ({}));
 
-const subscription = vi.hoisted(() => ({ findUnique: vi.fn(), findMany: vi.fn(), update: vi.fn(), upsert: vi.fn() }));
+const subscription = vi.hoisted(() => ({ findUnique: vi.fn(), findMany: vi.fn(), update: vi.fn(), updateMany: vi.fn(), upsert: vi.fn() }));
 const billingMandate = vi.hoisted(() => ({ findFirst: vi.fn(), updateMany: vi.fn(), create: vi.fn() }));
 const payment = vi.hoisted(() => ({ create: vi.fn(), update: vi.fn() }));
 const paymentSource = vi.hoisted(() => ({ upsert: vi.fn() }));
@@ -52,6 +52,7 @@ beforeEach(() => {
   process.env.WOMPI_PRICING_MODE = 'fixed_cop';
   process.env.WOMPI_PREMIUM_MONTHLY_AMOUNT_IN_CENTS = '11990000';
   subscription.update.mockResolvedValue({});
+  subscription.updateMany.mockResolvedValue({ count: 1 });
   subscription.upsert.mockResolvedValue({});
   billingMandate.updateMany.mockResolvedValue({});
   payment.create.mockResolvedValue({});
@@ -104,7 +105,7 @@ describe('texto del mandato', () => {
   it('dice el precio, la fecha del primer cobro y cómo cancelar', () => {
     const text = mandateText(base);
     expect(text).toContain('USD 29.99');
-    expect(text).toContain('7 días no se cobra nada');
+    expect(text).toContain('no se cobra durante los primeros 7 días');
     expect(text).toMatch(/13 de septiembre de 2026/);
     expect(text).toContain('Puedo cancelar en cualquier momento');
   });
@@ -159,8 +160,9 @@ describe('cobro programado', () => {
     planId: 'PREMIUM',
     interval: 'MONTHLY',
     chargeAttempts: 0,
+    nextChargeAt: new Date('2026-09-01T00:00:00Z'),
     user: { id: 'u1', email: 'alumna@correo.com', status: 'ACTIVE' },
-    paymentSource: { wompiId: 4242, status: 'ACTIVE' },
+    paymentSource: { wompiId: 4242, status: 'ACTIVE', environment: 'sandbox' },
   };
 
   it('no cobra sin un mandato vigente', async () => {
@@ -180,6 +182,22 @@ describe('cobro programado', () => {
     expect(chargePaymentSource).not.toHaveBeenCalled();
   });
 
+  it('no cobra si otra ejecución ya reclamó la fecha', async () => {
+    subscription.findMany.mockResolvedValue([due]);
+    billingMandate.findFirst.mockResolvedValue({ id: 'm1' });
+    subscription.updateMany.mockResolvedValue({ count: 0 });
+    expect((await chargeDueSubscriptions()).skipped).toBe(1);
+    expect(chargePaymentSource).not.toHaveBeenCalled();
+    expect(payment.create).not.toHaveBeenCalled();
+  });
+  it('no reintenta automáticamente un cobro con resultado de red incierto', async () => {
+    subscription.findMany.mockResolvedValue([due]);
+    billingMandate.findFirst.mockResolvedValue({ id: 'm1' });
+    chargePaymentSource.mockRejectedValue(new Error('timeout'));
+    expect((await chargeDueSubscriptions()).errors).toBe(1);
+    expect(subscription.update).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ nextChargeAt: null }) }));
+    expect(payment.create).toHaveBeenCalledOnce();
+  });
   it('crea el pago antes de llamar a Wompi, para no dejar cobros huérfanos', async () => {
     subscription.findMany.mockResolvedValue([due]);
     billingMandate.findFirst.mockResolvedValue({ id: 'm1' });

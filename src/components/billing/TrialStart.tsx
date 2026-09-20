@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useId, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { cardInputError } from '@/lib/card-input';
 import { useRouter } from 'next/navigation';
 import { CreditCard, Lock, ShieldCheck } from 'lucide-react';
 import { Button, Callout, Field, Input } from '@tl/ui';
@@ -23,6 +24,7 @@ import { TrialSuccess, type TrialStarted } from './TrialSuccess';
 interface TrialOffer {
   eligible: true;
   trialDays: number;
+  verificationAmountInCents: number;
   firstChargeAt: string;
   amountInCents: number;
   usdCents: number;
@@ -46,33 +48,19 @@ interface Ineligible {
 
 const digits = (value: string) => value.replace(/\D/g, '');
 
-/** Luhn. Evita un viaje a Wompi por una errata evidente. */
-function luhnValid(number: string): boolean {
-  if (number.length < 13 || number.length > 19) return false;
-  let sum = 0;
-  let double = false;
-  for (let i = number.length - 1; i >= 0; i--) {
-    let digit = Number(number[i]);
-    if (double) {
-      digit *= 2;
-      if (digit > 9) digit -= 9;
-    }
-    sum += digit;
-    double = !double;
-  }
-  return sum % 10 === 0;
-}
-
 export function TrialStart({
   planId,
   planName,
   interval,
+  onBusy,
 }: {
   planId: 'STANDARD' | 'PREMIUM';
   planName: string;
   interval: 'MONTHLY' | 'YEARLY';
+  onBusy?: (busy: boolean) => void;
 }) {
   const router = useRouter();
+  const inFlight = useRef(false);
   const ids = {
     number: useId(),
     holder: useId(),
@@ -116,24 +104,18 @@ export function TrialStart({
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    if (!offer?.eligible || submitting) return;
+    if (!offer?.eligible || inFlight.current) return;
 
     const pan = digits(number);
     const [expMonth, expYear] = exp.split('/').map((part) => digits(part));
 
-    if (!luhnValid(pan)) return setError('Revisa el número de la tarjeta.');
-    if (!expMonth || !expYear || Number(expMonth) < 1 || Number(expMonth) > 12) {
-      return setError('La fecha de vencimiento no es válida. Usa MM/AA.');
-    }
-    if (digits(cvc).length < 3) return setError('El código de seguridad no es válido.');
-    // Wompi exige al menos cinco caracteres; sin esta comprobación el fallo
-    // llega como un rechazo genérico de tarjeta y despista.
-    if (holder.trim().length < 5) {
-      return setError('Escribe el nombre completo tal como aparece en la tarjeta.');
-    }
+    const invalid = cardInputError(pan, exp, cvc, holder);
+    if (invalid) return setError(invalid);
     if (!accepted) return setError('Necesitamos tu autorización explícita para el cobro posterior.');
 
+    inFlight.current = true;
     setSubmitting(true);
+    onBusy?.(true);
     setError(null);
 
     try {
@@ -189,12 +171,15 @@ export function TrialStart({
         firstChargeAt: result.data.firstChargeAt,
         usdCents: offer.usdCents,
         card: result.data.card,
+        verificationVoided: result.data.verificationVoided,
       });
       router.refresh();
     } catch {
-      setError('No pudimos completar la operación. No se ha realizado ningún cobro.');
+      setError('No pudimos confirmar el resultado. Revisa Facturación antes de reintentar: la validación puede seguir pendiente.');
     } finally {
+      inFlight.current = false;
       setSubmitting(false);
+      onBusy?.(false);
     }
   }
 
@@ -236,7 +221,7 @@ export function TrialStart({
             {offer.trialDays} días de {planName}, sin coste
           </p>
           <p className="mt-1.5 text-[length:var(--text-xs)] leading-relaxed text-[var(--color-muted)]">
-            Pedimos una tarjeta para poder continuar automáticamente si decides quedarte. Hoy no se cobra nada.
+            Pedimos una tarjeta para poder continuar automáticamente si decides quedarte. La membresía no se cobra hoy. Validamos la tarjeta con COP 1.500 y solicitamos su anulación.
           </p>
         </div>
 
@@ -245,14 +230,14 @@ export function TrialStart({
             <span className="trial-timeline-dot" aria-hidden="true" />
             <div>
               <strong>Hoy</strong>
-              <span>Empiezas a usar {planName} completo. Cargo de USD 0,00.</span>
+              <span>Wompi valida tu tarjeta antes de activar {planName}. Cargo de validación: COP {(offer.verificationAmountInCents / 100).toLocaleString('es-CO')}; solicitamos su anulación.</span>
             </div>
           </li>
           <li>
             <span className="trial-timeline-dot" aria-hidden="true" />
             <div>
               <strong>Día {offer.trialDays - 2}</strong>
-              <span>Te avisamos de que la prueba está por terminar, con tiempo para decidir.</span>
+              <span>Puedes revisar la fecha del primer cobro y cancelar desde Facturación.</span>
             </div>
           </li>
           <li data-charge="true">
@@ -272,7 +257,7 @@ export function TrialStart({
         </Button>
         <p className="flex items-start gap-1.5 text-[length:var(--text-2xs)] leading-relaxed text-[var(--color-subtle)]">
           <ShieldCheck size={13} className="mt-0.5 shrink-0" aria-hidden="true" />
-          Cancelar lleva un clic desde Facturación y no tiene penalización. Si cancelas antes del cobro, no pagas nada
+          Puedes cancelar la renovación desde Facturación sin penalización. Si cancelas antes del cobro, no pagas la membresía
           y conservas el acceso hasta que termine la prueba.
         </p>
       </div>
@@ -281,7 +266,7 @@ export function TrialStart({
 
   // Paso 2. Los datos de la tarjeta, ya con el trato aceptado.
   return (
-    <form onSubmit={submit} noValidate className="space-y-4">
+    <form onSubmit={submit} noValidate aria-busy={submitting} className="space-y-4">
       <button
         type="button"
         onClick={() => setStep('oferta')}
@@ -295,13 +280,13 @@ export function TrialStart({
           {offer.trialDays} días gratis de {planName}
         </p>
         <p className="mt-1 text-[length:var(--text-xs)] leading-relaxed text-[var(--color-muted)]">
-          Hoy no se te cobra nada. El <strong>{firstCharge}</strong> se cobrarán{' '}
+          Hoy se solicita una validación de COP {(offer.verificationAmountInCents / 100).toLocaleString('es-CO')} y su anulación. El banco determina cuándo libera el importe. El <strong>{firstCharge}</strong> se cobrarán{' '}
           <strong>USD {(offer.usdCents / 100).toFixed(2)}</strong>
           {offer.pricingMode === 'usd_trm'
             ? ', convertidos a pesos con la TRM vigente ese día'
             : ` (aproximadamente COP ${(offer.amountInCents / 100).toLocaleString('es-CO')})`}
           , y la suscripción seguirá de forma {interval === 'YEARLY' ? 'anual' : 'mensual'}. Puedes cancelar antes desde
-          Facturación y no se te cobrará nada.
+          Facturación para evitar el cobro de la membresía.
         </p>
       </div>
 
@@ -310,7 +295,7 @@ export function TrialStart({
           id={ids.number}
           inputMode="numeric"
           autoComplete="cc-number"
-          placeholder="4242 4242 4242 4242"
+          placeholder="Número de tu tarjeta"
           value={number}
           maxLength={23}
           onChange={(event) =>
@@ -397,7 +382,7 @@ export function TrialStart({
 
       <Button type="submit" size="lg" fullWidth loading={submitting} disabled={!accepted}>
         <CreditCard size={17} aria-hidden="true" />
-        Empezar los {offer.trialDays} días gratis
+        {submitting ? 'Validando con Wompi…' : `Validar tarjeta y probar ${offer.trialDays} días`}
       </Button>
 
       <p className="flex items-start gap-1.5 text-[length:var(--text-2xs)] leading-relaxed text-[var(--color-subtle)]">

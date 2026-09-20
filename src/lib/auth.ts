@@ -4,7 +4,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import { SignJWT, jwtVerify } from 'jose';
 import { db } from './db';
-import { resolveActivePlan } from './active-plan';
+import { resolveActivePlan, trialAccessVerified } from './active-plan';
 import type { Role, SessionUser, ExperienceLevel, Locale } from '@tl/types';
 
 /**
@@ -207,7 +207,7 @@ export async function getAuth(): Promise<AuthContext | null> {
       where: { id: parsed.sid },
       include: {
         user: {
-          include: { profile: true, subscription: true },
+          include: { profile: true, subscription: { include: { paymentSource: { include: { mandates: { select: { verificationTransactionId: true, verificationAmountCents: true } } } } } } },
         },
       },
     });
@@ -227,7 +227,7 @@ export async function getAuth(): Promise<AuthContext | null> {
   if (session.tokenHash !== hashToken(parsed.raw)) return null;
   if (session.user.status !== 'ACTIVE' || session.user.deletedAt) return null;
 
-  const activePlan = resolveActivePlan(session.user.subscription);
+  const activePlan = resolveActivePlan(trialAccessVerified(session.user.subscription, process.env.NODE_ENV === 'production') ? session.user.subscription : null);
 
   return {
     sessionId: session.id,

@@ -18,6 +18,7 @@ import './live-chart.css';
 import './simple-terminal.css';
 import './app-refinement.css';
 import './auth-refresh.css';
+import './checkout-refresh.css';
 
 const sans = localFont({
   src: '../../identidad visual/fuentes/instrument-sans-latin.woff2',
