@@ -44,30 +44,20 @@ const composite = new CompositeMarketDataProvider();
 registerProvider(composite);
 registry.set('real', composite);
 
-let activeId = process.env.MARKET_DATA_PROVIDER || 'synthetic';
+let activeId = process.env.MARKET_DATA_PROVIDER || 'yahoo';
 
 export function setActiveProvider(id: string): void {
   if (!registry.has(id)) throw new Error(`Proveedor de datos no registrado: ${id}`);
   activeId = id;
 }
 
-/**
- * Proveedor activo. Si el configurado no está disponible (por ejemplo, falta
- * la credencial), se degrada al motor determinístico y lo deja registrado,
- * de modo que la interfaz siga mostrando la procedencia correcta.
- */
+/** No automatic synthetic fallback. Fixtures are only selectable in tests. */
 export function marketData(): MarketDataProvider {
-  const p = registry.get(activeId);
-  if (p) return p;
-  if (process.env.REQUIRE_REAL_MARKET_DATA === 'true') {
+  const provider = registry.get(activeId);
+  if (!provider || (provider.synthetic && process.env.NODE_ENV !== 'test')) {
     throw new Error('La fuente real configurada no está disponible. Práctica temporalmente bloqueada.');
   }
-  if (process.env.NODE_ENV !== 'test') {
-    console.warn(
-      `[market-data] Proveedor "${activeId}" no registrado. Se usa el motor determinístico local.`,
-    );
-  }
-  return synthetic;
+  return provider;
 }
 
 export function listProviders(): MarketDataProvider[] {

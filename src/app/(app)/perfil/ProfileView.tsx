@@ -10,6 +10,7 @@ import { InstallApp } from '@/components/pwa/InstallApp';
 import { isStandalone } from '@/components/pwa/appMode';
 import type { SessionUser, ThemeId } from '@tl/types';
 import { ASSET_CLASS_LABEL } from '@tl/types';
+import { PLAN_ENTITLEMENTS } from '@tl/types/plans';
 import { apiFetch, ApiRequestError } from '@/lib/client-api';
 import { formatCurrency, formatDateTime, formatPaymentDescription } from '@/lib/format';
 import { AdPrivacyControl } from '@/components/ads/AdPrivacy';
@@ -332,7 +333,7 @@ export function ProfileView({
                         <div key={p} className="rounded-[var(--radius-md)] border border-[var(--color-border)] p-4">
                           <p className="text-[14px] font-semibold">{p === 'STANDARD' ? 'Plus' : 'Pro'}</p>
                           <p className="num mt-1 text-[13px] text-[var(--color-muted)]">
-                            USD {p === 'STANDARD' ? '14,99' : '29,99'} al mes
+                            USD {PLAN_ENTITLEMENTS[p].priceMonthlyUsd.toLocaleString('es-CO', { minimumFractionDigits: 2 })} al mes
                           </p>
                           <div className="mt-3 space-y-2">
                             <Button size="sm" fullWidth onClick={() => subscribe(p, 'MONTHLY')}>

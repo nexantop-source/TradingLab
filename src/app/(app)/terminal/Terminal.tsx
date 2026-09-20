@@ -209,7 +209,7 @@ function AdvancedTerminal(props: TerminalProps & { onSimple: () => void }) {
     }
   }
 
-  const marketClosed = props.marketStatus === 'CLOSED' || props.marketStatus === 'HOLIDAY';
+  const marketClosed = props.marketStatus !== 'OPEN';
 
   return (
     <div data-view={view} className="app-terminal-shell flex h-[calc(100dvh-3.5rem)] flex-col lg:h-[calc(100dvh-5.5rem)]">

@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { RegisterForm } from './RegisterForm';
 import { getAuth } from '@/lib/auth';
-import { VirtualBalance } from '@tl/ui/compliance';
 import { checkoutPath, checkoutQuery, onboardingPath, parseCheckoutIntent } from '@/lib/checkout-intent';
 
 export const metadata: Metadata = {
@@ -25,26 +24,24 @@ export default async function RegisterPage({
   }
 
   return (
-    <div className="auth-form-card rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-[var(--color-surface)] p-7 shadow-[var(--shadow-soft)]">
-      <p className="auth-form-eyebrow">TU CRITERIO EMPIEZA AQUÍ</p>
-      <h1 className="text-2xl font-semibold tracking-[-0.02em]">Crea tu cuenta DEMO</h1>
-      <p className="mt-2 text-[13px] leading-relaxed text-[var(--color-muted)]">
-        Sin tarjeta, sin depósitos y sin promesas de rentabilidad. Al terminar recibirás:
+    <div className="auth-form-card">
+      <p className="auth-form-eyebrow">EMPIEZA CON LO QUE SABES HOY</p>
+      <h1>Aprender a invertir<br />empieza contigo.</h1>
+      <p className="auth-form-intro">
+        Crea tu cuenta gratis y da tu primer paso. No necesitas experiencia ni tarjeta.
       </p>
 
       {intent && (
-        <p className="mt-4 rounded-[var(--radius-sm)] border border-[var(--color-blue)] bg-[var(--color-blue-soft)] px-3.5 py-3 text-[12px] leading-relaxed text-[var(--color-muted)]">
+        <p className="auth-intent-note">
           Seleccionaste <strong className="text-[var(--color-text)]">{intent.plan === 'STANDARD' ? 'Plus' : 'Pro'} {intent.interval === 'YEARLY' ? 'anual' : 'mensual'}</strong>. Crear la cuenta es gratis; verás el importe exacto en COP antes de abrir Wompi.
         </p>
       )}
 
-      <div className="mt-4 rounded-[var(--radius-md)] border border-[color-mix(in_srgb,var(--color-gold)_24%,transparent)] bg-[var(--color-gold-soft)] p-4">
-        <VirtualBalance cents={1_000_000} size="lg" />
-      </div>
+      <p className="auth-free-note">Explore incluido · USD 10.000 virtuales para practicar</p>
 
       <RegisterForm intent={intent} />
 
-      <p className="mt-6 border-t border-[var(--color-border)] pt-5 text-center text-[13px] text-[var(--color-muted)]">
+      <p className="auth-switch">
         ¿Ya tienes cuenta?{' '}
         <Link href={`/entrar${checkoutQuery(intent)}`} className="font-medium text-[var(--color-blue)] hover:underline">
           Inicia sesión

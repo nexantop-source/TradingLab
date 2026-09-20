@@ -14,24 +14,25 @@ export default async function LandingPage() {
   const auth = await getAuth();
   const provider = marketData();
   const symbols = ['SPY', 'BTCUSD', 'EURUSD'];
-  const samples = await Promise.all(symbols.map(async symbol => {
+  const sampleResults = await Promise.allSettled(symbols.map(async symbol => {
     const [quote, series] = await Promise.all([provider.getQuote(symbol), provider.getCandles({ symbol, timeframe: '1h', limit: 90 })]);
     const meta = SYMBOLS.find(s => s.symbol === symbol)!;
-    return { symbol, name: meta.name, price: quote.price, change: quote.changePercent, values: series.candles.map(c => c.c), synthetic: provider.synthetic, source: provider.label, precision: meta.precision };
+    return { symbol, name: meta.name, price: quote.price, change: quote.changePercent, values: series.candles.map(c => c.c), synthetic: quote.provenance.synthetic, source: quote.provenance.providerLabel, precision: meta.precision };
   }));
+  const samples = sampleResults.flatMap(result => result.status === 'fulfilled' && result.value.values.length >= 2 ? [result.value] : []);
   const destination = auth ? '/panel' : '/crear-cuenta';
   return <div className="marketing-page investment-landing">
     <MarketingHeader authenticated={Boolean(auth)} />
     <main id="contenido">
       <section className="invest-hero">
         <div className="invest-hero-art" aria-hidden="true"><InvestmentArtwork scene="horizon" priority /></div>
-        <div className="invest-hero-copy"><Link href="/mercados" className="invest-announcement"><span />UN NUEVO HORIZONTE PARA TRADINGLAB<ChevronRight size={14} /></Link>
-          <h1>Tu próximo paso.<br /><span>Con más criterio.</span></h1>
-          <p>ETFs, cripto, divisas y acciones. Un solo espacio para<br className="desktop-break" /> entender los mercados y practicar tus decisiones.</p>
+        <div className="invest-hero-copy"><Link href="/mercados" className="invest-announcement"><span />TU PRIMERA INVERSIÓN: APRENDER<ChevronRight size={14} /></Link>
+          <h1>Antes de invertir,<br /><span>aprende a decidir.</span></h1>
+          <p>¿Quieres poner tu dinero a trabajar? Empieza por entender<br className="desktop-break" /> cómo funcionan los mercados. Aprende, practica con saldo virtual<br className="desktop-break" /> y revisa tus decisiones con TradingLab.</p>
           <div className="invest-hero-actions"><Link href={destination} className="invest-button">Empieza gratis <ArrowRight size={17} /></Link><Link href="/mercados" className="invest-text-link">Explorar mercados <ArrowUpRight size={17} /></Link></div>
           <div className="invest-hero-note"><ShieldCheck size={14} />USD 10.000 virtuales · Sin tarjeta · Cuenta DEMO</div>
         </div>
-        <PlatformPreview samples={samples} />
+        {samples.length > 0 ? <PlatformPreview samples={samples} /> : <div className="invest-panel invest-section"><p>Las cotizaciones no están disponibles en este momento. Puedes empezar por la academia y volver a consultar los mercados más tarde.</p><Link href={destination} className="invest-text-link">Empezar a aprender <ArrowRight size={16} /></Link></div>}
         <div className="invest-market-strip">{[['ETFs', 'Diversifica tu perspectiva'], ['Cripto', 'Un mercado que no duerme'], ['Divisas', 'Conecta con el mundo'], ['Acciones', 'Entiende cada empresa']].map(([a,b]) => <Link href="/mercados" key={a}><strong>{a}</strong><span>{b}</span><ArrowUpRight size={15} /></Link>)}</div>
       </section>
       <section className="invest-section" id="producto"><div className="invest-section-heading"><span className="invest-eyebrow">MENOS FRICCIÓN. MÁS PERSPECTIVA.</span><h2>Todo conectado.<br /><span>Todo tiene sentido.</span></h2><p>De encontrar una idea a entender su resultado.<br />Cada herramienta está donde la necesitas.</p></div>

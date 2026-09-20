@@ -36,7 +36,7 @@ export function quoteIsTradable(
   now = Date.now(),
 ): boolean {
   const { synthetic, freshness, sourceTimestamp } = quote.provenance;
-  if (synthetic) return false;
+  if (synthetic || quote.provenance.marketStatus !== 'OPEN' || freshness === 'MARKET_CLOSED') return false;
   if (!Number.isFinite(sourceTimestamp)) return false;
   // Un reloj adelantado por delante del nuestro es tolerable; un precio fechado
   // dentro de un minuto no lo es.

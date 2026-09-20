@@ -89,7 +89,7 @@ export async function createSimulation(params: {
   }
 
   const quote = await provider.getQuote(meta.symbol);
-  if (process.env.REQUIRE_REAL_MARKET_DATA === 'true' && !quoteIsTradable(quote, provider)) {
+  if (!quoteIsTradable(quote, provider)) {
     // Un precio viejo y un precio inventado no son el mismo problema, y decirle
     // lo mismo a la persona en los dos casos la deja sin saber qué hacer.
     //
@@ -97,7 +97,7 @@ export async function createSimulation(params: {
     // mercado no está negociando: un festivo que nuestro calendario de sesiones
     // no conoce, una media sesión, un cierre imprevisto. Eso se dice tal cual,
     // con la fecha del último cruce, porque es accionable: se vuelve mañana.
-    const quieto = !quote.provenance.synthetic && Number.isFinite(quote.provenance.sourceTimestamp);
+    const quieto = quote.provenance.marketStatus !== 'OPEN';
     throw new SimulationError(
       quieto
         ? `${meta.name} no está negociando ahora mismo: el último cruce real fue el ${new Date(quote.provenance.sourceTimestamp).toLocaleString('es-CO', { dateStyle: 'long', timeStyle: 'short', timeZone: 'UTC' })} UTC. Puede ser un festivo o un cierre imprevisto del mercado.`
@@ -167,7 +167,7 @@ export async function createSimulation(params: {
     // mano. Tenía diez segundos, heredados de cuando la única fuente entregaba
     // un precio por segundo: dejaba pasar el euro en la primera comprobación y
     // lo rechazaba aquí, de forma intermitente, según lo que tardara la base.
-    if (process.env.REQUIRE_REAL_MARKET_DATA === 'true' && !quoteIsTradable(quote, provider)) {
+    if (!quoteIsTradable(quote, provider)) {
       throw new SimulationError('La cotización venció antes de abrir el ejercicio. Inténtalo con un precio actualizado.', 'INVALID_INPUT');
     }
     const dailyLimit = entitlements(plan).simulationsPerDay;
@@ -336,6 +336,9 @@ async function closeWithValidatedTrigger(params: CloseParams, checkedTrigger?: P
 
   let fraction = expiredPosition ? 1 : params.fraction ?? 1;
   let reason: CloseReason = expiredPosition ? 'EXPIRY' : params.reason ?? (fraction < 1 ? 'PARTIAL' : 'MANUAL');
+  if ((reason === 'MANUAL' || reason === 'PARTIAL') && !quoteIsTradable({ provenance }, provider)) {
+    throw new SimulationError('No se puede operar: el mercado está cerrado o no hay cotización real vigente.', 'MARKET_CLOSED');
+  }
   let effectiveExit = exitMid;
 
   // ── Modo hipótesis ───────────────────────────────────────────────────────

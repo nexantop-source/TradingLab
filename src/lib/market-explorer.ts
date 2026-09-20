@@ -49,6 +49,7 @@ export async function getExplorerAssets(): Promise<ExplorerAsset[]> {
       synthetic: false,
       source: quote.provenance.providerLabel,
       marketStatus: quote.provenance.marketStatus,
+      freshness: quote.provenance.freshness,
       timestamp: quote.provenance.sourceTimestamp,
     };
   });

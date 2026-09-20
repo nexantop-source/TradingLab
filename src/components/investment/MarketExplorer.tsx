@@ -1,11 +1,13 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowDownUp, ArrowUpRight, Search, Star, ChevronRight } from 'lucide-react';
-import { ASSET_CLASS_LABEL, type AssetClass, type MarketStatus, type PlanId } from '@tl/types';
+import { ASSET_CLASS_LABEL, type AssetClass, type DataFreshness, type MarketStatus, type PlanId } from '@tl/types';
 import { PLAN_ENTITLEMENTS, planAtLeast } from '@tl/types/plans';
 import { Modal } from '@tl/ui';
 import { apiFetch } from '@/lib/client-api';
+import { marketSnapshotLabel } from '@/lib/market-freshness';
 import { FluidControl } from './FluidControl';
 import { AssetIcon } from './AssetIcon';
 export { AssetIcon } from './AssetIcon';
@@ -19,10 +21,19 @@ export interface ExplorerAsset {
   /** Ticker que ve la persona. Difiere del interno cuando se cotiza por un fondo. */
   ticker?: string;
   marketStatus?: MarketStatus;
+  freshness?: DataFreshness;
 }
 export function MarketExplorer({ assets, authenticated = false, initialWatchlist = [], plan = 'FREE' }: {
   assets: ExplorerAsset[]; authenticated?: boolean; initialWatchlist?: string[]; plan?: PlanId;
 }) {
+  const router = useRouter();
+  const [refreshing, startRefresh] = useTransition();
+  const [now, setNow] = useState<number>();
+  useEffect(() => {
+    setNow(Date.now());
+    const timer = setInterval(() => setNow(Date.now()), 15_000);
+    return () => clearInterval(timer);
+  }, []);
   const [category, setCategory] = useState('ALL');
   const [query, setQuery] = useState('');
   // Abre por lo que la gente reconoce, no por orden alfabético: con
@@ -75,12 +86,12 @@ export function MarketExplorer({ assets, authenticated = false, initialWatchlist
   return <div className="invest-explorer">
     <div className="invest-explorer-tools"><label className="invest-search"><Search size={18} aria-hidden="true" /><input aria-label="Buscar activos" placeholder="Busca un ETF, una moneda o una empresa" value={query} onChange={e => { setQuery(e.target.value); setLimit(PAGE); }} />{query && <button type="button" onClick={() => setQuery('')} aria-label="Borrar búsqueda">×</button>}</label><label className="invest-sort"><ArrowDownUp size={16} /><select aria-label="Ordenar activos" value={sort} onChange={e => setSort(e.target.value)}><option value="popular">Más conocidos</option><option value="name">Símbolo A–Z</option><option value="change">Mayor variación</option><option value="plan">Incluidos en mi plan</option></select></label></div>
     <FluidControl label="Categoría de mercado" value={category} onChange={v => { setCategory(v); setLimit(PAGE); }} options={[{ value: 'ALL', label: 'Todos' }, { value: 'ETF', label: 'ETFs' }, { value: 'CRYPTO', label: 'Cripto' }, { value: 'FOREX', label: 'Divisas' }, { value: 'STOCK', label: 'Acciones' }, { value: 'INDEX', label: 'Índices' }, { value: 'COMMODITY', label: 'Materias primas' }, { value: 'SAVED', label: 'Mi lista' }]} />
-    <div className="invest-list-caption"><span>{filtered.length === assets.length ? `${assets.length} instrumentos` : `${filtered.length} de ${assets.length} instrumentos`}</span><span>{assets.every(a => a.synthetic) ? 'Precios simulados · no son cotizaciones reales' : 'Consulta la fuente de cada instrumento'}</span></div>
+    <div className="invest-list-caption"><span>{filtered.length === assets.length ? `${assets.length} instrumentos` : `${filtered.length} de ${assets.length} instrumentos`}</span><span>Cotizaciones al cargar · pueden ser diferidas</span><button type="button" className="invest-refresh-quotes" disabled={refreshing} onClick={() => startRefresh(() => router.refresh())}>{refreshing ? 'Actualizando…' : 'Actualizar precios'}</button></div>
     {message && <div className="invest-feedback" role="status">{message}{!authenticated && <Link href="/entrar"> Iniciar sesión →</Link>}<button onClick={() => setMessage('')} aria-label="Cerrar mensaje">×</button></div>}
     <div className="invest-market-table"><div className="invest-market-head"><span>Instrumento</span><span>Precio de referencia</span><span>Variación de la sesión</span><span>Mercado</span><span>Seguimiento</span></div>
       {filtered.slice(0, limit).map(a => <div className="invest-market-row" key={a.symbol}>
         <button className="invest-asset-name" onClick={() => setSelected(a)}><AssetIcon {...a} /><span><strong>{a.ticker ?? a.symbol}{!planAtLeast(plan, a.minPlan) && <em className="invest-plan-tag">{PLAN_ENTITLEMENTS[a.minPlan].name}</em>}</strong><small title={a.name}>{a.name}</small></span></button>
-        <span className="invest-quote">{a.price == null ? 'No disponible' : a.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: a.precision })}<small>{a.currency} · {a.synthetic ? 'DEMO' : a.source}</small></span>
+        <span className="invest-quote">{a.price == null ? 'No disponible' : a.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: a.precision })}<small>{a.currency} · {a.synthetic ? 'DEMO' : a.source}</small><small className="invest-freshness" title={`Último dato: ${new Date(a.timestamp).toISOString()}`}>{marketSnapshotLabel(a, now)}</small></span>
         <span className={`invest-change ${(a.change ?? 0) < 0 ? 'down' : ''}`}>{a.change == null ? '—' : `${a.change >= 0 ? '+' : ''}${a.change.toFixed(2)}%`}</span>
         <span className="invest-market-class">{ASSET_CLASS_LABEL[a.assetClass]}</span>
         <button className="invest-watch" disabled={busy !== null} onClick={() => toggleWatch(a)} aria-label={`${watchlist.includes(a.symbol) ? 'Quitar' : 'Seguir'} ${a.symbol}`} aria-pressed={watchlist.includes(a.symbol)}><Star size={18} fill={watchlist.includes(a.symbol) ? 'currentColor' : 'none'} /></button>

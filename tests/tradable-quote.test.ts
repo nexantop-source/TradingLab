@@ -40,6 +40,12 @@ const binance = { declaredDelaySeconds: 1 };
 const yahoo = { declaredDelaySeconds: 900 };
 
 describe('abrir un ejercicio contra una cotización', () => {
+  it('rechaza mercados cerrados aunque su último precio sea reciente', () => {
+    for (const marketStatus of ['CLOSED', 'PRE_OPEN', 'HOLIDAY'] as const) {
+      expect(quoteIsTradable(quote({ marketStatus, sourceTimestamp: AHORA }), yahoo, AHORA)).toBe(false);
+    }
+    expect(quoteIsTradable(quote({ freshness: 'MARKET_CLOSED' }), yahoo, AHORA)).toBe(false);
+  });
   it('acepta el precio por segundo de una fuente que lo promete', () => {
     expect(quoteIsTradable(quote({ sourceTimestamp: AHORA - 800 }), binance, AHORA)).toBe(true);
   });

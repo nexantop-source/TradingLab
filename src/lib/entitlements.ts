@@ -73,7 +73,7 @@ export async function checkSimulationLimit(userId: string, plan: PlanId): Promis
     message: allowed
       ? ''
       : `Has alcanzado el límite de ${e.simulationsPerDay} simulaciones diarias del plan ${e.name}. El límite se reinicia a las 00:00 UTC.`,
-    upgradeTo: allowed ? null : 'STANDARD',
+    upgradeTo: allowed ? null : plan === 'FREE' ? 'STANDARD' : 'PREMIUM',
   };
 }
 
@@ -102,7 +102,7 @@ export async function checkAILimit(userId: string, plan: PlanId): Promise<LimitC
       message: allowed
         ? ''
         : `Has usado los ${e.aiAnalysesPerMonth} análisis educativos mensuales del plan ${e.name}.`,
-      upgradeTo: allowed || plan === 'PREMIUM' ? null : 'PREMIUM',
+      upgradeTo: allowed || plan === 'PREMIUM' ? null : plan === 'FREE' ? 'STANDARD' : 'PREMIUM',
     };
   }
   return { allowed: true, used: 0, limit: null, message: '', upgradeTo: null };

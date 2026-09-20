@@ -17,6 +17,7 @@ import './welcome-scenes.css';
 import './live-chart.css';
 import './simple-terminal.css';
 import './app-refinement.css';
+import './auth-refresh.css';
 
 const sans = localFont({
   src: '../../identidad visual/fuentes/instrument-sans-latin.woff2',
@@ -69,7 +70,7 @@ export const metadata: Metadata = {
   authors: [{ name: 'TradingLab' }],
   openGraph: {
     type: 'website',
-    locale: 'es_ES',
+    locale: 'es_CO',
     siteName: 'TradingLab',
     title: 'Aprende a decidir antes de arriesgar',
     description: `${LEGAL_ENTITY_DESCRIPTOR}. Simulación con dinero virtual, academia estructurada y análisis educativo con IA.`,

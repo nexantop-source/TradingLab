@@ -65,11 +65,13 @@ export function HistoryChart({
   const host = useRef<HTMLDivElement>(null);
   const chart = useRef<IChartApi | null>(null);
   const series = useRef<ISeriesApi<'Line' | 'Area' | 'Candlestick'> | null>(null);
+  const fittedView = useRef<string | null>(null);
   const levelLines = useRef<ReturnType<ISeriesApi<'Line'>['createPriceLine']>[]>([]);
   const [candles, setCandles] = useState<Candle[]>([]);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [error, setError] = useState<string | null>(null);
   const [source, setSource] = useState<string | null>(null);
+  const [observation, setObservation] = useState<DataProvenance | null>(null);
   const range = historyRange(rangeId);
 
   useEffect(() => {
@@ -78,7 +80,9 @@ export function HistoryChart({
     setState('loading');
     setError(null);
     onSummary?.(null);
-    void (async () => {
+    let timer: ReturnType<typeof setTimeout>;
+    async function refresh() {
+      if (document.hidden) { timer = setTimeout(refresh, 30_000); return; }
       try {
         const data = await apiFetch<HistoryResponse>(
           `/api/market/candles?symbol=${encodeURIComponent(symbol)}&timeframe=${range.timeframe}&limit=${range.limit}`,
@@ -87,6 +91,7 @@ export function HistoryChart({
         if (cancelled) return;
         setCandles(data.candles);
         setSource(data.provenance?.providerLabel ?? null);
+        setObservation(data.provenance);
         setState('ready');
       } catch (failure) {
         if (cancelled || controller.signal.aborted) return;
@@ -96,10 +101,14 @@ export function HistoryChart({
             ? failure.message
             : 'No pudimos traer el historial de este instrumento.',
         );
+      } finally {
+        if (!cancelled) timer = setTimeout(refresh, 30_000);
       }
-    })();
+    }
+    void refresh();
     return () => {
       cancelled = true;
+      clearTimeout(timer);
       controller.abort();
     };
     // `onSummary` es una función del padre y cambiar de identidad no debe
@@ -178,6 +187,8 @@ export function HistoryChart({
     // Las velas semanales de una década comparten fecha, no hora: mostrar la
     // hora en el eje llenaría todo de "00:00" sin decir nada.
     instance.applyOptions({ timeScale: { timeVisible: range.timeframe !== '1d' && range.timeframe !== '1w' } });
+    const viewKey = `${symbol}|${rangeId}|${type}`;
+    const visible = fittedView.current === viewKey ? instance.timeScale().getVisibleLogicalRange() : null;
     const rising = candles[candles.length - 1].c >= candles[0].o;
     const color = rising ? UP : DOWN;
     if (type === 'candles') {
@@ -188,8 +199,10 @@ export function HistoryChart({
         type === 'area' ? { lineColor: color, topColor: `${color}44`, bottomColor: `${color}00` } : { color },
       );
     }
-    instance.timeScale().fitContent();
-  }, [candles, type, range.timeframe]);
+    if (visible) instance.timeScale().setVisibleLogicalRange(visible);
+    else instance.timeScale().fitContent();
+    fittedView.current = viewKey;
+  }, [candles, type, range.timeframe, symbol, rangeId]);
 
   useEffect(() => {
     const target = series.current;
@@ -229,6 +242,7 @@ export function HistoryChart({
         <p className="simple-market-source">
           {span} · {summary.points.toLocaleString('es-CO')} velas de {range.timeframe}
           {source ? ` · Fuente: ${source}` : ''}
+          {observation ? ` · ${observation.marketStatus !== 'OPEN' ? 'Sesión cerrada' : 'Puede tener retraso'} · Última vela: ${new Date(summary.to).toLocaleString('es-CO')}` : ''}
         </p>
       )}
       <span className="sr-only">

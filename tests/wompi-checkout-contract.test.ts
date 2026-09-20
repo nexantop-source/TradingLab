@@ -89,11 +89,11 @@ describe('Wompi checkout identity contract', () => {
     mocks.currentTrm.mockResolvedValue({ source: 'SFC_TRM', rateHundredths: 312608, validFrom: day, validThrough: day });
     const result = await new WompiBillingProvider().createCheckout(params);
     if (result.status !== 'REDIRECT') throw new Error('Expected redirect');
-    expect(result.amountInCents).toBe(4685994);
-    expect(result.exchangeQuote?.usdAmountInCents).toBe(1499);
+    expect(result.amountInCents).toBe(1872522);
+    expect(result.exchangeQuote?.usdAmountInCents).toBe(599);
     const persisted = await mocks.paymentCreate.mock.results[0].value;
     expect(readExchangeQuote(persisted.description, persisted.amountCents)).toEqual(result.exchangeQuote);
-    expect(new URL(result.redirectUrl).searchParams.get('amount-in-cents')).toBe('4685994');
+    expect(new URL(result.redirectUrl).searchParams.get('amount-in-cents')).toBe('1872522');
     // Later retry works without asking for a new rate, even during an outage.
     mocks.paymentFind.mockResolvedValue(persisted);
     mocks.currentTrm.mockRejectedValue(new Error('TRM offline'));

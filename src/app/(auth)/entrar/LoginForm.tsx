@@ -5,27 +5,39 @@ import { Button, Field, Input, Callout } from '@tl/ui';
 import { PasswordInput } from '@/components/pwa/PasswordInput';
 import { apiFetch, ApiRequestError } from '@/lib/client-api';
 import { postLoginPath, type CheckoutIntent } from '@/lib/checkout-intent';
+import { loginSchema } from '@/lib/validation';
 
 export function LoginForm({ intent = null }: { intent?: CheckoutIntent | null }) {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
+  const submitting = React.useRef(false);
+  const formRef = React.useRef<HTMLFormElement>(null);
+
+  React.useEffect(() => {
+    const name = Object.keys(fieldErrors)[0];
+    if (name) (formRef.current?.elements.namedItem(name) as HTMLElement | null)?.focus();
+  }, [fieldErrors]);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setLoading(true);
+    if (submitting.current) return;
     setError(null);
     setFieldErrors({});
 
     const data = new FormData(e.currentTarget);
+    const parsed = loginSchema.safeParse({ email: data.get('email'), password: data.get('password') });
+    if (!parsed.success) {
+      setFieldErrors(Object.fromEntries(Object.entries(parsed.error.flatten().fieldErrors).map(([name, messages]) => [name, messages?.[0] ?? 'Revisa este campo.'])));
+      return;
+    }
+    submitting.current = true;
+    setLoading(true);
 
     try {
       const result = await apiFetch<{ next: string }>('/api/auth/login', {
         method: 'POST',
-        json: {
-          email: String(data.get('email') ?? ''),
-          password: String(data.get('password') ?? ''),
-        },
+        json: parsed.data,
       });
       // A new session needs a fresh document, not a race between an anonymous
       // Router Cache navigation and refresh (notably on installed iOS PWAs).
@@ -38,11 +50,12 @@ export function LoginForm({ intent = null }: { intent?: CheckoutIntent | null })
         setError('No hemos podido conectar con el servidor. Comprueba tu conexión.');
       }
       setLoading(false);
+      submitting.current = false;
     }
   }
 
   return (
-    <form onSubmit={onSubmit} className="mt-6 space-y-4" noValidate>
+    <form ref={formRef} onSubmit={onSubmit} className="auth-form" noValidate aria-busy={loading}>
       {error && (
         <Callout tone="danger" title="No se ha podido iniciar sesión">
           {error}
@@ -68,12 +81,11 @@ export function LoginForm({ intent = null }: { intent?: CheckoutIntent | null })
       </Field>
 
       <Button type="submit" fullWidth size="lg" loading={loading}>
-        Entrar
+        Iniciar sesión
       </Button>
 
       <p className="text-center text-[12px] text-[var(--color-subtle)]">
-        Al iniciar sesión aceptas los términos vigentes y confirmas que entiendes que TradingLab es una
-        plataforma educativa y de simulación.
+        Tu cuenta, tus lecciones y tus prácticas en un solo lugar.
       </p>
     </form>
   );

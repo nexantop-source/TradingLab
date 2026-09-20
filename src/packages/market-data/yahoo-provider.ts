@@ -122,7 +122,8 @@ export function yahooTicker(symbol: string): string | null {
       return meta.upstreamSymbol ?? meta.symbol;
     case 'CRYPTO': {
       // Respaldo por si Binance no responde. `BTCUSD` → `BTC-USD`.
-      const base = meta.symbol.replace(/USDT?$/, '');
+      if (meta.symbol.endsWith('USDT')) return null; // USD is not USDT.
+      const base = meta.symbol.replace(/USD$/, '');
       return base && base !== meta.symbol ? `${base}-USD` : null;
     }
     default:
@@ -260,14 +261,18 @@ function groupBars(bars: YahooBar[], factor: number): YahooBar[] {
 
 function snapshotFrom(meta: Record<string, unknown>, bars: YahooBar[]): YahooSnapshot | null {
   const last = bars[bars.length - 1];
-  const price = positive(meta.regularMarketPrice) ? (meta.regularMarketPrice as number) : last?.c;
-  if (!positive(price)) return null;
+  const stamp = Number(meta.regularMarketTime);
+  const hasDatedQuote = positive(meta.regularMarketPrice) && Number.isFinite(stamp) && stamp > 0;
+  // Price and timestamp must describe the same observation. Reception time is
+  // never a substitute for an unknown market timestamp.
+  const price = hasDatedQuote ? (meta.regularMarketPrice as number) : last?.c;
+  const sourceTimestamp = hasDatedQuote ? stamp * 1000 : last?.t;
+  if (!positive(price) || !positive(sourceTimestamp)) return null;
   const previousClose = positive(meta.chartPreviousClose)
     ? (meta.chartPreviousClose as number)
     : positive(meta.previousClose)
       ? (meta.previousClose as number)
       : price;
-  const stamp = Number(meta.regularMarketTime);
   return {
     price,
     previousClose,
@@ -276,7 +281,7 @@ function snapshotFrom(meta: Record<string, unknown>, bars: YahooBar[]): YahooSna
     open: positive(last?.o) ? last!.o : price,
     volume: typeof meta.regularMarketVolume === 'number' && meta.regularMarketVolume >= 0 ? meta.regularMarketVolume : 0,
     currency: typeof meta.currency === 'string' ? meta.currency : 'USD',
-    sourceTimestamp: Number.isFinite(stamp) && stamp > 0 ? stamp * 1000 : Date.now(),
+    sourceTimestamp,
     fetchedAt: Date.now(),
   };
 }
@@ -335,16 +340,19 @@ async function primeFromSpark(tickers: string[]): Promise<void> {
         const now = Date.now();
         for (const ticker of chunk) {
           const entry = payload?.[ticker];
-          const closes = (entry?.close ?? []).filter(positive);
-          const price = closes[closes.length - 1];
+          const observations = (entry?.close ?? []).flatMap((close, index) => {
+            const timestamp = entry?.timestamp?.[index];
+            return positive(close) && positive(timestamp) ? [{ close, timestamp }] : [];
+          });
+          const closes = observations.map(o => o.close);
+          const last = observations[observations.length - 1];
+          const price = last?.close;
           if (!positive(price)) continue;
           const previousClose = positive(entry?.previousClose)
             ? entry!.previousClose!
             : positive(entry?.chartPreviousClose)
               ? entry!.chartPreviousClose!
               : price;
-          const stamps = entry?.timestamp ?? [];
-          const stamp = stamps[stamps.length - 1];
           quoteCache.set(ticker, {
             price,
             previousClose,
@@ -357,7 +365,7 @@ async function primeFromSpark(tickers: string[]): Promise<void> {
             open: closes[0] ?? price,
             volume: 0,
             currency: 'USD',
-            sourceTimestamp: Number.isFinite(stamp) && stamp > 0 ? stamp * 1000 : now,
+            sourceTimestamp: last.timestamp * 1000,
             fetchedAt: now,
           });
         }
@@ -412,13 +420,13 @@ export class YahooMarketDataProvider implements MarketDataProvider {
 
   private toQuote(symbol: string, entry: YahooSnapshot): Quote {
     const meta = getSymbol(symbol);
-    const spread = (meta?.spreadBps ?? 2) / 20000;
+    // Yahoo snapshots do not provide an order book. Do not invent bid/ask.
     const change = entry.price - entry.previousClose;
     return {
       symbol,
       price: entry.price,
-      bid: entry.price * (1 - spread),
-      ask: entry.price * (1 + spread),
+      bid: entry.price,
+      ask: entry.price,
       change,
       changePercent: entry.previousClose > 0 ? (change / entry.previousClose) * 100 : 0,
       dayHigh: Math.max(entry.dayHigh, entry.price),

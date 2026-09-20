@@ -18,7 +18,7 @@ export const dynamic = 'force-dynamic';
  * sin entrar a la aplicación y sin credenciales, si hay que arreglar algo.
  */
 
-/** Un representante por familia. Si el representante cae, la familia cayó. */
+/** Representative probes only: success does not certify the rest of a family. */
 const PROBES: Array<{ symbol: string; family: string }> = [
   { symbol: 'BTCUSD', family: 'CRYPTO' },
   { symbol: 'AAPL', family: 'STOCK' },
@@ -41,7 +41,7 @@ export async function GET() {
         PROBES.map(async ({ symbol, family }) => {
           try {
             const quote = await marketData().getQuote(symbol);
-            const { synthetic, freshness, providerLabel, sourceTimestamp } = quote.provenance;
+            const { synthetic, freshness, marketStatus, providerLabel, sourceTimestamp } = quote.provenance;
             return {
               family,
               symbol,
@@ -49,6 +49,7 @@ export async function GET() {
               // un cierre de viernes es tan real como un precio de ahora.
               real: !synthetic,
               freshness,
+              marketStatus,
               source: providerLabel,
               ageSeconds: Math.max(0, Math.round((Date.now() - sourceTimestamp) / 1000)),
             };
@@ -61,9 +62,10 @@ export async function GET() {
       return {
         provider,
         realOnly,
-        // Verde solo si **todas** las familias traen precio real. Una sola en
-        // rojo ya significa que a alguien le falta la mitad del catálogo.
+        scope: 'representative_symbols_only',
+        // Real-source availability and realtime freshness are separate facts.
         healthy: families.every((f) => f.real),
+        allProbesRealtime: families.every(f => f.real && f.freshness === 'REALTIME' && f.marketStatus === 'OPEN' && f.ageSeconds != null && f.ageSeconds <= 30),
         families,
         // Se conserva la sonda original de los pares en vivo: es la que vigila
         // el pulso por segundo del que depende la terminal de cripto.

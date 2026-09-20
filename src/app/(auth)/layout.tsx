@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { Logo } from '@/components/Logo';
-import { MarketArtwork } from '@/components/pwa/MarketArtwork';
-import { ServiceNature, SimulationPill } from '@tl/ui/compliance';
+import { ArrowLeft, BookOpen, ScanLine, NotebookPen } from 'lucide-react';
 
 /**
  * Iniciar sesión y crear cuenta redirigen si ya hay sesión, así que su
@@ -11,34 +10,40 @@ export const dynamic = 'force-dynamic';
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="auth-shell relative min-h-dvh">
-      <div aria-hidden="true" className="mesh-aurora absolute inset-0 -z-10 opacity-60" />
-
-      <header className="px-5 py-6">
+    <div className="auth-shell auth-refresh">
+      <header className="auth-header">
         <Link href="/" aria-label="TradingLab, ir al inicio">
           <Logo size="sm" />
         </Link>
+        <Link href="/" className="auth-back-home"><ArrowLeft size={15} aria-hidden="true" /> Volver al inicio</Link>
       </header>
 
       <main id="contenido" className="auth-app-layout">
-        <aside className="auth-art-panel">
-          <span className="ios-eyebrow">APRENDE PRIMERO. DECIDE MEJOR.</span>
-          <h2>Un espacio para<br />tu próximo paso.</h2>
-          <MarketArtwork compact />
-          <p>Mercados, lecciones y práctica.<br />Todo empieza con tu curiosidad.</p>
-          <Link href="/app" className="glass-link">Conoce la app →</Link>
+        <aside className="auth-art-panel" aria-label="Aprender con TradingLab">
+          <span className="auth-story-eyebrow">TU PRIMERA INVERSIÓN: APRENDER</span>
+          <h2>Antes de invertir,<br /><em>aprende a decidir.</em></h2>
+          <p className="auth-story-intro">Dale una base a tus decisiones. Entiende los mercados y practica con dinero virtual, paso a paso.</p>
+          <div className="auth-practice-card">
+            <span className="auth-practice-label"><ScanLine size={16} aria-hidden="true" /> UNA PREGUNTA PARA EMPEZAR</span>
+            <p>¿Qué deberías entender<br />antes de invertir tu dinero?</p>
+            <div className="auth-concept-list"><span>Tu objetivo</span><span>El plazo</span><span>El riesgo</span></div>
+            <small>Empieza por el porqué. Después, practica el cómo.</small>
+          </div>
+          <ol className="auth-learning-path">
+            <li><BookOpen size={19} aria-hidden="true" /><div><strong>Entiende</strong><span>Conceptos explicados con claridad.</span></div></li>
+            <li><ScanLine size={19} aria-hidden="true" /><div><strong>Practica</strong><span>Ejercicios con saldo virtual.</span></div></li>
+            <li><NotebookPen size={19} aria-hidden="true" /><div><strong>Reflexiona</strong><span>Un diario para revisar tus decisiones.</span></div></li>
+          </ol>
+          <span className="auth-story-footer">Educación financiera · Hecho en Colombia</span>
         </aside>
         <section className="auth-form-panel" aria-label="Acceso a TradingLab">
-          <div className="mb-6 flex justify-center">
-            <SimulationPill />
-          </div>
           {children}
         </section>
       </main>
 
-      <footer className="border-t border-[var(--color-border)] px-5 py-8">
-        <div className="mx-auto max-w-2xl space-y-3 text-center">
-          <ServiceNature />
+      <footer className="auth-footer">
+        <div>
+          <p>TradingLab es una plataforma educativa. Las operaciones y el saldo son virtuales. No recibe capital de inversión ni permite retiros. Aprender no garantiza rentabilidad.</p>
           <nav aria-label="Enlaces legales" className="flex flex-wrap justify-center gap-x-4 gap-y-1">
             {[
               { href: '/legal/naturaleza-del-servicio', label: 'Naturaleza del servicio' },
