@@ -39,3 +39,13 @@ La verificación corresponde a una cuenta y una fuente de pago; no es una compro
 `node --conditions=react-server --import tsx scripts/qa-trial-sandbox.mts`
 
 El segundo comando requiere `.env.wompi.sandbox.local` y se niega a ejecutar otro ambiente. `scripts/qa-checkout-preview.mjs` levanta una vista aislada en http://localhost:3020/entrar, con cuenta QA y precios COP de ejemplo; no modifica la base habitual. Sus importes fijos son fixtures de QA, no una TRM de producción.
+
+## Verificación posterior en producción
+
+20 de septiembre de 2026, Bogotá: Firebase confirmó rollout SUCCEEDED, build READY y 100% del tráfico en 3b2663613ea5af5afb8369e065cfe64da5a6a9ce. Cloud Run tiene BILLING_PROVIDER=wompi, ambiente production y origen HTTPS correcto. Se comprobaron las versiones de secretos efectivamente referenciadas por la revisión: las cuatro credenciales Wompi tienen prefijo de producción. No fue necesario rotarlas.
+
+El comercio de Wompi production respondió 200 y entregó los tokens de aceptación requeridos. Precios, login, registro y receptor devolvieron 200. El receptor rechazó una firma inválida con 401 e ignoró correctamente una notificación firmada sin transacción con 200. Esta comprobación fue enviada por el script QA, no por el panel de Wompi: no demuestra la entrega de un pago real desde Wompi.
+
+Se detectaron dos programadores de cobros activos. Se pausó tradinglab-cobros-vencidos y se conservó tradinglab-charge-due, horario, con credencial coincidente y última ejecución sin error. Se alineó billing-scheduler.mjs con el nombre canónico. La segunda ejecución de qa-wompi-production.mjs pasó todas las comprobaciones sin crear usuarios, tarjetas, transacciones ni cargos.
+
+Solo permanece pendiente la operación real controlada por el titular, su notificación efectiva desde Wompi y la liquidación bancaria. No se dispone de una tarjeta del titular ni se ha ejecutado un cargo en su nombre.

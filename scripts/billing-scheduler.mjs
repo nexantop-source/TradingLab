@@ -23,7 +23,7 @@ import { join } from 'node:path';
 
 const PROJECT = process.env.GCP_PROJECT ?? 'nexant-87204';
 const LOCATION = process.env.GCP_REGION ?? 'us-east4';
-const JOB = 'tradinglab-cobros-vencidos';
+const JOB = 'tradinglab-charge-due';
 const SECRET = process.env.DISPATCH_SECRET_NAME ?? 'TRADINGLAB_PUSH_DISPATCH_SECRET';
 const APP = process.env.APP_URL ?? 'https://tradinglab--nexant-87204.us-east4.hosted.app';
 
@@ -63,10 +63,8 @@ async function dispatchSecret() {
 /**
  * La definición del trabajo.
  *
- * `13:20` hora de Bogotá: después de la apertura de los mercados y no en punto,
- * que es cuando programa todo el mundo. Una vez al día basta porque el
- * vencimiento se decide por fecha; ejecutar más a menudo no adelanta ningún
- * cobro y solo multiplica las ocasiones de cobrar dos veces si algo va mal.
+ * Usa el mismo trabajo horario que setup-schedulers.mjs para evitar duplicados.
+ * El antiguo tradinglab-cobros-vencidos queda pausado.
  *
  * Los reintentos esperan cada vez más porque un tiempo de espera agotado es
  * ambiguo -la petición salió, la respuesta se perdió- y el servicio ya marca la
@@ -77,8 +75,8 @@ function definition(secret) {
   return {
     name: `projects/${PROJECT}/locations/${LOCATION}/jobs/${JOB}`,
     description: 'Cobra las suscripciones cuya prueba gratuita ha vencido. Ver docs/BILLING-SCHEDULER.md',
-    schedule: '20 13 * * *',
-    timeZone: 'America/Bogota',
+    schedule: '5 * * * *',
+    timeZone: 'Etc/UTC',
     attemptDeadline: '540s',
     retryConfig: {
       retryCount: 3,

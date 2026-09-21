@@ -83,7 +83,7 @@ env:
 
   # ── Facturación y publicidad ───────────────────────────────────────────────
   - variable: BILLING_PROVIDER
-    # Receptores verificados; nuevas compras por periodo, sin débito recurrente.
+    # Pago único o prueba con mandato explícito y renovación.
     value: wompi
     availability:
       - RUNTIME
@@ -120,9 +120,8 @@ env:
     availability:
       - RUNTIME
 
-  # Cobrar una tarjeta guardada -la prueba gratuita al vencer- es la unica
-  # operacion que necesita la llave privada. El Checkout Web nunca la uso, por
-  # eso no estaba declarada.
+  # Llave privada solo en servidor: consulta de transacciones, validación
+  # de tarjeta y cobros recurrentes con mandato.
   - variable: WOMPI_PRIVATE_KEY
     secret: TRADINGLAB_WOMPI_PRIVATE_KEY
     availability:
