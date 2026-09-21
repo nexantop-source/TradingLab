@@ -32,7 +32,8 @@ export function DataProvenanceBadge({
   compact?: boolean;
   className?: string;
 }) {
-  const meta = FRESHNESS_META[provenance.freshness];
+  const freshness = provenance.marketStatus !== 'OPEN' ? 'MARKET_CLOSED' : provenance.freshness;
+  const meta = FRESHNESS_META[freshness];
   const [open, setOpen] = React.useState(false);
   const latency =
     provenance.latencyMs < 1000
@@ -54,11 +55,11 @@ export function DataProvenanceBadge({
         )}
       >
         <span
-          className={cn('size-1.5 rounded-full', meta.dot, provenance.freshness === 'REALTIME' && 'animate-pulse-dot')}
+          className={cn('size-1.5 rounded-full', meta.dot, freshness === 'REALTIME' && 'animate-pulse-dot')}
           aria-hidden="true"
         />
         {meta.label}
-        {!compact && <span className="num text-[var(--color-subtle)]">· {latency}</span>}
+        {!compact && <span className="num text-[var(--color-subtle)]">· {freshness === 'MARKET_CLOSED' ? 'Última referencia' : latency}</span>}
       </button>
 
       {open && (

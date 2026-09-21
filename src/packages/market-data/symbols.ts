@@ -7,6 +7,7 @@ import { COMMODITY_SEEDS, CRYPTO_SEEDS, ETF_SEEDS, FOREX_SEEDS, INDEX_SEEDS, STO
  * lleva horas quieto, no para decidir una ejecución.
  */
 const SESSIONS: Record<string, MarketSession> = {
+  CO_SPOT: { calendar: 'CO_SPOT', alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 13 * 60, closeMinuteUtc: 18 * 60, label: 'Lunes a viernes, 08:00 a 13:00 Colombia, excepto festivos; referencia spot local' },
   CRYPTO: { alwaysOpen: true, days: [0, 1, 2, 3, 4, 5, 6], openMinuteUtc: 0, closeMinuteUtc: 1440, label: '24 h, todos los días' },
   FOREX: { calendar: 'FOREX_NY', alwaysOpen: false, days: [0, 1, 2, 3, 4, 5], openMinuteUtc: 0, closeMinuteUtc: 1440,
     weekly: { openMinuteUtc: 22 * 60, closeMinuteUtc: 5 * 1440 + 22 * 60 },
@@ -201,7 +202,7 @@ for (const [symbol, basePrice, minPlan] of FOREX_SEEDS) {
     name: `${CURRENCY_NAME[base] ?? base} / ${CURRENCY_NAME[quote] ?? quote}`,
     assetClass: 'FOREX', quoteCurrency: quote, tickSize: 10 ** -precision,
     spreadBps: base === 'USD' || quote === 'USD' ? 2 : 4,
-    session: SESSIONS.FOREX,
+    session: symbol === 'USDCOP' ? SESSIONS.CO_SPOT : SESSIONS.FOREX,
     educationalRisk: base === 'USD' && !['EUR', 'GBP', 'JPY', 'CHF', 'CAD', 'AUD', 'NZD'].includes(quote) ? 4 : 3,
     description: DESCRIPTIONS[symbol]
       ?? `Cuántos ${(CURRENCY_NAME[quote] ?? quote).toLowerCase()} cuesta un ${(CURRENCY_NAME[base] ?? base).toLowerCase()}. Un tipo de cambio se mueve por la diferencia entre dos economías, nunca por una sola.`,

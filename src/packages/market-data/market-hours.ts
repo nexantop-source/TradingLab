@@ -1,11 +1,13 @@
 import type { MarketStatus, MarketSession } from '@tl/types';
 import { newYorkTime, newYorkInstant, usEquityHoliday, usEquityCloseMinute } from './us-calendar';
+import { colombiaHoliday } from './colombia-calendar';
 
 /** Session calendar: US cash holidays/early closes and New York DST; reference sessions elsewhere. */
 export function marketStatusFor(session: MarketSession, at: number): MarketStatus {
   if (session.alwaysOpen) return 'OPEN';
   if (!Number.isFinite(at)) return 'CLOSED';
-  if (session.calendar) {
+  if (session.calendar === 'CO_SPOT' && colombiaHoliday(at)) return 'HOLIDAY';
+  if (session.calendar === 'US_EQUITY' || session.calendar === 'FOREX_NY') {
     const local = newYorkTime(at);
     if (session.calendar === 'US_EQUITY') {
       if (local.day === 0 || local.day === 6) return 'CLOSED';
@@ -68,7 +70,7 @@ export function observedMarketStatus(
 export function lastOpenTimestamp(session: MarketSession, at: number): number {
   if (session.alwaysOpen) return at;
   if (marketStatusFor(session, at) === 'OPEN') return at;
-  if (session.calendar) {
+  if (session.calendar === 'US_EQUITY' || session.calendar === 'FOREX_NY') {
     const { date } = newYorkTime(at);
     for (let offset = 0; offset < 15; offset++) {
       const candidate = date - offset * 86400000;

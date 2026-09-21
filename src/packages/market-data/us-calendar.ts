@@ -16,7 +16,7 @@ const nth = (y: number, m: number, weekday: number, n: number) => {
   return first + ((weekday - new Date(first).getUTCDay() + 7) % 7 + 7 * (n - 1)) * day;
 };
 const observed = (date: number) => date + (new Date(date).getUTCDay() === 6 ? -day : new Date(date).getUTCDay() === 0 ? day : 0);
-function easter(y: number) {
+export function easter(y: number) {
   const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451);
   const v=h+l-7*m+114; return Date.UTC(y,Math.floor(v/31)-1,v%31+1);
 }

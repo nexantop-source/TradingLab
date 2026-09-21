@@ -21,3 +21,11 @@ Consulta real a Yahoo el 21/09/2026 a las 01:29 UTC (domingo por la noche en Col
 - Futuros, calendarios por producto: https://www.cmegroup.com/trading-hours.html
 
 El calendario implementado de feriados y medias sesiones corresponde a bolsa estadounidense al contado, no a todos los contratos CME/ICE ni bolsas extranjeras. Sus cierres especiales se restringen adicionalmente con la sesión entregada por Yahoo y la antigüedad del dato; si la fuente no comunica la sesión, sigue siendo una referencia, no una certificación de su calendario completo. Cierres extraordinarios futuros deben incorporarse cuando los anuncie la bolsa. La API de Yahoo no constituye un calendario oficial de todas las plazas.
+
+## USD/COP y etiquetas compartidas
+
+Se corrigió USD/COP para usar la sesión de referencia spot local 08:00–13:00 Colombia, con festivos colombianos y fin de semana. Esta ventana no representa el mercado offshore NDF ni los horarios de registro. Fuentes: https://icap.com.co/?download_id=22635&sdm_process_download=1 y https://www1.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=4954 .
+
+Las etiquetas compartidas priorizan CLOSED/HOLIDAY/PRE_OPEN sobre DELAYED y muestran «Mercado cerrado · última referencia». El detalle conserva la fecha real del precio. Una sesión abierta con datos diferidos conserva su advertencia: retraso no significa cierre.
+
+595 pruebas aprobadas en 51 archivos, incluyendo render de etiquetas contradictorias, horario y festivos colombianos, bloqueo de una cotización OPEN guardada fuera de sesión y respuesta Yahoo reciente durante domingo. Consulta real posterior: USDCOP CLOSED/MARKET_CLOSED, AAPL CLOSED/MARKET_CLOSED, EURUSD y BTCUSD OPEN/REALTIME; ningún dato sintético ni operación creada.
