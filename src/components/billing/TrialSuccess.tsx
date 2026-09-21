@@ -89,8 +89,7 @@ export function TrialSuccess({ started }: { started: TrialStarted }) {
       </div>
 
       <p className="trial-success-foot">
-        Te avisaremos antes del cobro. Puedes cancelar cuando quieras desde Facturación y conservarás el acceso hasta
-        que termine la prueba.
+        Consulta la próxima fecha de cobro y gestiona tu renovación desde Facturación.
       </p>
     </div>
   );

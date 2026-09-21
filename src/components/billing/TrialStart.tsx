@@ -221,7 +221,7 @@ export function TrialStart({
             {offer.trialDays} días de {planName}, sin coste
           </p>
           <p className="mt-1.5 text-[length:var(--text-xs)] leading-relaxed text-[var(--color-muted)]">
-            Pedimos una tarjeta para poder continuar automáticamente si decides quedarte. La membresía no se cobra hoy. Validamos la tarjeta con COP 1.500 y solicitamos su anulación.
+            Vincula tu tarjeta para continuar con tu plan al terminar la prueba. La membresía no se cobra hoy. Validamos la tarjeta con COP 1.500 y solicitamos su anulación.
           </p>
         </div>
 
@@ -246,7 +246,7 @@ export function TrialStart({
               <strong>{firstCharge}</strong>
               <span>
                 Primer cobro de USD {(offer.usdCents / 100).toFixed(2)}
-                {offer.pricingMode === 'usd_trm' ? ', en pesos con la TRM de ese día' : ''}, salvo que canceles antes.
+                {offer.pricingMode === 'usd_trm' ? ', en pesos con la TRM de ese día' : ''}.
               </span>
             </div>
           </li>
@@ -257,8 +257,7 @@ export function TrialStart({
         </Button>
         <p className="flex items-start gap-1.5 text-[length:var(--text-2xs)] leading-relaxed text-[var(--color-subtle)]">
           <ShieldCheck size={13} className="mt-0.5 shrink-0" aria-hidden="true" />
-          Puedes cancelar la renovación desde Facturación sin penalización. Si cancelas antes del cobro, no pagas la membresía
-          y conservas el acceso hasta que termine la prueba.
+          Consulta las fechas de tu plan y gestiona tu suscripción desde Facturación.
         </p>
       </div>
     );
@@ -285,8 +284,7 @@ export function TrialStart({
           {offer.pricingMode === 'usd_trm'
             ? ', convertidos a pesos con la TRM vigente ese día'
             : ` (aproximadamente COP ${(offer.amountInCents / 100).toLocaleString('es-CO')})`}
-          , y la suscripción seguirá de forma {interval === 'YEARLY' ? 'anual' : 'mensual'}. Puedes cancelar antes desde
-          Facturación para evitar el cobro de la membresía.
+          , y la suscripción seguirá de forma {interval === 'YEARLY' ? 'anual' : 'mensual'}. Gestiona tu renovación desde Facturación.
         </p>
       </div>
 

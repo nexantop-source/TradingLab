@@ -65,7 +65,7 @@ export function CheckoutView({ intent, plan, existingSubscription, trial }: {
         <h2>¿Cómo quieres empezar?</h2>
         <div className="checkout-options" role="group" aria-label="Modalidad de compra">
           <button type="button" className="checkout-option" aria-pressed={mode === 'payment'} disabled={loading} onClick={() => setMode('payment')}><span>Comprar {yearly ? 'un año' : 'un mes'}</span><small>Pago único con Wompi. Sin renovación automática.</small></button>
-          {trial && <button type="button" className="checkout-option" aria-pressed={mode === 'trial'} disabled={loading} onClick={() => setMode('trial')}><span>Probar {trial.days} días</span><small>Tarjeta validada y renovación {yearly ? 'anual' : 'mensual'}. Puedes cancelar.</small></button>}
+          {trial && <button type="button" className="checkout-option" aria-pressed={mode === 'trial'} disabled={loading} onClick={() => setMode('trial')}><span>Probar {trial.days} días</span><small>Tarjeta validada y renovación {yearly ? 'anual' : 'mensual'}.</small></button>}
         </div>
         {mode === 'trial' && trial ? <TrialStart key={`${intent.plan}:${intent.interval}`} planId={intent.plan} planName={plan.name} interval={intent.interval} onBusy={setLoading}/> : <div className="checkout-pay" aria-busy={loading}>
           <h3>{prepared?.status === 'REDIRECT' ? 'Este es tu total' : 'Confirma el importe en pesos'}</h3>
