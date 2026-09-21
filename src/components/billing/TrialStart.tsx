@@ -313,7 +313,7 @@ export function TrialStart({
         <Input
           id={ids.holder}
           autoComplete="cc-name"
-          placeholder="COMO APARECE EN LA TARJETA"
+          placeholder="Nombre como aparece en tu tarjeta"
           value={holder}
           maxLength={60}
           onChange={(event) => setHolder(event.target.value)}
@@ -326,7 +326,7 @@ export function TrialStart({
             id={ids.exp}
             inputMode="numeric"
             autoComplete="cc-exp"
-            placeholder="12/34"
+            placeholder="MM/AA"
             value={exp}
             maxLength={5}
             onChange={(event) => {
@@ -340,7 +340,7 @@ export function TrialStart({
             id={ids.cvc}
             inputMode="numeric"
             autoComplete="cc-csc"
-            placeholder="123"
+            placeholder="CVC"
             value={cvc}
             maxLength={4}
             onChange={(event) => setCvc(digits(event.target.value).slice(0, 4))}
