@@ -25,15 +25,15 @@ describe('la ventana semanal de las divisas', () => {
   const forex = getSymbol('EURUSD')!.session;
 
   it('abre el domingo por la tarde, como promete su etiqueta', () => {
-    expect(forex.label).toContain('Domingo 22:00');
-    expect(marketStatusFor(forex, Date.UTC(2026, 8, DOMINGO, 21, 0))).toBe('CLOSED');
-    expect(marketStatusFor(forex, Date.UTC(2026, 8, DOMINGO, 21, 45))).toBe('PRE_OPEN');
+    expect(forex.label).toContain('Domingo 17:00');
+    expect(marketStatusFor(forex, Date.UTC(2026, 8, DOMINGO, 20, 0))).toBe('CLOSED');
+    expect(marketStatusFor(forex, Date.UTC(2026, 8, DOMINGO, 20, 45))).toBe('PRE_OPEN');
     expect(marketStatusFor(forex, Date.UTC(2026, 8, DOMINGO, 22, 30))).toBe('OPEN');
   });
 
-  it('cierra el viernes a las 22:00 y no a medianoche', () => {
+  it('cierra el viernes a las 17:00 de Nueva York y no a medianoche', () => {
     // Este era el tramo que enseñaba un mercado cerrado como si estuviera vivo.
-    expect(marketStatusFor(forex, Date.UTC(2026, 8, 11, 21, 30))).toBe('OPEN');
+    expect(marketStatusFor(forex, Date.UTC(2026, 8, 11, 20, 30))).toBe('OPEN');
     expect(marketStatusFor(forex, Date.UTC(2026, 8, 11, 22, 30))).toBe('CLOSED');
     expect(marketStatusFor(forex, Date.UTC(2026, 8, 11, 23, 30))).toBe('CLOSED');
   });
@@ -52,7 +52,7 @@ describe('la ventana semanal de las divisas', () => {
   });
 
   it('congela el fin de semana en el cierre real del viernes', () => {
-    const cierre = Date.UTC(2026, 8, 11, 22) - 1;
+    const cierre = Date.UTC(2026, 8, 11, 21) - 1;
     for (const momento of [Date.UTC(2026, 8, 11, 23), Date.UTC(2026, 8, 12, 15), Date.UTC(2026, 8, DOMINGO + 7, 10)]) {
       expect(lastOpenTimestamp(forex, momento)).toBe(cierre);
     }

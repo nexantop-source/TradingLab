@@ -150,6 +150,7 @@ export interface AssetMeta {
 }
 
 export interface MarketSession {
+  calendar?: 'US_EQUITY' | 'FOREX_NY';
   /** `true` para mercados 24/7 como criptomonedas. */
   alwaysOpen: boolean;
   /**

@@ -1,4 +1,6 @@
 import type { DataProvenance } from '@tl/types';
+import { getSymbol } from './symbols';
+import { marketStatusFor } from './market-hours';
 
 /**
  * ¿Se puede abrir un ejercicio contra esta cotización?
@@ -31,10 +33,12 @@ import type { DataProvenance } from '@tl/types';
  * servidor detrás.
  */
 export function quoteIsTradable(
-  quote: { provenance: DataProvenance },
+  quote: { symbol?: string; provenance: DataProvenance },
   provider: { declaredDelaySeconds: number },
   now = Date.now(),
 ): boolean {
+  const session = quote.symbol ? getSymbol(quote.symbol)?.session : undefined;
+  if (session && marketStatusFor(session, now) !== 'OPEN') return false;
   const { synthetic, freshness, sourceTimestamp } = quote.provenance;
   if (synthetic || quote.provenance.marketStatus !== 'OPEN' || freshness === 'MARKET_CLOSED') return false;
   if (!Number.isFinite(sourceTimestamp)) return false;

@@ -91,7 +91,7 @@ const MARKET_LABEL: Record<string, string> = {
   OPEN: 'Abierto',
   CLOSED: 'Cerrado',
   PRE_OPEN: 'Preapertura',
-  HOLIDAY: 'Festivo',
+  HOLIDAY: 'Mercado cerrado · festivo',
 };
 
 function Row({ label, value }: { label: string; value: string }) {

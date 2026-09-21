@@ -4,11 +4,21 @@ import { YahooMarketDataProvider, resetYahooCache } from '../src/packages/market
 
 describe('Yahoo quote observation timestamps', () => {
   beforeEach(() => resetYahooCache());
-  afterEach(() => vi.unstubAllGlobals());
+  afterEach(() => { vi.unstubAllGlobals(); vi.useRealTimers(); });
   const provider = new YahooMarketDataProvider();
   function reply(body: unknown) {
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify(body), { status: 200 })));
   }
+  it('honors the provider early close for a futures contract with a recent quote', async () => {
+    vi.useFakeTimers();
+    const now = Date.parse('2026-11-27T19:00:00Z'); vi.setSystemTime(now);
+    reply({ chart: { result: [{ meta: { regularMarketPrice: 2000, regularMarketTime: now / 1000 - 30,
+      currentTradingPeriod: { regular: { start: now / 1000 - 36000, end: now / 1000 - 60 } } } }] } });
+    const quote = await provider.getQuote('XAUUSD');
+    expect(quote.provenance.marketStatus).toBe('CLOSED');
+    expect(quote.provenance.freshness).toBe('MARKET_CLOSED');
+    expect(quote.price).toBe(2000);
+  });
   it('keeps the original observation in the pulse without fabricating seconds', async () => {
     reply({ chart: { result: [{ meta: { regularMarketPrice: 200, regularMarketTime: 1_750_000_000 } }] } });
     const pulse = await buildMarketPulse(provider, 'AAPL', 1_750_000_120_000);

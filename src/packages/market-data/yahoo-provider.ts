@@ -141,6 +141,7 @@ interface YahooBar {
 }
 
 interface YahooSnapshot {
+  regularSession?: { start: number; end: number };
   price: number;
   previousClose: number;
   dayHigh: number;
@@ -273,7 +274,11 @@ function snapshotFrom(meta: Record<string, unknown>, bars: YahooBar[]): YahooSna
     : positive(meta.previousClose)
       ? (meta.previousClose as number)
       : price;
+  const regular = (meta.currentTradingPeriod as { regular?: { start?: number; end?: number } } | undefined)?.regular;
+  const regularSession = regular && positive(regular.start) && positive(regular.end) && regular.end > regular.start
+    ? { start: regular.start * 1000, end: regular.end * 1000 } : undefined;
   return {
+    regularSession,
     price,
     previousClose,
     dayHigh: positive(meta.regularMarketDayHigh) ? (meta.regularMarketDayHigh as number) : Math.max(price, last?.h ?? price),
@@ -399,7 +404,11 @@ export class YahooMarketDataProvider implements MarketDataProvider {
     // del calendario: es lo que evita anunciar como activo un mercado que lleva
     // horas parado por un festivo que la tabla no conoce.
     const session = getSymbol(symbol)?.session;
-    const status = session ? observedMarketStatus(session, now, sourceTimestamp) : this.getMarketStatus(symbol, now);
+    let status = session ? observedMarketStatus(session, now, sourceTimestamp) : this.getMarketStatus(symbol, now);
+    const ticker = yahooTicker(symbol);
+    const period = ticker ? quoteCache.get(ticker)?.regularSession : undefined;
+    // Provider session boundaries can close futures/foreign venues sooner than the reference calendar.
+    if (!session?.alwaysOpen && status === 'OPEN' && period && (now < period.start || now >= period.end)) status = 'CLOSED';
     const age = Math.max(0, now - sourceTimestamp);
     return {
       provider: this.id,

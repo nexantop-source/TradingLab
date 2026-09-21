@@ -90,7 +90,7 @@ describe('closed market uses a stable calendar boundary', () => {
     expect(new Set(result.ticks.map(tick => tick.price)).size).toBe(1);
     expect(result.quote.price).toBe(result.ticks[0].price);
     expect(result.provenance.sourceTimestamp).toBe(fridayClose);
-    expect(result.provenance.marketStatus).toBe('PRE_OPEN');
+    expect(result.provenance.marketStatus).toBe('HOLIDAY');
     expect(result.provenance.freshness).toBe('MARKET_CLOSED');
   });
   it('congela el fin de semana de divisas en el cierre real del viernes', () => {
@@ -100,7 +100,7 @@ describe('closed market uses a stable calendar boundary', () => {
     // anunciaba abierto un mercado ya cerrado, con su último precio congelado
     // presentado como si siguiera vivo.
     const forex = getSymbol('EURUSD')!.session;
-    const cierreDelViernes = Date.UTC(2026, 8, 4, 22) - 1;
+    const cierreDelViernes = Date.UTC(2026, 8, 4, 21) - 1;
     expect(lastOpenTimestamp(forex, Date.UTC(2026, 8, 6, 19, 47, 11))).toBe(cierreDelViernes);
     expect(marketStatusFor(forex, cierreDelViernes)).toBe('OPEN');
     expect(marketStatusFor(forex, Date.UTC(2026, 8, 4, 22, 30))).toBe('CLOSED');

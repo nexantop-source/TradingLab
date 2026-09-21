@@ -78,7 +78,7 @@ describe('proveedor sintético', () => {
   });
 
   it('las acciones estadounidenses están cerradas de madrugada', () => {
-    const night = Date.UTC(2026, 0, 20, 3, 0); // martes 03:00 UTC
+    const night = Date.UTC(2026, 0, 21, 3, 0); // martes 03:00 UTC
     expect(provider.getMarketStatus('AAPL', night)).toBe('CLOSED');
   });
 });

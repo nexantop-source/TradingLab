@@ -1,12 +1,23 @@
 import type { MarketStatus, MarketSession } from '@tl/types';
+import { newYorkTime, newYorkInstant, usEquityHoliday, usEquityCloseMinute } from './us-calendar';
 
-/**
- * Estado del mercado a partir de la sesión declarada del instrumento.
- * Es una aproximación educativa: no contempla festivos de cada plaza, y así
- * se indica al usuario en la interfaz.
- */
+/** Session calendar: US cash holidays/early closes and New York DST; reference sessions elsewhere. */
 export function marketStatusFor(session: MarketSession, at: number): MarketStatus {
   if (session.alwaysOpen) return 'OPEN';
+  if (!Number.isFinite(at)) return 'CLOSED';
+  if (session.calendar) {
+    const local = newYorkTime(at);
+    if (session.calendar === 'US_EQUITY') {
+      if (local.day === 0 || local.day === 6) return 'CLOSED';
+      if (usEquityHoliday(local.date)) return 'HOLIDAY';
+      if (local.minute < 570) return local.minute >= 540 ? 'PRE_OPEN' : 'CLOSED';
+      return local.minute < usEquityCloseMinute(local.date) ? 'OPEN' : 'CLOSED';
+    }
+    // FX is an OTC weekly session, not the US cash-equity holiday calendar.
+    if (local.day === 6 || (local.day === 5 && local.minute >= 1020)) return 'CLOSED';
+    if (local.day === 0 && local.minute < 1020) return local.minute >= 990 ? 'PRE_OPEN' : 'CLOSED';
+    return 'OPEN';
+  }
 
   const d = new Date(at);
   const day = d.getUTCDay();
@@ -36,26 +47,7 @@ export function marketStatusFor(session: MarketSession, at: number): MarketStatu
   return 'OPEN';
 }
 
-/**
- * Estado del mercado según lo que dice la fuente, no según nuestro calendario.
- *
- * El calendario es una aproximación y se equivoca de tres formas distintas: no
- * conoce los festivos -daba por abierto el Día del Trabajo estadounidense-, no
- * acierta los minutos exactos de veintitrés plazas repartidas por el mundo, y
- * no sigue los cambios de horario de verano de cada una.
- *
- * Cuando se equivoca, la interfaz enseña un instrumento activo con un precio
- * que lleva horas sin moverse, y quien lo mira no tiene forma de saber cuál de
- * las dos cosas es verdad.
- *
- * La fuente sí sabe cuándo se cruzó el último precio. Si dice que hace horas,
- * ese mercado no está negociando, diga lo que diga la tabla. El calendario
- * sigue sirviendo para lo que sí sabe: anunciar cuándo vuelve a abrir.
- *
- * El margen es generoso a propósito. Un par exótico puede pasar veinte minutos
- * sin cruzar a media tarde y seguir perfectamente abierto; lo que se busca no
- * son minutos de más, son discrepancias de horas.
- */
+/** Calendar closures take precedence; old observations can additionally close a reference session. */
 export function observedMarketStatus(
   session: MarketSession,
   at: number,
@@ -76,6 +68,16 @@ export function observedMarketStatus(
 export function lastOpenTimestamp(session: MarketSession, at: number): number {
   if (session.alwaysOpen) return at;
   if (marketStatusFor(session, at) === 'OPEN') return at;
+  if (session.calendar) {
+    const { date } = newYorkTime(at);
+    for (let offset = 0; offset < 15; offset++) {
+      const candidate = date - offset * 86400000;
+      if (session.calendar === 'FOREX_NY' && new Date(candidate).getUTCDay() !== 5) continue;
+      const last = newYorkInstant(candidate, session.calendar === 'US_EQUITY' ? usEquityCloseMinute(candidate) : 1020) - 1;
+      if (last <= at && marketStatusFor(session, last) === 'OPEN') return last;
+    }
+    return at;
+  }
 
   // Ventana semanal: el único cierre de la semana es el del viernes. Buscarlo
   // recorriendo días hacia atrás daba el final del jueves, porque el viernes
@@ -110,7 +112,7 @@ export function nextOpenTimestamp(session: MarketSession, at: number): number | 
   if (session.alwaysOpen) return null;
   const STEP = 5 * 60 * 1000;
   const LIMIT = (10 * 24 * 60 * 60 * 1000) / STEP;
-  let t = at;
+  let t = Math.floor(at / STEP) * STEP;
   for (let i = 0; i < LIMIT; i++) {
     t += STEP;
     if (marketStatusFor(session, t) === 'OPEN') return t;
@@ -122,5 +124,5 @@ export const MARKET_STATUS_LABEL: Record<MarketStatus, string> = {
   OPEN: 'Mercado abierto',
   CLOSED: 'Mercado cerrado',
   PRE_OPEN: 'Preapertura',
-  HOLIDAY: 'Festivo',
+  HOLIDAY: 'Mercado cerrado · festivo',
 };

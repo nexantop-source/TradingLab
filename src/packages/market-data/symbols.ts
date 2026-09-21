@@ -8,10 +8,10 @@ import { COMMODITY_SEEDS, CRYPTO_SEEDS, ETF_SEEDS, FOREX_SEEDS, INDEX_SEEDS, STO
  */
 const SESSIONS: Record<string, MarketSession> = {
   CRYPTO: { alwaysOpen: true, days: [0, 1, 2, 3, 4, 5, 6], openMinuteUtc: 0, closeMinuteUtc: 1440, label: '24 h, todos los días' },
-  FOREX: { alwaysOpen: false, days: [0, 1, 2, 3, 4, 5], openMinuteUtc: 0, closeMinuteUtc: 1440,
+  FOREX: { calendar: 'FOREX_NY', alwaysOpen: false, days: [0, 1, 2, 3, 4, 5], openMinuteUtc: 0, closeMinuteUtc: 1440,
     weekly: { openMinuteUtc: 22 * 60, closeMinuteUtc: 5 * 1440 + 22 * 60 },
-    label: 'Domingo 22:00 a viernes 22:00 UTC' },
-  US_EQUITY: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 13 * 60 + 30, closeMinuteUtc: 20 * 60, label: 'Lunes a viernes, 13:30 a 20:00 UTC' },
+    label: 'Domingo 17:00 a viernes 17:00, hora de Nueva York' },
+  US_EQUITY: { calendar: 'US_EQUITY', alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 13 * 60 + 30, closeMinuteUtc: 20 * 60, label: 'Lunes a viernes, 09:30 a 16:00 Nueva York; festivos y cierres anticipados' },
   EU_EQUITY: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 7 * 60, closeMinuteUtc: 15 * 60 + 30, label: 'Lunes a viernes, 07:00 a 15:30 UTC' },
   UK_EQUITY: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 8 * 60, closeMinuteUtc: 16 * 60 + 30, label: 'Lunes a viernes, 08:00 a 16:30 UTC' },
   JP_EQUITY: { alwaysOpen: false, days: [1, 2, 3, 4, 5], openMinuteUtc: 0, closeMinuteUtc: 6 * 60, label: 'Lunes a viernes, 00:00 a 06:00 UTC' },
