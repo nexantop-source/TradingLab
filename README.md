@@ -206,6 +206,10 @@ esencial:
 
 ## Licencia y marcas
 
+El código original de TradingLab se distribuye bajo la [licencia MIT](./LICENSE).
+Los componentes y recursos de terceros conservan sus respectivas licencias. Esta licencia no
+concede derechos sobre marcas comerciales ni sobre datos de proveedores externos.
+
 Todo el código, el diseño y el contenido educativo de este repositorio son originales. No se han
 copiado marcas, componentes, textos, diseños, nombres, iconos ni interfaces de IQ Option,
 TradingView ni de ninguna otra plataforma. Las menciones a terceros aparecen únicamente en contextos

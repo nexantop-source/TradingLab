@@ -2,6 +2,7 @@
   "name": "tradinglab",
   "version": "1.0.0",
   "private": true,
+  "license": "MIT",
   "description": "Plataforma educativa de análisis y simulación de mercados financieros",
   "scripts": {
     "dev": "next dev",
